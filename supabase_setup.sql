@@ -846,6 +846,16 @@ drop policy if exists "Anyone can view profiles" on public.profiles;
 -- the Stripe webhook, and by the handle_new_user trigger's SECURITY DEFINER
 -- context, which is unaffected by grants) can still change these columns;
 -- authenticated users keep write access to every other profile column.
+-- Guard each column first: this file's earlier sections don't all appear to
+-- have actually been run against every environment (pro_subscriber, added
+-- back in the "Roadmap Documents" section above, was found missing live),
+-- so re-declare them here idempotently before revoking on them.
+alter table public.profiles add column if not exists role                text default 'client' check (role in ('client', 'attorney'));
+alter table public.profiles add column if not exists subscription_tier   text default 'free';
+alter table public.profiles add column if not exists subscription_status text default 'active';
+alter table public.profiles add column if not exists pro_subscriber      boolean default false;
+alter table public.profiles add column if not exists stripe_customer_id  text;
+
 revoke update (role, subscription_tier, subscription_status, pro_subscriber, stripe_customer_id)
   on public.profiles from authenticated, anon;
 
