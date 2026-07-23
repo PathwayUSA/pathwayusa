@@ -189,6 +189,19 @@ export function AuthProvider({ children }) {
     return supabase.auth.signOut();
   };
 
+  const deleteAccount = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return { error: new Error('Not signed in') };
+    const { error } = await supabase.functions.invoke('delete-account', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (!error) {
+      setProfile(null);
+      await supabase.auth.signOut();
+    }
+    return { error };
+  };
+
   const updateReadingSpeed = async (speed) => {
     if (!user) return { error: new Error('Not signed in') };
     const { error } = await supabase
@@ -220,7 +233,7 @@ export function AuthProvider({ children }) {
   const clearPaymentSuccess = () => setPendingPaymentSuccess(false);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, pendingPasswordReset, pendingPaymentSuccess, signUp, signUpAsAttorney, signIn, signOut, forgotPassword, updateReadingSpeed, updateProfile, refreshProfile, clearPasswordReset, clearPaymentSuccess }}>
+    <AuthContext.Provider value={{ user, profile, loading, pendingPasswordReset, pendingPaymentSuccess, signUp, signUpAsAttorney, signIn, signOut, deleteAccount, forgotPassword, updateReadingSpeed, updateProfile, refreshProfile, clearPasswordReset, clearPaymentSuccess }}>
       {children}
     </AuthContext.Provider>
   );

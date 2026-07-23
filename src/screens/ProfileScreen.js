@@ -54,7 +54,7 @@ const PLAN_CONFIG = {
 
 export default function ProfileScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user, profile, signOut, updateProfile } = useAuth();
+  const { user, profile, signOut, updateProfile, deleteAccount } = useAuth();
   const { tier, isPro } = useSubscription();
   const insets = useSafeAreaInsets();
 
@@ -141,8 +141,8 @@ export default function ProfileScreen({ navigation }) {
         {
           text: 'Delete', style: 'destructive',
           onPress: async () => {
-            await supabase.from('profiles').delete().eq('id', user.id);
-            await signOut();
+            const { error } = await deleteAccount();
+            if (error) Alert.alert('Delete Failed', error.message || 'Please try again.');
           },
         },
       ]

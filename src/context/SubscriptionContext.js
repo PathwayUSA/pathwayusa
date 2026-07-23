@@ -13,8 +13,6 @@ const SubscriptionContext = createContext({
   subscription: null,
   loading: true,
   refresh: () => {},
-  activateTier: () => {},
-  cancelSubscription: () => {},
 });
 
 export function SubscriptionProvider({ children }) {
@@ -49,41 +47,11 @@ export function SubscriptionProvider({ children }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const activateTier = useCallback(async (planTier, { stripeCustomerId, stripeSubscriptionId } = {}) => {
-    if (!user) return;
-    const now = new Date().toISOString();
-    const { data } = await supabase
-      .from('subscriptions')
-      .upsert({
-        user_id: user.id,
-        status: 'active',
-        plan: planTier,
-        stripe_customer_id: stripeCustomerId ?? null,
-        stripe_subscription_id: stripeSubscriptionId ?? null,
-        created_at: now,
-      }, { onConflict: 'user_id' })
-      .select()
-      .single();
-
-    if (planTier === 'pro') {
-      await supabase.from('profiles').update({ pro_subscriber: true, subscription_tier: 'pro' }).eq('id', user.id);
-    }
-    setSubscription(data ?? null);
-    setTier(planTier);
-    await AsyncStorage.setItem(SUB_KEY, planTier);
-  }, [user]);
-
-  // Legacy alias for existing call sites
-  const activatePro = useCallback((opts) => activateTier('pro', opts), [activateTier]);
-
-  const cancelSubscription = useCallback(async () => {
-    if (!user) return;
-    await supabase.from('subscriptions').update({ status: 'cancelled' }).eq('user_id', user.id);
-    await supabase.from('profiles').update({ pro_subscriber: false, subscription_tier: 'free' }).eq('id', user.id);
-    setTier('free');
-    setSubscription((prev) => prev ? { ...prev, status: 'cancelled' } : null);
-    await AsyncStorage.setItem(SUB_KEY, 'free');
-  }, [user]);
+  // Entitlement (subscriptions row + profiles.subscription_tier/pro_subscriber) is
+  // written exclusively by the stripe-webhook edge function via the service_role
+  // key — see supabase_setup.sql's "SECURITY HARDENING (Phase 0)" section. Use
+  // startCheckout()/openBillingPortal() from src/services/stripe.ts to change
+  // plan state; there is no client-side tier mutation here anymore.
 
   const isPro   = tier === 'pro';
   const isBasic = isPro; // legacy alias — basic tier removed, all former basic users are now pro
@@ -94,9 +62,6 @@ export function SubscriptionProvider({ children }) {
       tier, isPro, isBasic, isFree,
       subscription, loading,
       refresh: load,
-      activateTier, activatePro,
-      cancelSubscription,
-      cancelPro: cancelSubscription,
     }}>
       {children}
     </SubscriptionContext.Provider>

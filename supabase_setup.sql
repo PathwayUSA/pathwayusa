@@ -821,3 +821,56 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- SECURITY HARDENING (Phase 0) — run this after all migrations above
+-- Fixes: world-readable profiles, client-writable role/entitlement columns,
+-- a client-writable subscriptions table, and an attorney_access_codes update
+-- policy that let any signed-in user reset or overwrite any code.
+-- ═══════════════════════════════════════════════════════════════════════════════
+
+-- ── profiles: remove the blanket "select using (true)" policy ────────────────
+-- The two policies added in the attorney-platform v2 section above
+-- ("Attorneys read linked client profiles" and "Anyone can look up attorneys
+-- by invite code") already cover every legitimate read case: own row, linked
+-- attorney<->client, and public attorney directory lookup by invite code.
+-- This policy made all of that redundant by also exposing every column of
+-- every profile — including date_of_birth, immigration_status,
+-- immigration_goals, last_lat/last_lng, and stripe_customer_id — to anyone
+-- holding the public anon key.
+drop policy if exists "Anyone can view profiles" on public.profiles;
+
+-- ── profiles: block client writes to role/entitlement columns ────────────────
+-- Row-level USING/WITH CHECK can't restrict individual columns, so this uses
+-- Postgres column-level privileges instead. Only the service_role (used by
+-- the Stripe webhook, and by the handle_new_user trigger's SECURITY DEFINER
+-- context, which is unaffected by grants) can still change these columns;
+-- authenticated users keep write access to every other profile column.
+revoke update (role, subscription_tier, subscription_status, pro_subscriber, stripe_customer_id)
+  on public.profiles from authenticated, anon;
+
+-- ── subscriptions: entitlement must only ever be written by the webhook ──────
+-- These policies let any authenticated user upsert their own row directly
+-- (status: 'active', plan: 'pro'), granting themselves Pro without ever going
+-- through Stripe. The only legitimate writer is the stripe-webhook edge
+-- function, which uses the service_role key and is not subject to RLS.
+-- Reads stay open to the owner.
+drop policy if exists "Users insert their own subscription" on public.subscriptions;
+drop policy if exists "Users update their own subscription" on public.subscriptions;
+
+-- ── attorney_access_codes: stop leaking claimed codes, stop arbitrary resets ──
+-- "Anyone can read access codes" exposed every code row, including firm
+-- name/attorney name/email on already-claimed codes. "Auth users can update
+-- access codes" had no WITH CHECK and wasn't scoped to a specific row, so any
+-- signed-in user could edit ANY code row — including resetting a used code
+-- back to used = false to reuse it, or overwriting another firm's metadata.
+drop policy if exists "Anyone can read access codes" on public.attorney_access_codes;
+create policy "Anyone can read unused access codes"
+  on public.attorney_access_codes for select
+  using (used = false);
+
+drop policy if exists "Auth users can update access codes" on public.attorney_access_codes;
+create policy "Users claim an unused access code for themselves"
+  on public.attorney_access_codes for update
+  using (used = false)
+  with check (used = true and used_by = auth.uid());

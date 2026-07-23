@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSubscription } from '../context/SubscriptionContext';
-import { startCheckout } from '../services/stripe';
+import { startCheckout, openBillingPortal } from '../services/stripe';
 import { SHADOWS } from '../theme';
 import { successHaptic, lightHaptic } from '../utils/haptics';
 import UserAvatar from '../components/UserAvatar';
@@ -43,9 +43,10 @@ const WHY_UPGRADE = [
 
 export default function UpgradeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const { isPro, isFree, loading, cancelSubscription, refresh } = useSubscription();
+  const { isPro, isFree, loading, refresh } = useSubscription();
   const [purchasing, setPurchasing] = useState(false);
   const [restoring,  setRestoring]  = useState(false);
+  const [managing,   setManaging]   = useState(false);
 
   const handleSubscribe = async () => {
     setPurchasing(true);
@@ -66,13 +67,24 @@ export default function UpgradeScreen({ navigation }) {
     setRestoring(false);
   };
 
+  const handleManageBilling = async () => {
+    setManaging(true);
+    try {
+      await openBillingPortal();
+      await refresh();
+    } catch (err) {
+      Alert.alert('Billing Portal Unavailable', err.message || 'Please try again.');
+    }
+    setManaging(false);
+  };
+
   const handleCancel = () => {
     Alert.alert(
       'Cancel Subscription?',
-      'You will lose access to Pro features at the end of your billing period.',
+      "You'll be taken to the billing portal to cancel — your Pro access continues until the end of the current billing period.",
       [
         { text: 'Keep My Plan', style: 'cancel' },
-        { text: 'Cancel Anyway', style: 'destructive', onPress: cancelSubscription },
+        { text: 'Continue', onPress: handleManageBilling },
       ],
     );
   };
@@ -160,8 +172,8 @@ export default function UpgradeScreen({ navigation }) {
             <Text style={{ fontSize: 13, color: '#388e3c', textAlign: 'center', lineHeight: 20 }}>
               Full access to every feature. Thank you for supporting PathwayUSA.
             </Text>
-            <TouchableOpacity onPress={handleCancel} style={{ marginTop: 4 }}>
-              <Text style={{ fontSize: 13, color: '#aaa' }}>Cancel subscription</Text>
+            <TouchableOpacity onPress={handleCancel} disabled={managing} style={{ marginTop: 4 }}>
+              <Text style={{ fontSize: 13, color: '#aaa' }}>{managing ? 'Opening billing portal…' : 'Cancel subscription'}</Text>
             </TouchableOpacity>
           </View>
         )}

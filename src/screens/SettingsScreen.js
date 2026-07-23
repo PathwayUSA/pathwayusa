@@ -107,7 +107,7 @@ function RowToggle({ icon, label, subtitle, value, onValueChange, iconColor = '#
 
 export default function SettingsScreen({ navigation }) {
   const { colors } = useTheme();
-  const { profile, user, updateReadingSpeed, updateProfile, signOut, refreshProfile } = useAuth();
+  const { profile, user, updateReadingSpeed, updateProfile, signOut, deleteAccount, refreshProfile } = useAuth();
   const { refresh: refreshOnboarding } = useOnboardingRefresh();
   const { enabled: vfxEnabled, toggle: toggleVfx } = useVisualEffects();
   const { lang, setLang } = useLanguage();
@@ -242,9 +242,8 @@ export default function SettingsScreen({ navigation }) {
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', style: 'destructive', onPress: async () => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) await supabase.from('profiles').delete().eq('id', user.id);
-          await signOut();
+          const { error } = await deleteAccount();
+          if (error) Alert.alert('Delete Failed', error.message || 'Please try again.');
         }},
       ]
     );
