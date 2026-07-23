@@ -30,6 +30,13 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# stray/debug artifacts
+/@react-navigation/
+claude_crash.log
+
+# Supabase CLI local cache
+supabase/.temp/
+
 # local env files
 .env*.local
 

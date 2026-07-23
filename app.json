@@ -1,21 +1,53 @@
 {
   "expo": {
-    "name": "pathwayusa",
+    "name": "PathwayUSA",
     "slug": "pathwayusa",
+    "scheme": "pathwayusa",
     "version": "1.0.0",
+    "description": "Your step-by-step guide to U.S. citizenship. Practice civics, track your immigration roadmap, find local help, and connect with attorneys — in English, Spanish, and Haitian Creole.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a9e89"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "So we can find immigration help near you."
+        }
+      ]
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pathwayusa.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "So we can find immigration help near you.",
+        "NSCameraUsageDescription": "To photograph your immigration documents for upload.",
+        "NSPhotoLibraryUsageDescription": "To select immigration documents from your photo library.",
+        "NSMicrophoneUsageDescription": "Not used by this app."
+      }
     },
     "android": {
+      "package": "com.pathwayusa.app",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1a9e89",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
