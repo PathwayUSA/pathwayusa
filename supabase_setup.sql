@@ -249,12 +249,21 @@ create policy "Users update their own subscription"
   using (auth.uid() = user_id);
 
 -- ── Attorney Clients ──────────────────────────────────────────────────────────
+-- attorney_id is nullable: AttorneyMatchScreen.js inserts a row with
+-- attorney_id: null to create a pending lead, and AttorneyClientsScreen.js
+-- queries/claims it via .is('attorney_id', null). client_id references
+-- public.profiles(id) (not auth.users(id)) so that PostgREST's
+-- `profiles!attorney_clients_client_id_fkey(...)` embed used throughout the
+-- attorney screens actually resolves — an FK to auth.users can't be embedded
+-- as `profiles`. This table was never applied to any live database, so this
+-- is the original (and only) definition, not a later patch.
 create table if not exists public.attorney_clients (
   id          uuid default gen_random_uuid() primary key,
-  attorney_id uuid references auth.users(id) on delete cascade not null,
-  client_id   uuid references auth.users(id) on delete cascade not null,
+  attorney_id uuid references auth.users(id) on delete cascade,
+  client_id   uuid references public.profiles(id) on delete cascade not null,
   linked_at   timestamptz default now(),
   notes       text,
+  status      text,
   unique(attorney_id, client_id)
 );
 
@@ -268,6 +277,25 @@ create policy "Attorneys manage their client relationships"
 create policy "Clients read their own attorney link"
   on public.attorney_clients for select
   using (auth.uid() = client_id);
+
+create policy "Clients create their own pending match request"
+  on public.attorney_clients for insert
+  with check (client_id = auth.uid() and attorney_id is null);
+
+create policy "Attorneys view unclaimed leads"
+  on public.attorney_clients for select
+  using (
+    attorney_id is null
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'attorney')
+  );
+
+create policy "Attorneys claim unclaimed leads"
+  on public.attorney_clients for update
+  using (
+    attorney_id is null
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'attorney')
+  )
+  with check (attorney_id = auth.uid());
 
 -- ── Attorney Notes ────────────────────────────────────────────────────────────
 create table if not exists public.attorney_notes (
@@ -437,10 +465,13 @@ create policy "Anyone can read invite codes (for validation)"
   using (true);
 
 -- ── Appointments ──────────────────────────────────────────────────────────────
+-- client_id references public.profiles(id), not auth.users(id): AttorneyHomeScreen.js
+-- embeds `profiles!appointments_client_id_fkey(full_name)`, which needs the FK to
+-- target profiles directly to resolve. Never applied to any live database.
 create table if not exists public.appointments (
   id          uuid default gen_random_uuid() primary key,
   attorney_id uuid references auth.users(id) on delete cascade not null,
-  client_id   uuid references auth.users(id) on delete cascade not null,
+  client_id   uuid references public.profiles(id) on delete cascade not null,
   title       text not null,
   date        date not null,
   time        time,
@@ -621,15 +652,18 @@ create table if not exists public.attorney_access_codes (
 
 alter table public.attorney_access_codes enable row level security;
 
--- Anyone (including anon) can SELECT to validate a code pre-signup
-create policy "Anyone can read access codes"
+-- This table was never applied to any live database, so it's created here
+-- directly with the policies from the Phase 0 security hardening below
+-- (scoped SELECT/UPDATE) rather than the wide-open versions that hardening
+-- section exists to fix — no reason to create it insecure first.
+create policy "Anyone can read unused access codes"
   on public.attorney_access_codes for select
-  using (true);
+  using (used = false);
 
--- Only authenticated users can mark a code as used
-create policy "Auth users can update access codes"
+create policy "Users claim an unused access code for themselves"
   on public.attorney_access_codes for update
-  using (auth.uid() is not null);
+  using (used = false)
+  with check (used = true and used_by = auth.uid());
 
 -- Seed demo codes for testing
 insert into public.attorney_access_codes (code, firm_name) values
@@ -639,10 +673,13 @@ on conflict (code) do nothing;
 
 -- ── Attorney Reminders ────────────────────────────────────────────────────────
 -- Attorneys can set dated reminders for specific clients, shown on their dashboard.
+-- client_id references public.profiles(id): AttorneyContext.js embeds
+-- `profiles!attorney_reminders_client_id_fkey(...)`, which needs the FK to
+-- target profiles directly to resolve. Never applied to any live database.
 create table if not exists public.attorney_reminders (
   id          uuid default gen_random_uuid() primary key,
   attorney_id uuid references auth.users(id) on delete cascade not null,
-  client_id   uuid references auth.users(id) on delete cascade,
+  client_id   uuid references public.profiles(id) on delete cascade,
   message     text not null,
   due_date    date not null,
   created_at  timestamptz default now()
@@ -830,15 +867,21 @@ CREATE TRIGGER on_auth_user_created
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- ── profiles: remove the blanket "select using (true)" policy ────────────────
--- The two policies added in the attorney-platform v2 section above
--- ("Attorneys read linked client profiles" and "Anyone can look up attorneys
--- by invite code") already cover every legitimate read case: own row, linked
--- attorney<->client, and public attorney directory lookup by invite code.
--- This policy made all of that redundant by also exposing every column of
--- every profile — including date_of_birth, immigration_status,
--- immigration_goals, last_lat/last_lng, and stripe_customer_id — to anyone
--- holding the public anon key.
+-- The attorney-platform v2 section above adds "Attorneys read linked client
+-- profiles" and "Anyone can look up attorneys by invite code", which cover
+-- linked attorney<->client reads and public attorney directory lookup — but
+-- neither of those covers a user reading their OWN row, and (verified live
+-- 2026-07-23) neither policy had actually been applied to production either.
+-- Dropping the blanket policy without an explicit own-row policy briefly left
+-- `profiles` with zero SELECT policies at all, so this policy is required,
+-- not optional. The blanket policy itself exposed every column of every
+-- profile — date_of_birth, immigration_status, immigration_goals,
+-- last_lat/last_lng, stripe_customer_id — to anyone holding the anon key.
 drop policy if exists "Anyone can view profiles" on public.profiles;
+
+create policy "Users read their own profile"
+  on public.profiles for select
+  using (auth.uid() = id);
 
 -- ── profiles: block client writes to role/entitlement columns ────────────────
 -- Row-level USING/WITH CHECK can't restrict individual columns, so this uses
@@ -868,19 +911,9 @@ revoke update (role, subscription_tier, subscription_status, pro_subscriber, str
 drop policy if exists "Users insert their own subscription" on public.subscriptions;
 drop policy if exists "Users update their own subscription" on public.subscriptions;
 
--- ── attorney_access_codes: stop leaking claimed codes, stop arbitrary resets ──
--- "Anyone can read access codes" exposed every code row, including firm
--- name/attorney name/email on already-claimed codes. "Auth users can update
--- access codes" had no WITH CHECK and wasn't scoped to a specific row, so any
--- signed-in user could edit ANY code row — including resetting a used code
--- back to used = false to reuse it, or overwriting another firm's metadata.
-drop policy if exists "Anyone can read access codes" on public.attorney_access_codes;
-create policy "Anyone can read unused access codes"
-  on public.attorney_access_codes for select
-  using (used = false);
-
-drop policy if exists "Auth users can update access codes" on public.attorney_access_codes;
-create policy "Users claim an unused access code for themselves"
-  on public.attorney_access_codes for update
-  using (used = false)
-  with check (used = true and used_by = auth.uid());
+-- ── attorney_access_codes ──────────────────────────────────────────────────────
+-- No fix needed here anymore: the table's "Attorney Access Codes" section
+-- above now creates it directly with these same scoped policies (it was
+-- never applied live, so there was no insecure state to patch). This note is
+-- left in place so the history of what Phase 0 fixed is still legible even
+-- though the actual DDL moved to the table's original declaration.
