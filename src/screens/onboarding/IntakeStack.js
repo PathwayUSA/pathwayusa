@@ -104,6 +104,39 @@ const dot = StyleSheet.create({
   inactive: { backgroundColor: '#D0D0D0' },
 });
 
+// ─── Save & Exit ──────────────────────────────────────────────────────────────
+// Immigration-status intake is exactly the kind of flow people need to pause
+// (gather a document, ask a family member) and come back to later — losing
+// all progress on backing out was the main friction point identified from
+// the Airbnb onboarding pattern review. This persists whatever's been
+// answered so far and lets the user into the main app without finishing.
+async function saveAndExit(user, intakeData, navigation) {
+  await AsyncStorage.multiSet([
+    [user ? `${ONBOARDING_KEY}/${user.id}` : ONBOARDING_KEY, 'partial'],
+    [ONBOARDING_DATA_KEY, JSON.stringify(intakeData ?? {})],
+  ]);
+  navigation.navigate('IntakeComplete');
+}
+
+function InFlowHeader({ title, subtitle, step, totalSteps, user, intakeData, navigation }) {
+  return (
+    <LinearGradient colors={[TEAL_DARK, TEAL]} style={s.screenHeader} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+      <View style={s.screenHeaderTop}>
+        <Text style={s.stepLabel}>Step {step} of {totalSteps}</Text>
+        <TouchableOpacity
+          onPress={() => saveAndExit(user, intakeData, navigation)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          activeOpacity={0.7}
+        >
+          <Text style={s.saveExitTxt}>Save &amp; exit</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={s.screenHeaderTitle}>{title}</Text>
+      {subtitle ? <Text style={s.screenHeaderSub}>{subtitle}</Text> : null}
+    </LinearGradient>
+  );
+}
+
 // ─── Picker Modal (reusable) ──────────────────────────────────────────────────
 
 function PickerModal({ visible, title, options, onSelect, onClose }) {
@@ -206,6 +239,27 @@ function WelcomeScreen({ navigation }) {
           ))}
         </View>
 
+        {/* Step preview — sets expectations for the length of the flow before
+            it starts, and shows a "save & exit" affordance exists so pausing
+            mid-flow feels safe. */}
+        <View style={s.previewWrap}>
+          {[
+            'Your immigration status',
+            'Your goals',
+            'How long you’ve been in the U.S.',
+            'A few more details',
+            'Your personalized roadmap',
+          ].map((txt, i) => (
+            <View key={txt} style={s.previewRow}>
+              <View style={s.previewNum}>
+                <Text style={s.previewNumTxt}>{i + 1}</Text>
+              </View>
+              <Text style={s.previewTxt}>{txt}</Text>
+            </View>
+          ))}
+          <Text style={s.previewNote}>You can save your progress and finish later at any point.</Text>
+        </View>
+
         {/* Start Now CTA */}
         <TouchableOpacity
           style={s.startBtn}
@@ -247,6 +301,7 @@ const STATUS_OPTIONS = [
 ];
 
 function StatusScreen({ navigation, route }) {
+  const { user } = useAuth();
   const [selected, setSelected] = useState(route.params?.intakeData?.immigration_status ?? null);
 
   const handleNext = () => {
@@ -258,11 +313,12 @@ function StatusScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={s.screen} edges={['bottom']}>
-      {/* Teal header strip */}
-      <LinearGradient colors={[TEAL_DARK, TEAL]} style={s.screenHeader} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-        <Text style={s.screenHeaderTitle}>I am currently...</Text>
-        <Text style={s.screenHeaderSub}>What best describes your immigration status?</Text>
-      </LinearGradient>
+      <InFlowHeader
+        title="I am currently..."
+        subtitle="What best describes your immigration status?"
+        step={2} totalSteps={6}
+        user={user} intakeData={route.params?.intakeData} navigation={navigation}
+      />
 
       <ScrollView contentContainerStyle={s.screenPad} showsVerticalScrollIndicator={false}>
         <View style={s.optionList}>
@@ -308,6 +364,7 @@ function StatusScreen({ navigation, route }) {
 // ─── SCREEN 3 — GOALS (branched by status) ────────────────────────────────────
 
 function GoalsScreen({ navigation, route }) {
+  const { user } = useAuth();
   const status = route.params?.intakeData?.immigration_status ?? 'other';
   const goals  = getGoalsForStatus(status);
   const [selected, setSelected] = useState(new Set(route.params?.intakeData?.immigration_goals ?? []));
@@ -331,10 +388,12 @@ function GoalsScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={s.screen} edges={['bottom']}>
-      <LinearGradient colors={[TEAL_DARK, TEAL]} style={s.screenHeader} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-        <Text style={s.screenHeaderTitle}>What is your goal?</Text>
-        <Text style={s.screenHeaderSub}>Select all that apply.</Text>
-      </LinearGradient>
+      <InFlowHeader
+        title="What is your goal?"
+        subtitle="Select all that apply."
+        step={3} totalSteps={6}
+        user={user} intakeData={route.params?.intakeData} navigation={navigation}
+      />
 
       <ScrollView contentContainerStyle={s.screenPad} showsVerticalScrollIndicator={false}>
         <View style={s.checkList}>
@@ -381,6 +440,7 @@ const TIME_OPTIONS = [
 ];
 
 function TimelineScreen({ navigation, route }) {
+  const { user } = useAuth();
   const [selected, setSelected] = useState(route.params?.intakeData?.years_in_us ?? null);
 
   const handleNext = () => {
@@ -392,10 +452,12 @@ function TimelineScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={s.screen} edges={['bottom']}>
-      <LinearGradient colors={[TEAL_DARK, TEAL]} style={s.screenHeader} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-        <Text style={s.screenHeaderTitle}>How long have you been in the U.S.?</Text>
-        <Text style={s.screenHeaderSub}>This helps us build your timeline.</Text>
-      </LinearGradient>
+      <InFlowHeader
+        title="How long have you been in the U.S.?"
+        subtitle="This helps us build your timeline."
+        step={4} totalSteps={6}
+        user={user} intakeData={route.params?.intakeData} navigation={navigation}
+      />
 
       <ScrollView contentContainerStyle={s.screenPad} showsVerticalScrollIndicator={false}>
         <View style={s.radioList}>
@@ -466,6 +528,7 @@ const COUNTRIES = [
 ].sort();
 
 function DetailsScreen({ navigation, route }) {
+  const { user } = useAuth();
   const prev = route.params?.intakeData ?? {};
   const [dob, setDob]                 = useState(prev.date_of_birth ?? '');
   const [country, setCountry]         = useState(prev.country_of_birth ?? '');
@@ -496,10 +559,14 @@ function DetailsScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={s.screen} edges={['bottom']}>
-      <LinearGradient colors={[TEAL_DARK, TEAL]} style={s.screenHeader} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-        <Text style={s.screenHeaderTitle}>A few more details...</Text>
-        <Text style={s.screenHeaderSub}>To personalize your experience.</Text>
-      </LinearGradient>
+      <InFlowHeader
+        title="A few more details..."
+        subtitle="To personalize your experience."
+        step={5} totalSteps={6}
+        user={user}
+        intakeData={{ ...prev, date_of_birth: dob, country_of_birth: country, primary_language: language, has_attorney: hasAttorney }}
+        navigation={navigation}
+      />
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={s.screenPad} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -760,7 +827,11 @@ const rv = StyleSheet.create({
 // ─── COMPLETE BRIDGE SCREEN ───────────────────────────────────────────────────
 
 // Shown while RootNavigator detects the completed intake and switches to AppStack.
+// Must call refresh() itself — arriving here only changes the screen inside
+// this stack, it doesn't make RootNavigator re-check AsyncStorage on its own.
 function CompleteScreen() {
+  const { refresh } = useOnboardingRefresh();
+  React.useEffect(() => { refresh(); }, [refresh]);
   return (
     <View style={{ flex: 1, backgroundColor: WHITE, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator size="large" color={TEAL} />
@@ -779,10 +850,16 @@ const s = StyleSheet.create({
   decCircle2:       { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.05)', bottom: 80, left: -60 },
   welcomeHeadline:  { fontSize: 30, fontWeight: '800', color: WHITE, textAlign: 'center', lineHeight: 38, marginBottom: 14 },
   welcomeSub:       { fontSize: 15, color: 'rgba(255,255,255,0.78)', textAlign: 'center', lineHeight: 23, marginBottom: 36 },
-  trustWrap:        { alignSelf: 'stretch', gap: 14, marginBottom: 40 },
+  trustWrap:        { alignSelf: 'stretch', gap: 14, marginBottom: 28 },
   trustRow:         { flexDirection: 'row', alignItems: 'center', gap: 12 },
   trustCheck:       { width: 26, height: 26, borderRadius: 13, backgroundColor: WHITE, justifyContent: 'center', alignItems: 'center' },
   trustText:        { fontSize: 15, color: WHITE, fontWeight: '500' },
+  previewWrap:      { alignSelf: 'stretch', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 18, gap: 12, marginBottom: 32 },
+  previewRow:       { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  previewNum:       { width: 22, height: 22, borderRadius: 11, borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)', justifyContent: 'center', alignItems: 'center' },
+  previewNumTxt:    { fontSize: 11, fontWeight: '700', color: WHITE },
+  previewTxt:       { fontSize: 14, color: 'rgba(255,255,255,0.9)', fontWeight: '500', flex: 1 },
+  previewNote:      { fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4, fontStyle: 'italic' },
   startBtn:         { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: WHITE, borderRadius: 14, height: 56, marginBottom: 16 },
   startBtnTxt:      { fontSize: 17, fontWeight: '800', color: TEAL },
   skipLink:         { marginBottom: 8 },
@@ -790,6 +867,9 @@ const s = StyleSheet.create({
 
   // Screen header (teal strip on non-welcome screens)
   screenHeader:     { paddingHorizontal: 20, paddingTop: 52, paddingBottom: 20 },
+  screenHeaderTop:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
+  stepLabel:        { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.7)', letterSpacing: 0.3 },
+  saveExitTxt:      { fontSize: 13, fontWeight: '600', color: WHITE, textDecorationLine: 'underline' },
   screenHeaderTitle:{ fontSize: 22, fontWeight: '800', color: WHITE, lineHeight: 30, marginBottom: 4 },
   screenHeaderSub:  { fontSize: 14, color: 'rgba(255,255,255,0.8)', lineHeight: 20 },
 

@@ -13,6 +13,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getMissionData, buildDefaultMissionData } from '../lib/stepMissionData';
+import GlossaryText from '../components/GlossaryText';
 import { mediumHaptic, lightHaptic, heavyHaptic } from '../utils/haptics';
 
 // Offline queue key — completions recorded while offline are synced on next mount
@@ -278,11 +279,11 @@ function StepGuideTab({ mission, styles, colors }) {
                 </View>
                 {expanded.has(step.number) && (
                   <View style={{ gap: 10 }}>
-                    <Text style={styles.microDesc}>{step.description}</Text>
+                    <GlossaryText style={styles.microDesc}>{step.description}</GlossaryText>
                     {step.tip && (
                       <View style={styles.microTip}>
                         <Ionicons name="bulb-outline" size={15} color="#F5A623" />
-                        <Text style={styles.microTipTxt}>{step.tip}</Text>
+                        <GlossaryText style={styles.microTipTxt}>{step.tip}</GlossaryText>
                       </View>
                     )}
                     {step.link && (

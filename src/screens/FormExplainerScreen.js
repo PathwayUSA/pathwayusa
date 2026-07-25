@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useSpeech } from '../hooks/useSpeech';
 
 const FORMS = [
@@ -237,6 +238,8 @@ export default function FormExplainerScreen() {
         <Ionicons name="information-circle-outline" size={16} color="#f9a825" />
         <Text style={[styles.infoText, { color: '#7c6c0e' }]}>All USCIS forms are FREE at uscis.gov. Never pay a third-party website for these forms. Each form download link opens directly on the official USCIS website.</Text>
       </View>
+
+      <DisclaimerBanner />
 
       {FORMS.map((form) => (
         <FormCard key={form.id} form={form} colors={colors} selected={selected} onSelect={setSelected} onSpeak={speak} />

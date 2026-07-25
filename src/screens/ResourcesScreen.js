@@ -17,6 +17,8 @@ import { useLanguage } from '../i18n';
 
 const { width } = Dimensions.get('window');
 
+const SAVED_RESOURCES_KEY = '@pathwayusa/saved_resources';
+
 const DISTANCE_OPTIONS = [5, 10, 25, 50];
 
 const CATEGORIES = [
@@ -135,7 +137,12 @@ function makeStyles(colors) {
 
     // Resources list
     resultsSection: { paddingHorizontal: 20, marginTop: 22 },
-    resultsTitle: { fontSize: 16, fontWeight: '900', color: '#1A1A2E', marginBottom: 12 },
+    resultsHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+    resultsTitle: { fontSize: 16, fontWeight: '900', color: '#1A1A2E', flex: 1 },
+    savedToggle: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, borderWidth: 1.5, borderColor: colors.primary },
+    savedToggleActive: { backgroundColor: colors.primary },
+    savedToggleTxt: { fontSize: 12, fontWeight: '700', color: colors.primary },
+    savedToggleTxtActive: { color: '#fff' },
 
     // Resource card
     resourceCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 12, gap: 10, ...SHADOWS.small },
@@ -181,11 +188,29 @@ export default function ResourcesScreen({ navigation }) {
   const [loadingDB, setLoadingDB] = useState(false);
   const [showCount, setShowCount] = useState(3);
   const [intakeData, setIntakeData] = useState(null);
+  const [savedIds, setSavedIds] = useState(new Set());
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(ONBOARDING_DATA_KEY)
       .then((raw) => { if (raw) setIntakeData(JSON.parse(raw)); })
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem(SAVED_RESOURCES_KEY)
+      .then((raw) => { if (raw) setSavedIds(new Set(JSON.parse(raw))); })
+      .catch(() => {});
+  }, []);
+
+  const toggleSaved = useCallback((id) => {
+    lightHaptic();
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      AsyncStorage.setItem(SAVED_RESOURCES_KEY, JSON.stringify(Array.from(next))).catch(() => {});
+      return next;
+    });
   }, []);
 
   // Try to fetch from Supabase; fall back to placeholder
@@ -220,12 +245,13 @@ export default function ResourcesScreen({ navigation }) {
   const filtered = useMemo(() => {
     let list = resources.filter((r) => r.distanceMi <= distance);
     if (activeCategory) list = list.filter((r) => r.category === activeCategory);
+    if (showSavedOnly) list = list.filter((r) => savedIds.has(r.id));
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter((r) => r.name.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q));
     }
     return list.sort((a, b) => a.distanceMi - b.distanceMi);
-  }, [resources, distance, activeCategory, search]);
+  }, [resources, distance, activeCategory, showSavedOnly, savedIds, search]);
 
   const handleCall = useCallback((phone) => {
     if (!phone) return;
@@ -346,21 +372,31 @@ export default function ResourcesScreen({ navigation }) {
 
         {/* ── RESULTS ── */}
         <View style={styles.resultsSection}>
-          <Text style={styles.resultsTitle}>
-            {activeCategory
-              ? `${CATEGORIES.find((c) => c.id === activeCategory)?.label ?? activeCategory} Near You`
-              : 'Top Resources Near You'}
-            {loadingDB && <ActivityIndicator color={colors.primary} size="small" style={{ marginLeft: 8 }} />}
-          </Text>
+          <View style={styles.resultsHeaderRow}>
+            <Text style={styles.resultsTitle}>
+              {activeCategory
+                ? `${CATEGORIES.find((c) => c.id === activeCategory)?.label ?? activeCategory} Near You`
+                : 'Top Resources Near You'}
+              {loadingDB && <ActivityIndicator color={colors.primary} size="small" style={{ marginLeft: 8 }} />}
+            </Text>
+            <TouchableOpacity
+              style={[styles.savedToggle, showSavedOnly && styles.savedToggleActive]}
+              onPress={() => { lightHaptic(); setShowSavedOnly((v) => !v); setShowCount(3); }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name={showSavedOnly ? 'bookmark' : 'bookmark-outline'} size={13} color={showSavedOnly ? '#fff' : colors.primary} />
+              <Text style={[styles.savedToggleTxt, showSavedOnly && styles.savedToggleTxtActive]}>Saved</Text>
+            </TouchableOpacity>
+          </View>
 
           {filtered.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 40, gap: 10 }}>
-              <Ionicons name="search-outline" size={40} color="#BDC3C7" />
+              <Ionicons name={showSavedOnly ? 'bookmark-outline' : 'search-outline'} size={40} color="#BDC3C7" />
               <Text style={{ fontSize: 15, color: '#BDC3C7', fontWeight: '600' }}>
-                No results found
+                {showSavedOnly ? 'No saved resources yet' : 'No results found'}
               </Text>
               <Text style={{ fontSize: 13, color: '#BDC3C7', textAlign: 'center', lineHeight: 19 }}>
-                Try a wider distance or a different category.
+                {showSavedOnly ? 'Tap the bookmark on a resource to save it here.' : 'Try a wider distance or a different category.'}
               </Text>
             </View>
           ) : (
@@ -373,7 +409,17 @@ export default function ResourcesScreen({ navigation }) {
                     {/* Top row: name + bookmark */}
                     <View style={styles.cardTopRow}>
                       <Text style={styles.cardName} numberOfLines={2}>{resource.name}</Text>
-                      <Ionicons name="bookmark-outline" size={20} color="#BDC3C7" />
+                      <TouchableOpacity
+                        onPress={() => toggleSaved(resource.id)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons
+                          name={savedIds.has(resource.id) ? 'bookmark' : 'bookmark-outline'}
+                          size={20}
+                          color={savedIds.has(resource.id) ? colors.primary : '#BDC3C7'}
+                        />
+                      </TouchableOpacity>
                     </View>
 
                     {/* Category badge */}

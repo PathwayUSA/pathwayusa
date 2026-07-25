@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { SHADOWS } from '../theme';
+import StatusBadge from '../components/StatusBadge';
 import {
   registerForPushNotifications,
   scheduleDeadlineNotifications,
@@ -33,6 +34,12 @@ function urgencyColor(days) {
   if (days > 60) return '#27AE60';
   if (days > 30) return '#E67E22';
   return '#E74C3C';
+}
+
+function urgencyTone(days) {
+  if (days > 60) return 'success';
+  if (days > 30) return 'warning';
+  return 'danger';
 }
 
 function makeStyles(colors) {
@@ -276,11 +283,11 @@ export default function DeadlinesScreen({ navigation }) {
                         <View style={styles.cardBody}>
                           <Text style={styles.cardTitle}>{dl.title}</Text>
                           <Text style={styles.cardDate}>{formatDate(dl.deadline_date)}</Text>
-                          <View style={[styles.daysBadge, { backgroundColor: uc + '18' }]}>
-                            <Text style={[styles.daysText, { color: uc }]}>
-                              {days === 0 ? 'Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`}
-                            </Text>
-                          </View>
+                          <StatusBadge
+                            style={{ marginTop: 4 }}
+                            tone={urgencyTone(days)}
+                            label={days === 0 ? 'Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`}
+                          />
                         </View>
                         <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteDeadline(dl)}>
                           <Ionicons name="trash-outline" size={18} color="#BDC3C7" />

@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../theme';
+import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useTheme } from '../context/ThemeContext';
 import { useSpeech } from '../hooks/useSpeech';
 
@@ -397,6 +398,8 @@ export default function AppointmentPrepScreen({ navigation }) {
             <View style={[s.progressBarInner, { width: `${(completedCount / 7) * 100}%` }]} />
           </View>
         </LinearGradient>
+
+        <DisclaimerBanner />
 
         {/* Day cards */}
         <Text style={[s.sectionTitle, { color: colors.text }]}>Your 7-Day Program</Text>

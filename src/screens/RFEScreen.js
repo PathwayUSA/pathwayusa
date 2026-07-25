@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useSpeech } from '../hooks/useSpeech';
 
 const RFE_TYPES = [
@@ -367,6 +368,8 @@ export default function RFEScreen() {
           An RFE is NOT a denial — it is USCIS asking for more information. Select your RFE type below for a complete response guide. You have 87 days from the RFE date to respond.
         </Text>
       </View>
+
+      <DisclaimerBanner />
 
       {/* RFE type list */}
       <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>SELECT YOUR RFE TYPE</Text>

@@ -33,6 +33,7 @@ import {
 } from '../lib/notifications';
 import { LOCATION_QUESTION_IDS, getPersonalizedAnswer, STATE_DATA } from '../data/stateRepresentatives';
 import { getStateFromZip } from '../lib/zipToState';
+import GlossaryText from '../components/GlossaryText';
 
 const { width } = Dimensions.get('window');
 const KEYS = {
@@ -1148,7 +1149,7 @@ function TipsTab({ tipFavorites, onToggleFav, styles, colors }) {
                 <Text style={styles.tipCatTxt}>{tip.category.toUpperCase()}</Text>
               </View>
               <Text style={styles.tipTitle}>{tip.title}</Text>
-              <Text style={styles.tipBody}>{tip.body}</Text>
+              <GlossaryText style={styles.tipBody}>{tip.body}</GlossaryText>
               <View style={styles.tipActions}>
                 <TouchableOpacity style={styles.tipFavBtn} onPress={() => onToggleFav(tip.id)} activeOpacity={0.7} accessibilityLabel={isFav ? 'Remove bookmark' : 'Save tip'}>
                   <Ionicons name={isFav ? 'bookmark' : 'bookmark-outline'} size={22} color={isFav ? colors.primary : '#bbb'} />

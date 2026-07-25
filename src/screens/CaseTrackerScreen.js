@@ -6,11 +6,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { supabase } from '../lib/supabase';
 import { SHADOWS } from '../theme';
 import PaywallPrompt from '../components/PaywallPrompt';
+import StatusBadge from '../components/StatusBadge';
 
 const STATUS_PLAIN = {
   'Case Was Received':               'USCIS got your application. They are reviewing it and will contact you with next steps.',
@@ -49,6 +51,16 @@ function statusColor(status, primaryColor) {
   if (s.includes('evidence'))   return '#ff9800';
   if (s.includes('interview'))  return '#2196f3';
   return primaryColor;
+}
+
+function statusTone(status) {
+  if (!status) return 'neutral';
+  const s = status.toLowerCase();
+  if (s.includes('approved'))  return 'success';
+  if (s.includes('denied'))    return 'danger';
+  if (s.includes('evidence'))  return 'warning';
+  if (s.includes('interview')) return 'info';
+  return 'info';
 }
 
 function makeStyles(colors) {
@@ -184,6 +196,8 @@ export default function CaseTrackerScreen() {
           </View>
         </View>
 
+        <DisclaimerBanner style={{ marginHorizontal: 16 }} />
+
         {cases.length > 0 && (
           <>
             <Text style={styles.sectionLabel}>Tracked Cases</Text>
@@ -210,6 +224,12 @@ export default function CaseTrackerScreen() {
                     <View style={{ flex: 1 }}>
                       <Text style={styles.receiptNum}>{c.receipt_number}</Text>
                       <Text style={[styles.statusText, { color }]}>{c.last_status ?? 'Unknown'}</Text>
+                      <StatusBadge
+                        style={{ marginTop: 6 }}
+                        tone={statusTone(c.last_status)}
+                        label="Source: USCIS.gov"
+                        icon="shield-checkmark"
+                      />
                     </View>
                     <TouchableOpacity onPress={() => deleteCase(c)} style={{ padding: 4 }}>
                       <Ionicons name="close-circle-outline" size={20} color="#ccc" />

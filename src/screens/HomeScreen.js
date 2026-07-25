@@ -17,6 +17,7 @@ import { QUESTIONS } from '../data/civicsQuestions';
 import { supabase } from '../lib/supabase';
 import { getPathway } from '../lib/pathwayRouter';
 import { getMissionData, buildDefaultMissionData } from '../lib/stepMissionData';
+import { BADGE_DEFS, hasBadge } from '../lib/badges';
 import { ONBOARDING_KEY, ONBOARDING_DATA_KEY } from './onboarding/IntakeStack';
 import { useOnboardingRefresh } from '../context/OnboardingContext';
 import UserAvatar from '../components/UserAvatar';
@@ -185,6 +186,7 @@ export default function HomeScreen({ navigation }) {
   const { t } = useLanguage();
   const { refresh: refreshOnboarding } = useOnboardingRefresh();
   const { isPro } = useSubscription();
+  const earnedBadgeCount = BADGE_DEFS.filter((b) => hasBadge(profile?.badges, b.id)).length;
 
   // Intake / onboarding
   const [intakeData, setIntakeData]       = useState(null);
@@ -725,6 +727,7 @@ export default function HomeScreen({ navigation }) {
             { icon: 'school',    label: 'Practice\nQuiz', color: '#2A8B7A', bg: '#E8F4F1', screen: 'Learn'    },
             { icon: 'documents', label: 'My\nDocuments', color: '#2196F3', bg: '#E3F2FD', screen: 'Documents' },
             { icon: 'briefcase', label: 'Find\nAttorney', color: '#F5A623', bg: '#FFF4E0', screen: 'Legal'    },
+            { icon: 'ribbon',    label: `${earnedBadgeCount}/${BADGE_DEFS.length}\nBadges`, color: '#8E44AD', bg: '#F3E8FA', screen: 'Badges' },
           ].map((action) => (
             <TouchableOpacity
               key={action.screen}

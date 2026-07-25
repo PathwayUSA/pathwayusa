@@ -12,6 +12,8 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { supabase } from '../lib/supabase';
 import { SHADOWS } from '../theme';
 import PaywallPrompt from '../components/PaywallPrompt';
+import StatusBadge from '../components/StatusBadge';
+import GlossaryText from '../components/GlossaryText';
 
 const PATHS = {
   'Citizenship (N-400)': [
@@ -205,9 +207,16 @@ export default function DocumentsScreen() {
                 >
                   {checked && <Ionicons name="checkmark" size={16} color="#fff" />}
                 </TouchableOpacity>
-                <Text style={[styles.docName, { color: checked ? colors.textSecondary : colors.text }, checked && styles.docNameDone]}>
-                  {docName}
-                </Text>
+                <View style={{ flex: 1 }}>
+                  <GlossaryText style={[styles.docName, { color: checked ? colors.textSecondary : colors.text }, checked && styles.docNameDone]}>
+                    {docName}
+                  </GlossaryText>
+                  <StatusBadge
+                    style={{ marginTop: 4 }}
+                    label={checked ? 'Uploaded' : 'Missing'}
+                    tone={checked ? 'success' : 'warning'}
+                  />
+                </View>
                 {photo ? (
                   <TouchableOpacity onPress={() => pickPhoto(docName)}>
                     <Image source={{ uri: photo }} style={styles.thumbnail} />
