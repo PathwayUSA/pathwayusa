@@ -42,6 +42,34 @@ function urgencyTone(days) {
   return 'danger';
 }
 
+// Fixed, not user-configurable — a lightweight keyword read of the title
+// since user_deadlines has no category column. Good enough to group a
+// short list into recognizable buckets without a schema change.
+const DEADLINE_CATEGORIES = [
+  { key: 'tps',         label: 'TPS',         color: '#8E44AD', match: /\btps\b/i },
+  { key: 'biometrics',  label: 'Biometrics',  color: '#16A085', match: /biometric/i },
+  { key: 'interview',   label: 'Interview',   color: '#2980B9', match: /interview/i },
+  { key: 'court',       label: 'Court',       color: '#C0392B', match: /\b(court|hearing)\b/i },
+  { key: 'renewal',     label: 'Renewal',     color: '#E67E22', match: /renew/i },
+  { key: 'filing',      label: 'Filing',      color: '#27AE60', match: /\b(file|filing|application|form|n-400|i-485|i-751|i-90)\b/i },
+  { key: 'appointment', label: 'Appointment', color: '#2C3E50', match: /appointment|appt/i },
+];
+const OTHER_CATEGORY = { key: 'other', label: 'Other', color: '#7F8C8D' };
+
+function categorize(title) {
+  return DEADLINE_CATEGORIES.find((c) => c.match.test(title ?? '')) ?? OTHER_CATEGORY;
+}
+
+function groupByCategory(list) {
+  const groups = new Map();
+  for (const dl of list) {
+    const cat = categorize(dl.title);
+    if (!groups.has(cat.key)) groups.set(cat.key, { cat, items: [] });
+    groups.get(cat.key).items.push(dl);
+  }
+  return Array.from(groups.values());
+}
+
 function makeStyles(colors) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background ?? '#F5F7F5' },
@@ -116,6 +144,13 @@ function makeStyles(colors) {
       fontSize: 11, fontWeight: '700', color: '#7F8C8D', letterSpacing: 0.8,
       marginBottom: 10, marginTop: 4, textTransform: 'uppercase',
     },
+
+    catGroupHeader: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 8, marginTop: 6 },
+    catDot: { width: 8, height: 8, borderRadius: 4 },
+    catGroupTitle: { fontSize: 12, fontWeight: '800', color: '#1A1A2E' },
+
+    searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, height: 42, marginTop: 12, marginBottom: 4, ...SHADOWS.small },
+    searchInput: { flex: 1, fontSize: 14, color: '#1A1A2E' },
   });
 }
 
@@ -126,6 +161,7 @@ export default function DeadlinesScreen({ navigation }) {
   const styles                = useMemo(() => makeStyles(colors), [colors]);
 
   const [deadlines, setDeadlines]         = useState([]);
+  const [search, setSearch]               = useState('');
   const [loading, setLoading]             = useState(true);
   const [hasPermission, setHasPermission] = useState(true);
   const [modalVisible, setModalVisible]   = useState(false);
@@ -213,8 +249,11 @@ export default function DeadlinesScreen({ navigation }) {
     ]);
   };
 
-  const upcoming = deadlines.filter((d) => daysUntil(d.deadline_date) >= 0);
-  const past     = deadlines.filter((d) => daysUntil(d.deadline_date) < 0);
+  const searched = search.trim()
+    ? deadlines.filter((d) => d.title.toLowerCase().includes(search.trim().toLowerCase()))
+    : deadlines;
+  const upcoming = searched.filter((d) => daysUntil(d.deadline_date) >= 0);
+  const past     = searched.filter((d) => daysUntil(d.deadline_date) < 0);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -258,6 +297,25 @@ export default function DeadlinesScreen({ navigation }) {
           <Text style={styles.addBtnText}>Add Deadline</Text>
         </TouchableOpacity>
 
+        {deadlines.length > 3 && (
+          <View style={styles.searchWrap}>
+            <Ionicons name="search" size={16} color="#BDC3C7" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search deadlines..."
+              placeholderTextColor="#BDC3C7"
+              value={search}
+              onChangeText={setSearch}
+              returnKeyType="search"
+            />
+            {search.length > 0 && (
+              <TouchableOpacity onPress={() => setSearch('')}>
+                <Ionicons name="close-circle" size={16} color="#BDC3C7" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
         {loading ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
         ) : deadlines.length === 0 ? (
@@ -268,17 +326,29 @@ export default function DeadlinesScreen({ navigation }) {
               Add filing deadlines, renewal dates, or court appearances. We'll remind you 30, 7, and 1 day before each one.
             </Text>
           </View>
+        ) : searched.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyIcon}>🔍</Text>
+            <Text style={styles.emptyTitle}>No matches</Text>
+            <Text style={styles.emptySub}>Nothing found for "{search}".</Text>
+          </View>
         ) : (
           <>
             {upcoming.length > 0 && (
               <>
                 <Text style={styles.sectionTitle}>Upcoming</Text>
-                {upcoming.map((dl) => {
-                  const days = daysUntil(dl.deadline_date);
-                  const uc   = urgencyColor(days);
-                  const reminderOn = dl.reminder_enabled ?? true;
-                  return (
-                    <View key={dl.id} style={[styles.card, { borderLeftColor: uc }]}>
+                {groupByCategory(upcoming).map(({ cat, items }) => (
+                  <View key={cat.key} style={{ marginBottom: 4 }}>
+                    <View style={styles.catGroupHeader}>
+                      <View style={[styles.catDot, { backgroundColor: cat.color }]} />
+                      <Text style={styles.catGroupTitle}>{cat.label}</Text>
+                    </View>
+                    {items.map((dl) => {
+                      const days = daysUntil(dl.deadline_date);
+                      const uc   = urgencyColor(days);
+                      const reminderOn = dl.reminder_enabled ?? true;
+                      return (
+                        <View key={dl.id} style={[styles.card, { borderLeftColor: uc }]}>
                       <View style={styles.cardTopRow}>
                         <View style={styles.cardBody}>
                           <Text style={styles.cardTitle}>{dl.title}</Text>
@@ -313,8 +383,10 @@ export default function DeadlinesScreen({ navigation }) {
                         />
                       </View>
                     </View>
-                  );
-                })}
+                      );
+                    })}
+                  </View>
+                ))}
               </>
             )}
 

@@ -25,6 +25,13 @@ const CATEGORY_COLORS = {
   Education: { color: '#2e7d32', bg: '#e8f5e9' },
 };
 
+const CATEGORY_FILTERS = [
+  { id: 'Legal',     label: 'Legal Aid', icon: 'briefcase' },
+  { id: 'Medical',   label: 'Health',    icon: 'medkit' },
+  { id: 'Housing',   label: 'Housing',   icon: 'home' },
+  { id: 'Education', label: 'Education', icon: 'school' },
+];
+
 // Only resources with lat/lng are pinned. Supabase resources without coordinates
 // appear in the list view only — add lat/lng columns to the resources table when
 // geocoding is wired up.
@@ -35,10 +42,16 @@ export default function ResourceMapScreen({ navigation, route }) {
   const mapRef = useRef(null);
 
   const allResources = route.params?.resources ?? [];
-  const pinnable = allResources.filter((r) => r.lat != null && r.lng != null);
 
   const [selectedResource, setSelectedResource] = useState(null);
   const [region, setRegion] = useState(DEFAULT_REGION);
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  const visibleResources = activeCategory
+    ? allResources.filter((r) => r.category === activeCategory)
+    : allResources;
+  const pinnable = visibleResources.filter((r) => r.lat != null && r.lng != null);
+  const availableCategories = new Set(allResources.map((r) => r.category));
 
   useEffect(() => {
     Location.requestForegroundPermissionsAsync()
@@ -78,6 +91,29 @@ export default function ResourceMapScreen({ navigation, route }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Map View</Text>
         <View style={{ width: 40 }} />
+      </View>
+
+      {/* Persistent category filter chips */}
+      <View style={styles.chipRow}>
+        {CATEGORY_FILTERS.filter((c) => availableCategories.has(c.id)).map((c) => {
+          const active = activeCategory === c.id;
+          const catStyle = cat(c.id);
+          return (
+            <TouchableOpacity
+              key={c.id}
+              style={[styles.chip, active && { backgroundColor: catStyle.color, borderColor: catStyle.color }]}
+              onPress={() => {
+                lightHaptic();
+                setActiveCategory(active ? null : c.id);
+                setSelectedResource(null);
+              }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name={c.icon} size={13} color={active ? '#fff' : catStyle.color} />
+              <Text style={[styles.chipTxt, { color: active ? '#fff' : catStyle.color }]}>{c.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Info strip when no pins available (Supabase resources lack coordinates) */}
@@ -167,6 +203,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F7F5',
   },
   infoTxt: { fontSize: 12, color: '#7F8C8D', flex: 1, lineHeight: 17 },
+  chipRow: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8,
+    paddingHorizontal: 16, paddingVertical: 10,
+    backgroundColor: '#fff', zIndex: 9,
+    ...SHADOWS.small,
+  },
+  chip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16,
+    borderWidth: 1.5, borderColor: '#E8ECE8', backgroundColor: '#fff',
+  },
+  chipTxt: { fontSize: 12, fontWeight: '700' },
   map: { flex: 1 },
   bottomCard: {
     backgroundColor: '#fff',

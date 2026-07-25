@@ -234,6 +234,14 @@ function makeStyles(colors) {
     },
     explanationLabel: { fontSize: 14, fontWeight: '800', color: colors.primary, marginBottom: 8 },
     explanationText: { fontSize: 16, color: '#444', lineHeight: 24 },
+    diffBox: {
+      backgroundColor: '#fff5f5', borderRadius: 14, padding: 16, marginTop: 8,
+      borderLeftWidth: 4, borderLeftColor: '#e53935', gap: 6,
+    },
+    diffLabel: { fontSize: 12, fontWeight: '800', color: '#c62828', letterSpacing: 0.3 },
+    diffRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+    diffWrong: { fontSize: 15, fontWeight: '700', color: '#c62828', textDecorationLine: 'line-through' },
+    diffCorrect: { fontSize: 15, fontWeight: '800', color: '#2e7d32' },
     quizFooter: { backgroundColor: '#fff', padding: 16, gap: 12, ...SHADOWS.medium },
     feedbackBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -759,9 +767,20 @@ function TestQuizView({ questions, onFinish, mode, autoPlay, userState, navigati
           );
         })}
 
+        {revealed && selected !== q.correct && (
+          <View style={styles.diffBox}>
+            <Text style={styles.diffLabel}>WHY THIS WAS WRONG</Text>
+            <View style={styles.diffRow}>
+              <Text style={styles.diffWrong}>{selected}</Text>
+              <Ionicons name="arrow-forward" size={14} color="#7F8C8D" />
+              <Text style={styles.diffCorrect}>{q.correct}</Text>
+            </View>
+          </View>
+        )}
+
         {revealed && (
           <View style={styles.explanationBox}>
-            <Text style={styles.explanationLabel}>EXPLANATION</Text>
+            <Text style={styles.explanationLabel}>{selected === q.correct ? 'EXPLANATION' : 'THE RULE'}</Text>
             <Text style={styles.explanationText}>{q.explanation}</Text>
             <SpeakerBtn target="answer" label="Read answer" />
           </View>

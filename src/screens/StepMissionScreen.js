@@ -14,6 +14,8 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getMissionData, buildDefaultMissionData } from '../lib/stepMissionData';
 import GlossaryText from '../components/GlossaryText';
+import CelebrationModal from '../components/CelebrationModal';
+import { awardBadge, BADGE_DEFS } from '../lib/badges';
 import { mediumHaptic, lightHaptic, heavyHaptic } from '../utils/haptics';
 
 // Offline queue key — completions recorded while offline are synced on next mount
@@ -95,6 +97,9 @@ function makeStyles(colors) {
     markLinkTxt: { fontSize: 14, color: '#7F8C8D', fontWeight: '600' },
 
     // Micro-steps
+    microHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, paddingHorizontal: 4 },
+    microHeaderCount: { fontSize: 13, fontWeight: '700', color: '#7F8C8D' },
+    microHeaderToggle: { fontSize: 13, fontWeight: '700' },
     microStep: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
     microNumWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
     microNumTxt: { fontSize: 14, fontWeight: '900', color: '#fff' },
@@ -246,6 +251,7 @@ function OverviewTab({ mission, styles, colors, onStartGuide, onMarkComplete, ga
 // ── Step Guide Tab ────────────────────────────────────────────────────────────
 function StepGuideTab({ mission, styles, colors }) {
   const [expanded, setExpanded] = useState(new Set([1]));
+  const allExpanded = expanded.size === mission.microSteps.length;
 
   const toggle = (n) => {
     setExpanded(prev => {
@@ -255,9 +261,22 @@ function StepGuideTab({ mission, styles, colors }) {
     });
   };
 
+  const toggleAll = () => {
+    lightHaptic();
+    setExpanded(allExpanded ? new Set() : new Set(mission.microSteps.map((s) => s.number)));
+  };
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={[styles.card, { marginTop: 20, gap: 0 }]}>
+      <View style={styles.microHeaderRow}>
+        <Text style={styles.microHeaderCount}>{mission.microSteps.length} steps</Text>
+        <TouchableOpacity onPress={toggleAll} activeOpacity={0.7}>
+          <Text style={[styles.microHeaderToggle, { color: colors.primary }]}>
+            {allExpanded ? 'Collapse all' : 'Expand all'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.card, { marginTop: 8, gap: 0 }]}>
         {mission.microSteps.map((step, i) => (
           <React.Fragment key={step.number}>
             <TouchableOpacity
@@ -482,7 +501,7 @@ function HelpTab({ styles, colors, navigation }) {
 }
 
 // ── Completion Overlay ────────────────────────────────────────────────────────
-function CompletionOverlay({ styles, step, stepIndex, totalSteps, pathway, navigation, steps }) {
+function CompletionOverlay({ styles, step, stepIndex, totalSteps, pathway, navigation, steps, profile }) {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim  = useRef(new Animated.Value(0)).current;
 
@@ -532,8 +551,19 @@ function CompletionOverlay({ styles, step, stepIndex, totalSteps, pathway, navig
             <Ionicons name="arrow-forward" size={20} color="#fff" />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.nextStepBtn} onPress={() => navigation.navigate('AppMain')} activeOpacity={0.85}>
-            <Text style={styles.nextStepBtnTxt}>Back to Roadmap</Text>
+          <TouchableOpacity
+            style={styles.nextStepBtn}
+            onPress={() => {
+              heavyHaptic();
+              navigation.navigate('Celebration', {
+                name: profile?.full_name || 'Friend',
+                path: pathway?.id === 'D' ? 'green_card' : 'citizenship',
+                date: new Date().toDateString(),
+              });
+            }}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.nextStepBtnTxt}>View Your Certificate 🎉</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={styles.backRoadmapBtn} onPress={() => navigation.navigate('AppMain')} activeOpacity={0.7}>
@@ -550,10 +580,11 @@ export default function StepMissionScreen({ route, navigation }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [completed, setCompleted] = useState(false);
+  const [newBadge, setNewBadge] = useState(null);
 
   // ── Document state (lifted — persists across tab switches) ────────────────
   const [docStatuses, setDocStatuses]   = useState({});
@@ -725,8 +756,21 @@ export default function StepMissionScreen({ route, navigation }) {
       .eq('id', user.id)
       .catch(() => {});
 
+    // Award the "first step" / "roadmap done" badges here — this is the only
+    // exit path that confirms the write actually reached Supabase, so it's
+    // the only one safe to also award a badge against. awardBadge() is
+    // idempotent (no-ops if already earned), so it's safe to attempt on
+    // every completion rather than tracking "is this really the first one"
+    // client-side. Only surface the celebration modal when a badge is
+    // genuinely newly earned, not on every step.
+    const isFinalStep = !steps?.[stepIndex + 1];
+    const badgeId = isFinalStep ? 'roadmap_done' : 'first_step';
+    awardBadge(user.id, badgeId, supabase)
+      .then((awarded) => { if (awarded) setNewBadge(BADGE_DEFS.find((b) => b.id === badgeId)); })
+      .catch(() => {});
+
     setCompleted(true);
-  }, [user, step, stepIndex]);
+  }, [user, step, stepIndex, steps, totalSteps]);
 
   if (!step) {
     return (
@@ -822,8 +866,17 @@ export default function StepMissionScreen({ route, navigation }) {
           pathway={pathway}
           navigation={navigation}
           steps={steps}
+          profile={profile}
         />
       )}
+
+      <CelebrationModal
+        visible={!!newBadge}
+        title={newBadge?.name}
+        subtitle={newBadge ? `Badge earned: ${newBadge.desc}` : ''}
+        iconName={newBadge?.icon}
+        onClose={() => setNewBadge(null)}
+      />
     </View>
   );
 }

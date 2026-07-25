@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Image, Alert, ActivityIndicator,
+  Image, Alert, ActivityIndicator, TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -76,6 +76,9 @@ function makeStyles(colors) {
     progressFill:{ height: 6, borderRadius: 3 },
     progressTxt: { fontSize: 13, fontWeight: '700', color: colors.text, flexShrink: 0 },
 
+    searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, height: 42, marginBottom: 16, ...SHADOWS.small },
+    searchInput: { flex: 1, fontSize: 14, color: colors.text },
+
     docRow: {
       backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
       flexDirection: 'row', alignItems: 'center', gap: 12, ...SHADOWS.small,
@@ -96,6 +99,7 @@ export default function DocumentsScreen() {
   const styles      = useMemo(() => makeStyles(colors), [colors]);
 
   const [selectedPath, setSelectedPath] = useState(PATH_KEYS[0]);
+  const [search, setSearch] = useState('');
   const [docs, setDocs]   = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -156,9 +160,12 @@ export default function DocumentsScreen() {
     }
   };
 
-  const currentDocs = PATHS[selectedPath] ?? [];
-  const completed   = currentDocs.filter((d) => docs[d]?.checked).length;
-  const pct         = currentDocs.length > 0 ? completed / currentDocs.length : 0;
+  const allDocs     = PATHS[selectedPath] ?? [];
+  const currentDocs = search.trim()
+    ? allDocs.filter((d) => d.toLowerCase().includes(search.trim().toLowerCase()))
+    : allDocs;
+  const completed   = allDocs.filter((d) => docs[d]?.checked).length;
+  const pct         = allDocs.length > 0 ? completed / allDocs.length : 0;
 
   if (!isPro) {
     return <PaywallPrompt featureName="Document Checklist" />;
@@ -188,11 +195,32 @@ export default function DocumentsScreen() {
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${pct * 100}%`, backgroundColor: colors.primary }]} />
           </View>
-          <Text style={styles.progressTxt}>{completed}/{currentDocs.length}</Text>
+          <Text style={styles.progressTxt}>{completed}/{allDocs.length}</Text>
+        </View>
+
+        <View style={styles.searchWrap}>
+          <Ionicons name="search" size={16} color="#BDC3C7" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search documents..."
+            placeholderTextColor="#BDC3C7"
+            value={search}
+            onChangeText={setSearch}
+            returnKeyType="search"
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={16} color="#BDC3C7" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {loading ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
+        ) : currentDocs.length === 0 ? (
+          <Text style={{ textAlign: 'center', color: '#BDC3C7', marginTop: 24, fontSize: 13 }}>
+            No documents match "{search}"
+          </Text>
         ) : (
           currentDocs.map((docName) => {
             const doc     = docs[docName];
