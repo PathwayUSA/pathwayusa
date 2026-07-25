@@ -48,14 +48,6 @@ function makeStyles(colors) {
   });
 }
 
-const MOCK_LEADERBOARD = [
-  { rank: 1, name: 'Maria G.', count: 23 },
-  { rank: 2, name: 'Carlos M.', count: 18 },
-  { rank: 3, name: 'Ana L.',   count: 14 },
-  { rank: 4, name: 'José R.',  count: 11 },
-  { rank: 5, name: 'Diana P.', count: 9 },
-];
-
 const RANK_EMOJIS = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 export default function ReferralScreen() {
@@ -64,24 +56,33 @@ export default function ReferralScreen() {
   const styles      = useMemo(() => makeStyles(colors), [colors]);
   const [referralCode, setReferralCode] = useState('');
   const [stats, setStats]               = useState({ invited: 0, joined: 0 });
+  const [leaderboard, setLeaderboard]   = useState([]);
 
   useEffect(() => {
     if (!user) return;
     supabase.from('profiles').select('referral_code, referral_count').eq('id', user.id).maybeSingle().then(({ data }) => {
       if (data?.referral_code) {
-        const invited = data.referral_count ?? 0;
         setReferralCode(data.referral_code);
-        setStats({ invited, joined: Math.floor(invited * 0.65) });
-        // Auto-award Community Champion badge at 5+ referrals
-        if (invited >= 5) {
-          awardBadge(user.id, 'community_champion', supabase);
-        }
       } else {
         // Auto-generate referral code if none exists
         const code = (profile?.full_name?.split(' ')[0]?.toUpperCase() ?? 'PATH') + Math.random().toString(36).substr(2, 4).toUpperCase();
         supabase.from('profiles').update({ referral_code: code }).eq('id', user.id);
         setReferralCode(code);
       }
+    });
+
+    supabase.rpc('get_my_referral_stats').then(({ data }) => {
+      const row = data?.[0];
+      if (!row) return;
+      setStats({ invited: row.invited ?? 0, joined: row.joined ?? 0 });
+      // Auto-award Community Champion badge at 5+ referrals
+      if ((row.invited ?? 0) >= 5) {
+        awardBadge(user.id, 'community_champion', supabase);
+      }
+    });
+
+    supabase.from('referral_leaderboard').select('*').then(({ data }) => {
+      setLeaderboard(data ?? []);
     });
   }, [user]);
 
@@ -122,7 +123,7 @@ export default function ReferralScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rewardName}>Your friend gets 2 weeks Pro free</Text>
-                  <Text style={styles.rewardDesc}>Plus 500 bonus XP to start their journey</Text>
+                  <Text style={styles.rewardDesc}>As soon as they sign up with your code</Text>
                 </View>
               </View>
               <View style={styles.rewardCard}>
@@ -162,24 +163,23 @@ export default function ReferralScreen() {
                 <Text style={styles.statNum}>{stats.joined}</Text>
                 <Text style={styles.statLabel}>Friends{'\n'}Joined</Text>
               </View>
-              <View style={styles.statCard}>
-                <Text style={[styles.statNum, { color: colors.primary }]}>{stats.invited * 500}</Text>
-                <Text style={styles.statLabel}>Bonus{'\n'}XP Earned</Text>
-              </View>
             </View>
           </View>
 
           {/* Leaderboard */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Top Inviters This Month</Text>
-            {MOCK_LEADERBOARD.map((entry) => (
-              <View key={entry.rank} style={styles.leaderCard}>
-                <Text style={styles.leaderRank}>{RANK_EMOJIS[entry.rank] ?? entry.rank}</Text>
-                <Text style={styles.leaderName}>{entry.name}</Text>
-                <Text style={styles.leaderCount}>{entry.count} joined</Text>
-              </View>
-            ))}
-            <Text style={styles.comingSoon}>Live leaderboard coming soon</Text>
+            <Text style={styles.sectionTitle}>Top Inviters</Text>
+            {leaderboard.length === 0 ? (
+              <Text style={styles.comingSoon}>No invites yet — be the first on the board!</Text>
+            ) : (
+              leaderboard.map((entry, i) => (
+                <View key={`${entry.display_name}-${i}`} style={styles.leaderCard}>
+                  <Text style={styles.leaderRank}>{RANK_EMOJIS[i + 1] ?? i + 1}</Text>
+                  <Text style={styles.leaderName}>{entry.display_name}</Text>
+                  <Text style={styles.leaderCount}>{entry.referral_count} joined</Text>
+                </View>
+              ))
+            )}
           </View>
         </ScrollView>
       </View>

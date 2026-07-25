@@ -20,6 +20,7 @@ export default function SignUpScreen({ navigation }) {
   const [email, setEmail]             = useState('');
   const [password, setPassword]       = useState('');
   const [confirmPw, setConfirmPw]     = useState('');
+  const [inviteCode, setInviteCode]   = useState('');
   const [showPw, setShowPw]           = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading]         = useState(false);
@@ -43,7 +44,7 @@ export default function SignUpScreen({ navigation }) {
   const handleSignUp = async () => {
     if (!validate()) return;
     setLoading(true);
-    const { data, error } = await signUp(email.trim(), password, name.trim());
+    const { data, error } = await signUp(email.trim(), password, name.trim(), inviteCode.trim());
     setLoading(false);
     if (error) {
       Alert.alert('Sign Up Failed', error.message);
@@ -174,6 +175,23 @@ export default function SignUpScreen({ navigation }) {
               </TouchableOpacity>
             </View>
             {errors.confirm ? <Text style={styles.errTxt}>{errors.confirm}</Text> : null}
+          </View>
+
+          {/* Invite code (optional) */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Invite Code (optional)</Text>
+            <View style={styles.inputRow}>
+              <Ionicons name="gift-outline" size={19} color="#bbb" />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter a friend's code"
+                placeholderTextColor="#ccc"
+                value={inviteCode}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                onChangeText={setInviteCode}
+              />
+            </View>
           </View>
 
           <TouchableOpacity

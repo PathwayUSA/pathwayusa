@@ -44,6 +44,7 @@ import AttorneyMatchScreen     from './src/screens/AttorneyMatchScreen';
 import SettingsScreen          from './src/screens/SettingsScreen';
 import DeadlinesScreen         from './src/screens/DeadlinesScreen';
 import DocumentsScreen         from './src/screens/DocumentsScreen';
+import DocumentExpiryScreen    from './src/screens/DocumentExpiryScreen';
 import CaseTrackerScreen       from './src/screens/CaseTrackerScreen';
 import UpgradeScreen           from './src/screens/UpgradeScreen';
 import ClientDetailScreen      from './src/screens/ClientDetailScreen';
@@ -222,6 +223,7 @@ function AppStack({ firstSession = false }) {
       <Stack.Screen name="Settings"    component={SettingsScreen}    options={{ title: 'Settings',    ...headerOpts }} />
       <Stack.Screen name="Deadlines"   component={DeadlinesScreen}   options={{ title: 'Deadline Reminders',  ...headerOpts }} />
       <Stack.Screen name="Documents"   component={DocumentsScreen}   options={{ title: 'Document Checklist',  ...headerOpts }} />
+      <Stack.Screen name="DocumentExpiry" component={DocumentExpiryScreen} options={{ title: 'Document Expiry Dates', ...headerOpts }} />
       <Stack.Screen name="CaseTracker"  component={CaseTrackerScreen}  options={{ title: 'USCIS Case Tracker', ...headerOpts }} />
       <Stack.Screen name="Upgrade"     component={UpgradeScreen}     options={{ title: 'Upgrade to Pro',     ...headerOpts }} />
       <Stack.Screen name="ClientDetail" component={ClientDetailScreen} options={{ title: 'Client Details',    ...headerOpts }} />

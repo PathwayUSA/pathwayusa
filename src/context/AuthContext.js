@@ -123,7 +123,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, referralCode) => {
     const result = await supabase.auth.signUp({
       email, password,
       options: {
@@ -136,6 +136,12 @@ export function AuthProvider({ children }) {
       supabase.from('profiles')
         .update({ full_name: fullName })
         .eq('id', result.data.user.id)
+        .then(() => {});
+    }
+    // Redeem an entered invite code — only possible once a session exists (email
+    // confirmation may defer this; the code is only usable at first-signup time).
+    if (result.data?.session && referralCode?.trim()) {
+      supabase.rpc('redeem_referral_code', { p_code: referralCode.trim().toUpperCase() })
         .then(() => {});
     }
     return result;

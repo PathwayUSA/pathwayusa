@@ -79,6 +79,14 @@ function makeStyles(colors) {
     searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, height: 42, marginBottom: 16, ...SHADOWS.small },
     searchInput: { flex: 1, fontSize: 14, color: colors.text },
 
+    expiryBanner: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff',
+      borderRadius: 14, padding: 14, marginBottom: 20, ...SHADOWS.small,
+    },
+    expiryIcon:  { width: 38, height: 38, borderRadius: 10, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' },
+    expiryTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+    expirySub:   { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+
     docRow: {
       backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
       flexDirection: 'row', alignItems: 'center', gap: 12, ...SHADOWS.small,
@@ -91,7 +99,7 @@ function makeStyles(colors) {
   });
 }
 
-export default function DocumentsScreen() {
+export default function DocumentsScreen({ navigation }) {
   const { colors }  = useTheme();
   const { user }    = useAuth();
   const { isPro }   = useSubscription();
@@ -197,6 +205,21 @@ export default function DocumentsScreen() {
           </View>
           <Text style={styles.progressTxt}>{completed}/{allDocs.length}</Text>
         </View>
+
+        <TouchableOpacity
+          style={styles.expiryBanner}
+          onPress={() => navigation.navigate('DocumentExpiry')}
+          activeOpacity={0.85}
+        >
+          <View style={styles.expiryIcon}>
+            <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.expiryTitle}>Track Document Expiry Dates</Text>
+            <Text style={styles.expirySub}>Green card, passport, EAD & more — get reminded before they expire</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#BDC3C7" />
+        </TouchableOpacity>
 
         <View style={styles.searchWrap}>
           <Ionicons name="search" size={16} color="#BDC3C7" />

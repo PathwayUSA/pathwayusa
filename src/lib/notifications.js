@@ -9,6 +9,7 @@ const IS_EXPO_GO = Constants.appOwnership === 'expo';
 const DAILY_REMINDER_ID_KEY   = '@pathwayusa/daily_reminder_id';
 const NOTIF_ASKED_KEY         = '@pathwayusa/notification_permission_asked';
 const DEADLINE_NOTIF_KEY      = '@pathwayusa/deadline_notif_ids';
+const DOC_EXPIRY_NOTIF_KEY    = '@pathwayusa/doc_expiry_notif_ids';
 const INACTIVITY_NOTIF_KEY    = '@pathwayusa/inactivity_notif_id';
 const ELIGIBILITY_NOTIF_KEY   = '@pathwayusa/eligibility_notif_ids';
 const WEEKLY_NOTIF_KEY        = '@pathwayusa/weekly_notif_id';
@@ -162,6 +163,90 @@ export async function cancelDeadlineNotifications(deadlineId) {
     }
     delete map[String(deadlineId)];
     await AsyncStorage.setItem(DEADLINE_NOTIF_KEY, JSON.stringify(map));
+  } catch {}
+}
+
+// ── Document Expiry Notifications ─────────────────────────────────────────────
+
+export async function scheduleDocumentExpiryNotifications(doc) {
+  if (IS_EXPO_GO) return;
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') return;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('doc-expiry-reminder', {
+        name: 'Document Expiry Reminders',
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: true,
+      }).catch(() => {});
+    }
+
+    // Cancel previously scheduled notifications for this document
+    const raw = await AsyncStorage.getItem(DOC_EXPIRY_NOTIF_KEY).catch(() => null);
+    const map = raw ? JSON.parse(raw) : {};
+    const existing = map[String(doc.id)] ?? [];
+    for (const id of existing) {
+      await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+    }
+
+    const expiryMs = new Date(doc.expiry_date + 'T09:00:00').getTime();
+    const now = Date.now();
+    const ids = [];
+
+    // Longer lead times than deadline reminders — document renewals (EAD, green
+    // card, passport) typically need months of processing lead time, not weeks.
+    for (const daysBefore of [90, 30, 7]) {
+      const fireMs = expiryMs - daysBefore * 86400000;
+      if (fireMs <= now) continue;
+
+      const label = daysBefore === 7 ? 'in 7 days' : `in ${daysBefore} days`;
+      const id = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '📄 Document Expiring Soon',
+          body: `Your ${doc.doc_name} expires ${label}. Start renewing now if needed.`,
+          sound: true,
+          data: { docExpiryId: doc.id },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: new Date(fireMs),
+          channelId: Platform.OS === 'android' ? 'doc-expiry-reminder' : undefined,
+        },
+      });
+      ids.push(id);
+    }
+
+    map[String(doc.id)] = ids;
+    await AsyncStorage.setItem(DOC_EXPIRY_NOTIF_KEY, JSON.stringify(map));
+  } catch {}
+}
+
+export async function cancelDocumentExpiryNotifications(docId) {
+  try {
+    const raw = await AsyncStorage.getItem(DOC_EXPIRY_NOTIF_KEY).catch(() => null);
+    if (!raw) return;
+    const map = JSON.parse(raw);
+    const ids = map[String(docId)] ?? [];
+    for (const id of ids) {
+      await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+    }
+    delete map[String(docId)];
+    await AsyncStorage.setItem(DOC_EXPIRY_NOTIF_KEY, JSON.stringify(map));
+  } catch {}
+}
+
+export async function cancelAllDocumentExpiryNotifications() {
+  try {
+    const raw = await AsyncStorage.getItem(DOC_EXPIRY_NOTIF_KEY);
+    if (!raw) return;
+    const map = JSON.parse(raw);
+    for (const ids of Object.values(map)) {
+      for (const id of ids) {
+        await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
+      }
+    }
+    await AsyncStorage.removeItem(DOC_EXPIRY_NOTIF_KEY);
   } catch {}
 }
 
@@ -381,6 +466,7 @@ export async function cancelAllUserNotifications() {
     cancelEligibilityMilestones(),
     cancelWeeklySummary(),
     cancelAllDeadlineNotifications(),
+    cancelAllDocumentExpiryNotifications(),
   ]);
 }
 
