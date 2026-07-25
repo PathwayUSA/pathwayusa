@@ -282,6 +282,24 @@ export default function DeadlinesScreen({ navigation }) {
           </View>
         )}
 
+        {/* Appointment/interview/biometrics prep banner */}
+        {upcoming.some((d) => ['interview', 'biometrics', 'appointment'].includes(categorize(d.title).key)) && (
+          <TouchableOpacity
+            style={styles.tpsBanner}
+            onPress={() => navigation.navigate('AppointmentPrep')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.tpsBannerTitle}>🗓️ Have an Appointment Coming Up?</Text>
+            <Text style={styles.tpsBannerSub}>
+              Get a 7-day prep checklist for interviews and biometrics appointments.
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={[styles.tpsBtnTxt, { color: colors.primary }]}>Open Appointment Prep</Text>
+              <Ionicons name="arrow-forward" size={14} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
+        )}
+
         {/* Notifications off banner */}
         {!hasPermission && (
           <View style={styles.permBanner}>

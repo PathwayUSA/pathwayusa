@@ -569,8 +569,15 @@ export default function SettingsScreen({ navigation }) {
           subtitle="Update your status and goals"
         />
         <RowLink
+          icon="person-circle-outline"
+          label="Edit Profile"
+          iconColor={colors.primary}
+          onPress={() => navigation.navigate('Profile')}
+        />
+        <View style={styles.divider} />
+        <RowLink
           icon="create-outline"
-          label="Update My Profile"
+          label="Redo Immigration Assessment"
           iconColor={colors.primary}
           onPress={async () => {
             if (user) await AsyncStorage.removeItem(`${ONBOARDING_KEY}/${user.id}`).catch(() => {});
@@ -603,6 +610,8 @@ export default function SettingsScreen({ navigation }) {
         <RowLink icon="star-outline"         label="Rate PathwayUSA"            iconColor="#f59e0b"  onPress={() => Linking.openURL('https://apps.apple.com/app/pathwayusa')} />
         <View style={styles.divider} />
         <RowLink icon="share-outline"        label="Share the App"              iconColor="#43a047"  onPress={handleShareApp} />
+        <View style={styles.divider} />
+        <RowLink icon="gift-outline"          label="Refer Friends"              iconColor="#e91e63"  onPress={() => navigation.navigate('Referral')} />
       </View>
 
       {/* ── Legal ── */}

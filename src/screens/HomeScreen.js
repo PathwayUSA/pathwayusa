@@ -98,8 +98,8 @@ greeting: { fontSize: 15, color: 'rgba(255,255,255,0.72)', marginBottom: 10 },
     progressBtnTxt: { fontSize: 15, fontWeight: '800', color: '#fff' },
 
     // Quick actions
-    quickGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginTop: 20 },
-    quickItem: { flex: 1, alignItems: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, backgroundColor: '#fff', ...SHADOWS.small },
+    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 20, marginTop: 20 },
+    quickItem: { width: '31%', alignItems: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, backgroundColor: '#fff', ...SHADOWS.small },
     quickIconWrap: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
     quickLabel: { fontSize: 11, fontWeight: '700', color: '#1A1A2E', textAlign: 'center', lineHeight: 15 },
 
@@ -728,6 +728,7 @@ export default function HomeScreen({ navigation }) {
             { icon: 'documents', label: 'My\nDocuments', color: '#2196F3', bg: '#E3F2FD', screen: 'Documents' },
             { icon: 'briefcase', label: 'Find\nAttorney', color: '#F5A623', bg: '#FFF4E0', screen: 'Legal'    },
             { icon: 'ribbon',    label: `${earnedBadgeCount}/${BADGE_DEFS.length}\nBadges`, color: '#8E44AD', bg: '#F3E8FA', screen: 'Badges' },
+            { icon: 'search',    label: 'Case\nStatus', color: '#16A085', bg: '#E8F8F4', screen: 'CaseTracker' },
           ].map((action) => (
             <TouchableOpacity
               key={action.screen}

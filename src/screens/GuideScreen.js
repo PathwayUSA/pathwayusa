@@ -445,17 +445,41 @@ export default function GuideScreen({ navigation }) {
       {currentStep?.form && (
         <View style={styles.taskCard}>
           <Text style={styles.taskCardTitle}>Required Form</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary + '12', borderRadius: 12, padding: 14 }}>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary + '12', borderRadius: 12, padding: 14 }}
+            onPress={() => { lightHaptic(); navigation.navigate('FormExplainer'); }}
+            activeOpacity={0.8}
+          >
             <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + '22', alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name="document-text-outline" size={20} color={colors.primary} />
             </View>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={{ fontSize: 15, fontWeight: '800', color: '#1A1A2E' }}>{currentStep.form}</Text>
-              <Text style={{ fontSize: 12, color: '#7F8C8D' }}>Available at uscis.gov</Text>
+              <Text style={{ fontSize: 12, color: '#7F8C8D' }}>Tap for a plain-language field guide</Text>
             </View>
-          </View>
+            <Ionicons name="chevron-forward" size={18} color="#CCC" />
+          </TouchableOpacity>
         </View>
       )}
+
+      {/* Resource links */}
+      <View style={styles.taskCard}>
+        <Text style={styles.taskCardTitle}>If Something Goes Wrong</Text>
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFF3E0', borderRadius: 12, padding: 14 }}
+          onPress={() => { lightHaptic(); navigation.navigate('RFE'); }}
+          activeOpacity={0.8}
+        >
+          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#FFE0B2', alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="warning-outline" size={20} color="#E65100" />
+          </View>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: '#1A1A2E' }}>Received a Request for Evidence?</Text>
+            <Text style={{ fontSize: 12, color: '#7F8C8D' }}>Step-by-step response guide</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#CCC" />
+        </TouchableOpacity>
+      </View>
 
       {/* Attorney CTA */}
       <TouchableOpacity
