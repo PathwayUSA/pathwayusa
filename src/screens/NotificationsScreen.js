@@ -1,122 +1,158 @@
-// TODO: Replace static notifications with Supabase real-time subscription
-// to user_notifications table.
-// Schema: { id, user_id, type, title, body, read, created_at, screen }
-// Use supabase.channel('notifications').on('postgres_changes', ...) for live updates.
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../i18n';
+import { supabase } from '../lib/supabase';
 import { SHADOWS } from '../theme';
 import { lightHaptic } from '../utils/haptics';
+import { BADGE_DEFS } from '../lib/badges';
 
-export const NOTIF_READ_KEY = '@pathwayusa/notifications_read_ids';
+const NOTIF_READ_KEY = '@pathwayusa/notifications_read_ids';
 
-const TABS = ['notif_all', 'notif_reminders', 'notif_news', 'notif_updates'];
-const TAB_TYPES = [null, 'reminder', 'news', 'update'];
+const TABS = ['notif_all', 'notif_reminders', 'notif_updates'];
+const TAB_TYPES = [null, 'reminder', 'update'];
 
-const STATIC_NOTIFICATIONS = [
-  {
-    id: 'n1',
-    type: 'reminder',
-    icon: 'notifications',
-    color: '#E67E22',
-    bg: '#FFF4E0',
-    title: 'TPS Renewal Reminder',
-    body: 'Check renewal deadlines at uscis.gov. File Form I-821 before your status expires.',
-    timestamp: '2h ago',
-    screen: 'Guide',
-  },
-  {
-    id: 'n2',
-    type: 'reminder',
-    icon: 'document-text',
-    color: '#E67E22',
-    bg: '#FFF4E0',
-    title: 'N-400 Deadline',
-    body: 'Your application window is approaching. Complete Form N-400 soon.',
-    timestamp: '1d ago',
-    screen: 'Guide',
-  },
-  {
-    id: 'n3',
-    type: 'reminder',
-    icon: 'map',
-    color: '#27AE60',
-    bg: '#EAF7EE',
-    title: 'Continue Your Journey',
-    body: "You haven't completed a step in 3 days. Tap to pick up where you left off.",
-    timestamp: '3d ago',
-    screen: 'Guide',
-  },
-  {
-    id: 'n4',
-    type: 'reminder',
-    icon: 'flame',
-    color: '#F5A623',
-    bg: '#FFF4E0',
-    title: 'Daily Challenge',
-    body: "Complete today's quiz to keep your momentum going.",
-    timestamp: '8h ago',
-    screen: 'Home',
-  },
-  {
-    id: 'n5',
-    type: 'news',
-    icon: 'newspaper',
-    color: '#1976d2',
-    bg: '#E3F2FD',
-    title: 'Policy Update',
-    body: 'New TPS designation announced for select countries. Check if you qualify.',
-    timestamp: '2d ago',
-    screen: null,
-  },
-  {
-    id: 'n6',
-    type: 'update',
-    icon: 'sparkles',
-    color: '#27AE60',
-    bg: '#EAF7EE',
-    title: 'New Feature Available',
-    body: 'Travel Tracker is now available for Green Card holders. Track trips to avoid abandonment.',
-    timestamp: '1w ago',
-    screen: 'TravelTracker',
-  },
-];
+const REMINDER_STYLE = { icon: 'notifications', color: '#E67E22', bg: '#FFF4E0' };
+const INACTIVITY_STYLE = { icon: 'map', color: '#27AE60', bg: '#EAF7EE' };
 
-export function getUnreadCount(readIds) {
-  return Math.max(0, STATIC_NOTIFICATIONS.length - readIds.length);
+// Same 14-day threshold used for the scheduled push in lib/notifications.js —
+// keep the in-app nudge and the push reminder agreeing on what "inactive" means.
+const INACTIVITY_DAYS = 14;
+const DEADLINE_WINDOW_DAYS = 30;
+const DOC_EXPIRY_WINDOW_DAYS = 90;
+
+function daysUntil(iso) {
+  return Math.ceil((new Date(iso + 'T12:00:00') - new Date()) / 86400000);
 }
 
-export async function loadUnreadCount() {
-  try {
-    const raw = await AsyncStorage.getItem(NOTIF_READ_KEY);
-    const readIds = raw ? JSON.parse(raw) : [];
-    return getUnreadCount(readIds);
-  } catch {
-    return 0;
+function dueLabel(days) {
+  if (days === 0) return 'today';
+  if (days === 1) return 'tomorrow';
+  if (days > 1) return `in ${days} days`;
+  if (days === -1) return 'yesterday';
+  return `${Math.abs(days)} days ago`;
+}
+
+// Builds the live notification list from data that already exists elsewhere in
+// the app (deadlines, document expiry, badges, last activity) — no separate
+// notifications table, nothing persisted beyond which ids the user has read.
+async function computeNotifications({ user, profile, isPro }) {
+  const items = [];
+
+  const { data: deadlines } = await supabase
+    .from('user_deadlines')
+    .select('*')
+    .eq('user_id', user.id);
+
+  for (const dl of (deadlines ?? [])) {
+    const days = daysUntil(dl.deadline_date);
+    if (days < 0 || days > DEADLINE_WINDOW_DAYS) continue;
+    items.push({
+      id: `deadline-${dl.id}`,
+      type: 'reminder',
+      sortDays: days,
+      ...REMINDER_STYLE,
+      title: dl.title,
+      body: `"${dl.title}" is due ${dueLabel(days)}. Tap to view your deadlines.`,
+      timestamp: `Due ${dueLabel(days)}`,
+      screen: 'Deadlines',
+    });
   }
+
+  if (isPro) {
+    const { data: docExpiry } = await supabase
+      .from('document_expiry')
+      .select('*')
+      .eq('user_id', user.id);
+
+    for (const rec of (docExpiry ?? [])) {
+      const days = daysUntil(rec.expiry_date);
+      if (days > DOC_EXPIRY_WINDOW_DAYS) continue;
+      const expired = days < 0;
+      items.push({
+        id: `docexpiry-${rec.id}`,
+        type: 'reminder',
+        sortDays: days,
+        ...REMINDER_STYLE,
+        title: expired ? `${rec.doc_name} Expired` : `${rec.doc_name} Expiring Soon`,
+        body: expired
+          ? `Your ${rec.doc_name} expired ${dueLabel(days)}. Renew as soon as possible.`
+          : `Your ${rec.doc_name} expires ${dueLabel(days)}. Start renewing now if needed.`,
+        timestamp: expired ? `Expired ${dueLabel(days)}` : `Expires ${dueLabel(days)}`,
+        screen: 'DocumentExpiry',
+      });
+    }
+  }
+
+  items.sort((a, b) => a.sortDays - b.sortDays);
+
+  if (profile?.last_step_action_at) {
+    const daysSince = Math.floor((Date.now() - new Date(profile.last_step_action_at)) / 86400000);
+    if (daysSince >= INACTIVITY_DAYS) {
+      items.push({
+        id: 'inactivity',
+        type: 'reminder',
+        ...INACTIVITY_STYLE,
+        title: 'Continue Your Journey',
+        body: `You haven't made progress in ${daysSince} days. Tap to pick up where you left off.`,
+        timestamp: `${daysSince} days inactive`,
+        screen: 'Guide',
+      });
+    }
+  }
+
+  const earnedBadges = profile?.badges ?? [];
+  for (const badgeId of earnedBadges) {
+    const badge = BADGE_DEFS.find((b) => b.id === badgeId);
+    if (!badge) continue;
+    items.push({
+      id: `badge-${badge.id}`,
+      type: 'update',
+      icon: badge.icon,
+      color: badge.color,
+      bg: badge.color + '20',
+      title: `New Badge: ${badge.name}`,
+      body: badge.desc,
+      timestamp: 'Achievement unlocked',
+      screen: 'Badges',
+    });
+  }
+
+  return items;
 }
 
 export default function NotificationsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useLanguage();
+  const { user, profile } = useAuth();
+  const { isPro } = useSubscription();
   const styles = makeStyles(colors);
 
   const [activeTab, setActiveTab] = useState(0);
   const [readIds, setReadIds] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIF_READ_KEY)
       .then((raw) => { if (raw) setReadIds(JSON.parse(raw)); })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    computeNotifications({ user, profile, isPro })
+      .then(setNotifications)
+      .finally(() => setLoading(false));
+  }, [user, profile, isPro]);
 
   const markRead = useCallback(async (id) => {
     setReadIds((prev) => {
@@ -129,10 +165,10 @@ export default function NotificationsScreen({ navigation }) {
 
   const markAllRead = useCallback(async () => {
     lightHaptic();
-    const all = STATIC_NOTIFICATIONS.map((n) => n.id);
+    const all = notifications.map((n) => n.id);
     setReadIds(all);
     await AsyncStorage.setItem(NOTIF_READ_KEY, JSON.stringify(all)).catch(() => {});
-  }, []);
+  }, [notifications]);
 
   const handlePress = useCallback((notif) => {
     lightHaptic();
@@ -142,10 +178,10 @@ export default function NotificationsScreen({ navigation }) {
 
   const typeFilter = TAB_TYPES[activeTab];
   const visible = typeFilter
-    ? STATIC_NOTIFICATIONS.filter((n) => n.type === typeFilter)
-    : STATIC_NOTIFICATIONS;
+    ? notifications.filter((n) => n.type === typeFilter)
+    : notifications;
 
-  const unread = getUnreadCount(readIds);
+  const unread = Math.max(0, notifications.length - readIds.filter((id) => notifications.some((n) => n.id === id)).length);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -182,7 +218,9 @@ export default function NotificationsScreen({ navigation }) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
-        {visible.length === 0 ? (
+        {loading ? (
+          <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
+        ) : visible.length === 0 ? (
           <View style={styles.emptyBox}>
             <Ionicons name="notifications-off-outline" size={52} color="#DDD" />
             <Text style={styles.emptyTitle}>{t('notif_empty_title')}</Text>
