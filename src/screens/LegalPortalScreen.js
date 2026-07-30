@@ -19,15 +19,12 @@ const TEAL = '#2A8B7A';
 const GOLD = '#F5A623';
 
 const TRUST_SIGNALS = [
-  { icon: 'ribbon',             label: 'Verified\nAttorneys', sub: 'USCIS Compliance',      color: null },
   { icon: 'lock-closed',        label: 'Secure &\nPrivate',   sub: 'Your data is protected', color: NAVY },
-  { icon: 'sync',               label: 'Real-Time\nUpdates',  sub: 'Stay informed',          color: GOLD },
 ];
 
 const WHY_CONNECT = [
   'Get professional legal advice tailored to your case',
   'Avoid costly mistakes on your immigration forms',
-  'Increase your approval chances significantly',
   'Direct messaging with your attorney in the app',
   'Track your case status in real time',
 ];

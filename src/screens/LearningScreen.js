@@ -93,15 +93,11 @@ function makeStyles(colors) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: '#f9f9fc' },
 
-    // Top tab bar
-    tabBar: {
-      flexDirection: 'row', backgroundColor: colors.primaryDark ?? colors.primary,
-      borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.15)',
-    },
-    tabBtn: { flex: 1, paddingVertical: 14, alignItems: 'center', gap: 4, minHeight: 60 },
-    tabBtnActive: { borderBottomWidth: 3, borderBottomColor: '#fff' },
-    tabLabel: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.6)' },
-    tabLabelActive: { color: '#fff' },
+    // Study links row (Tips/Stats/Guide — open as modals, not a persistent tab bar)
+    studyLinksRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 16, paddingTop: 10 },
+    studyLinkBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 11, paddingVertical: 6, borderRadius: 20, backgroundColor: '#F3F4F6' },
+    studyLinkTxt: { fontSize: 12.5, fontWeight: '700', color: '#333' },
+    modalCloseBtn: { alignSelf: 'flex-end', padding: 16 },
 
     // Hero banner
     heroBanner: { paddingHorizontal: 20, paddingVertical: 24 },
@@ -923,7 +919,7 @@ function ModeSelectView({ allQuestions, categories, wrongCounts, flashProgress, 
         {/* Daily Challenge */}
         <View style={styles.dailyCard}>
           <PressableScale onPress={() => onStartTest('daily', 'all')} haptic={false}>
-            <LinearGradient colors={['#ff9a44', '#ff4b2b']} style={styles.dailyGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <LinearGradient colors={[colors.primary, colors.primaryDark]} style={styles.dailyGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
               <View style={styles.dailyLeft}>
                 <Ionicons name="flame" size={28} color="#fff" />
                 <View style={styles.dailyInfo}>
@@ -1293,13 +1289,6 @@ function OnboardingModal({ visible, onClose, styles, colors }) {
 
 // ── Main LearningScreen ───────────────────────────────────────────────────────
 
-const TABS = [
-  { key: 'quiz',  label: 'Quiz',  icon: 'school'      },
-  { key: 'tips',  label: 'Tips',  icon: 'bulb'        },
-  { key: 'stats', label: 'Stats', icon: 'stats-chart'  },
-  { key: 'guide', label: 'Guide', icon: 'book'        },
-];
-
 // ── Daily Done celebration screen (shown when daily quiz limit is reached) ──
 
 function DailyDoneView({ onHome, colors, navigation }) {
@@ -1356,7 +1345,9 @@ export default function LearningScreen() {
   const navigation       = useNavigation();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
-  const [activeTab, setActiveTab]     = useState('quiz');
+  const [showTipsModal, setShowTipsModal]   = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
   const [phase, setPhase]             = useState('home');
   const [currentMode, setCurrentMode] = useState(null);
   const [questions, setQuestions]     = useState([]);
@@ -1599,13 +1590,13 @@ export default function LearningScreen() {
     }
 
     setPhase('home');
-    setActiveTab('stats');
+    setShowStatsModal(true);
   }, [stats, user, saveStats]);
 
   const handleRetry = () => {
     startTest(currentMode, 'all');
   };
-  const handleHome = () => { setPhase('home'); setActiveTab('quiz'); };
+  const handleHome = () => { setPhase('home'); };
 
   const toggleTipFav = useCallback(async (id) => {
     setTipFavorites((prev) => {
@@ -1690,68 +1681,77 @@ export default function LearningScreen() {
     return <DailyDoneView onHome={handleHome} colors={colors} navigation={navigation} />;
   }
 
-  // Home: tabs view
+  // Home view — no internal tab bar (it duplicated the app's own bottom
+  // navigation); Tips/Stats/Guide open as modals from small links instead.
   return (
     <View style={styles.root}>
-      {/* Tab bar */}
-      <View style={styles.tabBar}>
-        {TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            style={[styles.tabBtn, activeTab === tab.key && styles.tabBtnActive]}
-            onPress={() => setActiveTab(tab.key)}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name={activeTab === tab.key ? tab.icon : `${tab.icon}-outline`}
-              size={20}
-              color={activeTab === tab.key ? colors.primary : '#aaa'}
-            />
-            <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>{tab.label}</Text>
+      <View style={{ flex: 1 }}>
+        <HelperTip
+          tipKey="learn"
+          message="This is your learning hub — practice quiz questions, take daily challenges, and build your citizenship knowledge."
+          icon="book-outline"
+          delay={700}
+          accentColor="#1B3A5C"
+          pulseGlow
+          local
+        />
+        <View style={styles.studyLinksRow}>
+          <TouchableOpacity style={styles.studyLinkBtn} onPress={() => setShowTipsModal(true)} activeOpacity={0.75}>
+            <Ionicons name="bulb-outline" size={16} color={colors.primary} />
+            <Text style={styles.studyLinkTxt}>Tips</Text>
           </TouchableOpacity>
-        ))}
+          <TouchableOpacity style={styles.studyLinkBtn} onPress={() => setShowStatsModal(true)} activeOpacity={0.75}>
+            <Ionicons name="stats-chart-outline" size={16} color={colors.primary} />
+            <Text style={styles.studyLinkTxt}>Stats</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.studyLinkBtn} onPress={() => setShowGuideModal(true)} activeOpacity={0.75}>
+            <Ionicons name="book-outline" size={16} color={colors.primary} />
+            <Text style={styles.studyLinkTxt}>Guide</Text>
+          </TouchableOpacity>
+        </View>
+        <ModeSelectView
+          allQuestions={quizQuestions}
+          categories={categories}
+          wrongCounts={wrongCounts}
+          flashProgress={flashProgress}
+          onStartTest={startTest}
+          onStartPractice={startPractice}
+          onChangeVersion={() => setShowTestVersionModal(true)}
+          testVersion={testVersion}
+          quizSize={quizSize}
+          passThreshold={passThreshold}
+          autoPlay={autoPlay}
+          onAutoPlayChange={saveAutoPlay}
+          userState={userState}
+          styles={styles}
+          colors={colors}
+        />
       </View>
 
-      {/* Tab content */}
-      {activeTab === 'quiz' && (
+      <Modal visible={showTipsModal} animationType="slide" onRequestClose={() => setShowTipsModal(false)}>
         <View style={{ flex: 1 }}>
-          <HelperTip
-            tipKey="learn"
-            message="This is your learning hub — practice quiz questions, take daily challenges, and build your citizenship knowledge."
-            icon="book-outline"
-            delay={700}
-            accentColor="#1B3A5C"
-            pulseGlow
-            local
-          />
-          <ModeSelectView
-            allQuestions={quizQuestions}
-            categories={categories}
-            wrongCounts={wrongCounts}
-            flashProgress={flashProgress}
-            onStartTest={startTest}
-            onStartPractice={startPractice}
-            onChangeVersion={() => setShowTestVersionModal(true)}
-            testVersion={testVersion}
-            quizSize={quizSize}
-            passThreshold={passThreshold}
-            autoPlay={autoPlay}
-            onAutoPlayChange={saveAutoPlay}
-            userState={userState}
-            styles={styles}
-            colors={colors}
-          />
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowTipsModal(false)} activeOpacity={0.8}>
+            <Ionicons name="close" size={22} color="#1A1A2E" />
+          </TouchableOpacity>
+          <TipsTab tipFavorites={tipFavorites} onToggleFav={toggleTipFav} styles={styles} colors={colors} />
         </View>
-      )}
-      {activeTab === 'tips' && (
-        <TipsTab tipFavorites={tipFavorites} onToggleFav={toggleTipFav} styles={styles} colors={colors} />
-      )}
-      {activeTab === 'stats' && (
-        <StatsTab stats={stats} styles={styles} colors={colors} />
-      )}
-      {activeTab === 'guide' && (
-        <GuideTab allQuestions={allQuestions} categories={categories} testVersion={testVersion} userState={userState} styles={styles} colors={colors} lang={lang} />
-      )}
+      </Modal>
+      <Modal visible={showStatsModal} animationType="slide" onRequestClose={() => setShowStatsModal(false)}>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowStatsModal(false)} activeOpacity={0.8}>
+            <Ionicons name="close" size={22} color="#1A1A2E" />
+          </TouchableOpacity>
+          <StatsTab stats={stats} styles={styles} colors={colors} />
+        </View>
+      </Modal>
+      <Modal visible={showGuideModal} animationType="slide" onRequestClose={() => setShowGuideModal(false)}>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowGuideModal(false)} activeOpacity={0.8}>
+            <Ionicons name="close" size={22} color="#1A1A2E" />
+          </TouchableOpacity>
+          <GuideTab allQuestions={allQuestions} categories={categories} testVersion={testVersion} userState={userState} styles={styles} colors={colors} lang={lang} />
+        </View>
+      </Modal>
 
       <OnboardingModal visible={showOnboarding} onClose={dismissOnboarding} styles={styles} colors={colors} />
 

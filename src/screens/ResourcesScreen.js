@@ -22,10 +22,10 @@ const SAVED_RESOURCES_KEY = '@pathwayusa/saved_resources';
 const DISTANCE_OPTIONS = [5, 10, 25, 50];
 
 const CATEGORIES = [
-  { id: 'Legal',      label: 'Legal Aid',   icon: 'briefcase',  color: '#1565c0', bg: '#e3f2fd' },
-  { id: 'Medical',    label: 'Health',      icon: 'medkit',     color: '#c62828', bg: '#ffebee' },
-  { id: 'Housing',    label: 'Housing',     icon: 'home',       color: '#e65100', bg: '#fff3e0' },
-  { id: 'Education',  label: 'Education',   icon: 'school',     color: '#2e7d32', bg: '#e8f5e9' },
+  { id: 'Legal',      label: 'Legal Aid',   icon: 'briefcase' },
+  { id: 'Medical',    label: 'Health',      icon: 'medkit' },
+  { id: 'Housing',    label: 'Housing',     icon: 'home' },
+  { id: 'Education',  label: 'Education',   icon: 'school' },
 ];
 
 // Orlando-area placeholder data (lat/lng are approximate for map pins)
@@ -112,6 +112,12 @@ function makeStyles(colors) {
     searchWrap: { marginHorizontal: 20, marginTop: -22, backgroundColor: '#fff', borderRadius: 14, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, gap: 10, height: 52, ...SHADOWS.medium, zIndex: 10 },
     searchInput: { flex: 1, fontSize: 15, color: '#1A1A2E' },
 
+    // Legal entry point
+    legalRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 20, marginTop: 14, backgroundColor: '#fff', borderRadius: 14, padding: 14, ...SHADOWS.small },
+    legalIconWrap: { width: 38, height: 38, borderRadius: 11, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
+    legalRowTitle: { fontSize: 14, fontWeight: '700', color: '#1A1A2E' },
+    legalRowSub: { fontSize: 11.5, color: '#7F8C8D', marginTop: 2, lineHeight: 15 },
+
     // Distance chips
     distanceRow: { paddingHorizontal: 20, marginTop: 18 },
     distanceLabel: { fontSize: 13, fontWeight: '700', color: '#7F8C8D', marginBottom: 10 },
@@ -169,9 +175,10 @@ function makeStyles(colors) {
   });
 }
 
+// One neutral treatment for every category — the color used to encode
+// which category a resource belonged to carried no real meaning.
 function getCategoryStyle(catId, primary, primaryLight) {
-  const cat = CATEGORIES.find((c) => c.id === catId);
-  return cat ? { bg: cat.bg, color: cat.color } : { bg: primaryLight, color: primary };
+  return { bg: primaryLight, color: primary };
 }
 
 export default function ResourcesScreen({ navigation }) {
@@ -313,6 +320,22 @@ export default function ResourcesScreen({ navigation }) {
           )}
         </View>
 
+        {/* ── LEGAL ENTRY POINT — paid attorney option, alongside free resources ── */}
+        <TouchableOpacity
+          style={styles.legalRow}
+          onPress={() => { lightHaptic(); navigation.navigate('Legal'); }}
+          activeOpacity={0.85}
+        >
+          <View style={styles.legalIconWrap}>
+            <Ionicons name="briefcase-outline" size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.legalRowTitle}>Talk to a Licensed Attorney</Text>
+            <Text style={styles.legalRowSub}>Paid — for complex cases. Free legal aid is listed below.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#BDC3C7" />
+        </TouchableOpacity>
+
         {/* ── DISTANCE FILTER ── */}
         <View style={styles.distanceRow}>
           <Text style={styles.distanceLabel}>{t('res_distance_label')}</Text>
@@ -348,14 +371,14 @@ export default function ResourcesScreen({ navigation }) {
               return (
                 <TouchableOpacity
                   key={cat.id}
-                  style={[styles.catTile, isActive && { borderWidth: 2, borderColor: cat.color }]}
+                  style={[styles.catTile, isActive && { borderWidth: 2, borderColor: colors.primary }]}
                   onPress={() => { lightHaptic(); setActiveCategory(isActive ? null : cat.id); setShowCount(3); }}
                   activeOpacity={0.8}
                 >
-                  <View style={[styles.catIconWrap, { backgroundColor: isActive ? cat.color : cat.bg }]}>
-                    <Ionicons name={cat.icon} size={22} color={isActive ? '#fff' : cat.color} />
+                  <View style={[styles.catIconWrap, { backgroundColor: isActive ? colors.primary : colors.border }]}>
+                    <Ionicons name={cat.icon} size={22} color={isActive ? '#fff' : colors.textSecondary} />
                   </View>
-                  <Text style={[styles.catLabel, isActive && { color: cat.color }]}>{cat.label}</Text>
+                  <Text style={[styles.catLabel, isActive && { color: colors.primary }]}>{cat.label}</Text>
                 </TouchableOpacity>
               );
             })}

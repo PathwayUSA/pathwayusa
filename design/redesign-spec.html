@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PathwayUSA — screen redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
+<style>
+:root{
+--navy:#0F2438; --navy-soft:#16324F;
+--teal:#1D9E75; --teal-deep:#0F6E56; --teal-pale:#E1F5EE; --teal-light:#5DCAA5;
+--amber:#EF9F27; --amber-pale:#FAEEDA; --amber-deep:#854F0B; --amber-dark:#633806;
+--red:#E24B4A; --red-deep:#A32D2D; --red-pale:#FCEBEB;
+--paper:#F4F6F5; --white:#fff;
+--ink:#16324F; --slate:#5F5E5A; --mute:#888780; --line:#E4E7E6;
+--pageink:#1a1a18;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#EFEDE7;font-family:'Public Sans',sans-serif;color:var(--pageink);line-height:1.6}
+.page{max-width:1180px;margin:0 auto;padding:48px 28px 80px}
+header.top{margin-bottom:8px}
+h1{font-size:30px;font-weight:700;margin:0 0 8px;letter-spacing:-0.02em}
+.sub{color:#5a5a55;font-size:16px;max-width:70ch;margin:0 0 40px}
+h2.sec{font-size:21px;font-weight:700;margin:56px 0 6px;letter-spacing:-0.01em}
+.secnote{color:#5a5a55;font-size:15px;margin:0 0 24px;max-width:78ch}
+.row{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px}
+.notes{flex:1;min-width:280px;padding-top:6px}
+.notes h3{font-size:15px;font-weight:700;margin:0 0 10px}
+.notes ul{margin:0 0 18px;padding-left:18px}
+.notes li{font-size:14.5px;margin-bottom:8px;color:#3d3d3a}
+.flag{background:#fff;border-left:3px solid var(--amber);padding:12px 14px;font-size:13.5px;color:#3d3d3a;margin-bottom:14px}
+.flag b{color:var(--amber-dark)}
+
+/* phone */
+.phone{width:328px;flex:0 0 328px;background:var(--paper);border-radius:30px;overflow:hidden;border:1px solid #d8d6ce;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.hdr{background:var(--navy);padding:16px 18px 22px;color:#fff}
+.hdr .eyebrow{color:#9FB0BA;font-size:12.5px;margin:0 0 6px}
+.hdr h4{margin:0;font-size:19px;font-weight:600}
+.body{padding:14px}
+.card{background:#fff;border-radius:12px;padding:15px}
+.card+.card,.card+.stack,.stack+.card{margin-top:11px}
+.stack{background:#fff;border-radius:12px;overflow:hidden}
+.rowitem{display:flex;align-items:center;gap:13px;padding:14px 15px;border-bottom:1px solid var(--line)}
+.rowitem:last-child{border-bottom:none}
+.rowitem i.lead{font-size:20px;color:var(--ink)}
+.rowitem .txt{flex:1}
+.rowitem .txt p{margin:0;font-size:14.5px;color:var(--ink)}
+.rowitem .txt span{font-size:12px;color:var(--mute)}
+.rowitem i.chev{font-size:17px;color:#B4B2A9}
+.btn{background:var(--teal);color:#fff;text-align:center;padding:13px;border-radius:10px;font-size:15px;font-weight:600}
+.btn.ghost{background:#fff;color:var(--teal-deep);border:1.5px solid var(--teal);}
+.label{font-size:10.5px;letter-spacing:.09em;color:var(--teal-deep);margin:0 0 5px;font-weight:700}
+.bar{height:5px;background:#EEEDE8;border-radius:3px;overflow:hidden}
+.bar>div{height:100%;border-radius:3px}
+.tabs{display:flex;background:#fff;border-top:1px solid var(--line);padding:9px 0 14px}
+.tabs div{flex:1;text-align:center}
+.tabs i{font-size:20px;color:var(--mute)}
+.tabs p{font-size:10.5px;color:var(--mute);margin:2px 0 0}
+.tabs .on i,.tabs .on p{color:var(--teal-deep)}
+.alert{background:var(--amber-pale);border-radius:12px;padding:13px 15px;display:flex;gap:11px;margin-top:11px}
+.alert i{color:var(--amber-deep);font-size:18px}
+.alert p{margin:0;font-size:13.5px;font-weight:600;color:var(--amber-dark)}
+.alert span{font-size:12.5px;color:var(--amber-deep)}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.disc{font-size:10.5px;color:var(--mute);margin:12px 4px 0;line-height:1.45}
+
+/* voice bar */
+.voicebar{display:flex;align-items:center;gap:11px;background:var(--navy-soft);color:#fff;padding:11px 14px;border-radius:12px;margin-top:11px}
+.voicebar .play{width:34px;height:34px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 34px}
+.voicebar p{margin:0;font-size:13.5px;font-weight:600}
+.voicebar span{font-size:11.5px;color:#9FB0BA}
+.wave{display:flex;gap:2px;align-items:flex-end;height:18px}
+.wave i{display:block;width:2.5px;background:var(--teal-light);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="top">
+  <h1>PathwayUSA — screen redesign</h1>
+  <p class="sub">Seven screens, restructured around one rule: every screen answers "what do I do next?" before it shows anything else. Voice is treated as a first-class navigation layer, not an accessibility afterthought.</p>
+</header>
+
+<!-- ============ HOME ============ -->
+<h2 class="sec">1. Home</h2>
+<p class="secnote">The current Home has eleven competing cards of equal visual weight. This version has one hero, one action, one alert, and a short list.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr" style="padding-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <span style="color:var(--teal-light);font-size:12px;letter-spacing:.06em;font-weight:700">PATHWAYUSA</span>
+        <span><i class="ti ti-settings" style="color:#9FB0BA;font-size:18px"></i></span>
+      </div>
+      <p class="eyebrow">You can apply for citizenship in</p>
+      <p style="font-size:29px;font-weight:700;margin:0 0 3px;line-height:1.1">1 year, 4 months</p>
+      <p style="color:var(--teal-light);font-size:12.5px;margin:0">Earliest filing date · Mar 12, 2028</p>
+      <div class="bar" style="background:rgba(255,255,255,.15);margin-top:15px"><div style="width:62%;background:var(--teal)"></div></div>
+    </div>
+    <div class="body">
+      <div class="card" style="border-left:3px solid var(--teal);border-radius:0">
+        <p class="label">NEXT STEP · 3 OF 11</p>
+        <p style="font-size:17.5px;font-weight:700;color:var(--ink);margin:0 0 3px">Study for the civics test</p>
+        <p style="font-size:13px;color:var(--slate);margin:0 0 13px">You'd pass 14 of 20 right now. Six more to go.</p>
+        <div class="btn">Practice 10 questions</div>
+      </div>
+      <div class="voicebar">
+        <div class="play"><i class="ti ti-player-play"></i></div>
+        <div style="flex:1"><p>Read this step to me</p><span>2 min · English</span></div>
+        <i class="ti ti-language" style="font-size:18px;color:#9FB0BA"></i>
+      </div>
+      <div class="alert">
+        <i class="ti ti-alert-triangle"></i>
+        <div><p>Green card expires in 5 months</p><span>File Form I-90 to renew</span></div>
+      </div>
+      <div class="stack" style="margin-top:11px">
+        <div class="rowitem"><i class="ti ti-folder lead"></i><div class="txt"><p>My documents</p><span>4 saved · 2 still needed</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-map-pin lead"></i><div class="txt"><p>Find help near you</p><span>Legal aid, health, housing</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-map-2 lead"></i><div class="txt"><p>See my full roadmap</p><span>2 of 11 steps done</span></div><i class="ti ti-chevron-right chev"></i></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="on"><i class="ti ti-home"></i><p>Home</p></div>
+      <div><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>What changed</h3>
+    <ul>
+      <li><b>Countdown is the hero.</b> Computed from the green card date they already give you (5 years, or 3 if married to a citizen, minus the 90-day early filing window). This is the single most emotionally sticky thing you can put on screen — people open the app just to look at it.</li>
+      <li><b>Two CTAs became one.</b> "Continue Journey" and "Continue Step" pointed to the same place.</li>
+      <li><b>Progress is now a real measure.</b> "You'd pass 14 of 20" moves when they study. "18% of journey" moves when they tick a checkbox.</li>
+      <li><b>Removed:</b> duplicate progress card, six-tile grid, badge counter, stats bar, testimonial, horizontal journey cards, dark CTA banner.</li>
+    </ul>
+    <div class="flag"><b>Before you ship:</b> the "2.1M+ / 15K+ / 500+" stats and the "Ana L." testimonial with the cartoon avatar have to go unless they're real. Fabricated review content is an App Store rejection risk, and your audience is the most scam-targeted population in the country — synthetic-looking proof triggers exactly the alarm you don't want.</div>
+    <h3>Empty state</h3>
+    <ul><li>Before a green card date exists, the navy header becomes a single prompt: "Add your green card date to see when you can apply." One field, one button. That's the highest-value thing a new user can do.</li></ul>
+  </div>
+</div>
+
+<!-- ============ STUDY ============ -->
+<h2 class="sec">2. Study</h2>
+<p class="secnote">Your strongest daily-habit surface. Currently it's a mode picker; it should be a diagnostic that tells them what's broken and fixes it.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr">
+      <p class="eyebrow">Civics test readiness</p>
+      <div style="display:flex;align-items:baseline;gap:9px"><span style="font-size:40px;font-weight:700;line-height:1">14</span><span style="color:#9FB0BA;font-size:17px">of 20 correct</span></div>
+      <p style="color:var(--teal-light);font-size:12.5px;margin:9px 0 0">Passing is 12. You're ready — keep it steady.</p>
+    </div>
+    <div class="body">
+      <div class="card">
+        <p style="font-size:14.5px;font-weight:700;color:var(--ink);margin:0 0 13px">Where you're losing points</p>
+        <div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--ink)">Branches of government</span><span style="color:var(--red-deep);font-weight:600">4 of 12</span></div><div class="bar"><div style="width:33%;background:var(--red)"></div></div></div>
+        <div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--ink)">American history: 1800s</span><span style="color:var(--amber-deep);font-weight:600">7 of 14</span></div><div class="bar"><div style="width:50%;background:var(--amber)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--ink)">Rights and responsibilities</span><span style="color:var(--teal-deep);font-weight:600">15 of 16</span></div><div class="bar"><div style="width:94%;background:var(--teal)"></div></div></div>
+      </div>
+      <div class="btn" style="margin-top:11px">Drill your weak spots</div>
+      <div class="stack" style="margin-top:11px">
+        <div class="rowitem"><i class="ti ti-cards lead"></i><div class="txt"><p>Flashcards</p><span>Learn at your own pace</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-clipboard-check lead"></i><div class="txt"><p>Practice interview</p><span>20 questions, timed like the real one</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-headphones lead"></i><div class="txt"><p>Listen and answer</p><span>Spoken questions, spoken answers</span></div><i class="ti ti-chevron-right chev"></i></div>
+      </div>
+      <p class="disc">Questions come from the official USCIS civics list. Verify current requirements at uscis.gov.</p>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div class="on"><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>What changed</h3>
+    <ul>
+      <li><b>Readiness replaces "1 known".</b> A score against the real 12/20 pass bar is honest and motivating; a raw count of flashcards seen is neither.</li>
+      <li><b>Weak topics are named.</b> "15 to review" tells them nothing. "Branches of government: 4 of 12" tells them what to open a book about.</li>
+      <li><b>Four header tabs removed.</b> Quiz / Tips / Stats / Guide was a second navigation layer competing with the bottom bar. Stats are now the screen itself.</li>
+      <li><b>Listen and answer</b> is the highest-leverage new mode for your audience — closer to the real oral interview than reading ever gets.</li>
+    </ul>
+    <div class="flag"><b>Prerequisite:</b> this screen needs per-question topic tagging in your Supabase schema. If civics questions aren't categorized yet, that migration comes first — everything else here is cosmetic without it.</div>
+    <h3>Stickiness</h3>
+    <ul><li>Spaced repetition on wrong answers is the honest version of a streak — it earns the daily open by being useful, not by punishing absence. Consistent with dropping XP/streak gamification.</li></ul>
+  </div>
+</div>
+
+<!-- ============ ROADMAP ============ -->
+<h2 class="sec">3. Roadmap</h2>
+<p class="secnote">Currently three tabs plus a repeated progress card plus a repeated eligibility card. It should read as one continuous path with a clear "you are here".</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr">
+      <p class="eyebrow">Your path to citizenship</p>
+      <h4>Step 3 of 11</h4>
+      <div class="bar" style="background:rgba(255,255,255,.15);margin-top:14px"><div style="width:18%;background:var(--teal)"></div></div>
+    </div>
+    <div class="body">
+      <div class="card" style="opacity:.62;padding:12px 15px">
+        <div style="display:flex;gap:11px;align-items:center"><i class="ti ti-circle-check" style="color:var(--teal);font-size:20px"></i><div><p style="margin:0;font-size:14px;font-weight:600;color:var(--ink)">Check your eligibility</p><span style="font-size:12px;color:var(--mute)">Done</span></div></div>
+      </div>
+      <div class="card" style="opacity:.62;padding:12px 15px;margin-top:8px">
+        <div style="display:flex;gap:11px;align-items:center"><i class="ti ti-circle-check" style="color:var(--teal);font-size:20px"></i><div><p style="margin:0;font-size:14px;font-weight:600;color:var(--ink)">Gather your basic records</p><span style="font-size:12px;color:var(--mute)">Done</span></div></div>
+      </div>
+      <div class="card" style="border-left:3px solid var(--teal);border-radius:0;margin-top:11px">
+        <p class="label">YOU ARE HERE</p>
+        <p style="font-size:17px;font-weight:700;color:var(--ink);margin:0 0 6px">Study for the civics test</p>
+        <p style="font-size:13px;color:var(--slate);margin:0 0 12px">USCIS asks up to 10 of 100 questions. You need 6 right. Most people study 2–3 months.</p>
+        <div class="voicebar" style="margin:0 0 11px">
+          <div class="play"><i class="ti ti-player-play"></i></div>
+          <div style="flex:1"><p>Listen to this step</p><span>Plain language · 90 sec</span></div>
+        </div>
+        <div class="btn">Start studying</div>
+        <div class="btn ghost" style="margin-top:8px">What do I need for this?</div>
+      </div>
+      <div class="card" style="margin-top:11px;padding:12px 15px">
+        <div style="display:flex;gap:11px;align-items:center"><i class="ti ti-lock" style="color:#B4B2A9;font-size:20px"></i><div><p style="margin:0;font-size:14px;font-weight:600;color:var(--mute)">Gather required documents</p><span style="font-size:12px;color:var(--mute)">Next up</span></div></div>
+      </div>
+      <div class="card" style="margin-top:8px;padding:12px 15px">
+        <div style="display:flex;gap:11px;align-items:center"><i class="ti ti-lock" style="color:#B4B2A9;font-size:20px"></i><div><p style="margin:0;font-size:14px;font-weight:600;color:var(--mute)">File Form N-400</p><span style="font-size:12px;color:var(--mute)">Locked</span></div></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div><i class="ti ti-school"></i><p>Study</p></div>
+      <div class="on"><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>What changed</h3>
+    <ul>
+      <li><b>One continuous list, not tabs.</b> Steps / Timeline / Tasks split one mental model into three. Completed steps collapse to a single dimmed line; the active step expands. That's the entire interaction.</li>
+      <li><b>Done steps stay visible.</b> Seeing two finished steps above you is the motivation that a "18%" number tries and fails to deliver.</li>
+      <li><b>"What do I need for this?"</b> is the entry point for your RAG assistant — scoped to the current step, so answers stay grounded instead of open-ended.</li>
+      <li><b>Locked steps show, but greyed.</b> Visible future reduces anxiety; tappable future creates confusion about ordering.</li>
+    </ul>
+    <div class="flag"><b>Language check:</b> "Est. time: Study 2–3 months before interview" reads as a promise about their case. "Most people study 2–3 months" is the same information without implying you know their timeline.</div>
+  </div>
+</div>
+
+<!-- ============ DOCUMENTS ============ -->
+<h2 class="sec">4. Documents</h2>
+<p class="secnote">Currently a tile on Home. This is your single strongest retention mechanic and deserves real estate — once someone's records live here, leaving is expensive.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr">
+      <p class="eyebrow">My documents</p>
+      <h4>4 saved · 2 still needed</h4>
+      <div class="bar" style="background:rgba(255,255,255,.15);margin-top:14px"><div style="width:67%;background:var(--teal)"></div></div>
+    </div>
+    <div class="body">
+      <div class="alert" style="margin-top:0">
+        <i class="ti ti-clock-exclamation"></i>
+        <div><p>Green card expires Dec 2026</p><span>Renewal window opens in 1 month</span></div>
+      </div>
+      <div class="stack" style="margin-top:11px">
+        <div class="rowitem"><i class="ti ti-id lead" style="color:var(--teal-deep)"></i><div class="txt"><p>Green card</p><span>Uploaded Jun 4</span></div><span class="pill" style="background:var(--teal-pale);color:var(--teal-deep)">Saved</span></div>
+        <div class="rowitem"><i class="ti ti-passport lead" style="color:var(--teal-deep)"></i><div class="txt"><p>Passport</p><span>Uploaded Jun 4</span></div><span class="pill" style="background:var(--teal-pale);color:var(--teal-deep)">Saved</span></div>
+        <div class="rowitem"><i class="ti ti-file-text lead" style="color:var(--teal-deep)"></i><div class="txt"><p>Tax returns (3 yrs)</p><span>Uploaded Jul 1</span></div><span class="pill" style="background:var(--teal-pale);color:var(--teal-deep)">Saved</span></div>
+        <div class="rowitem"><i class="ti ti-file-plus lead" style="color:var(--mute)"></i><div class="txt"><p>Marriage certificate</p><span>Needed for the 3-year rule</span></div><span class="pill" style="background:var(--amber-pale);color:var(--amber-dark)">Needed</span></div>
+        <div class="rowitem"><i class="ti ti-file-plus lead" style="color:var(--mute)"></i><div class="txt"><p>Travel history</p><span>Trips outside the US</span></div><span class="pill" style="background:var(--amber-pale);color:var(--amber-dark)">Needed</span></div>
+      </div>
+      <div class="btn" style="margin-top:11px"><i class="ti ti-camera"></i> Add a document</div>
+      <div class="card" style="margin-top:11px;background:var(--teal-pale)">
+        <div style="display:flex;gap:11px"><i class="ti ti-lock" style="color:var(--teal-deep);font-size:18px"></i><p style="margin:0;font-size:12.5px;color:var(--teal-deep);line-height:1.5">Your documents are encrypted and only visible to you. PathwayUSA staff cannot open them.</p></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>Why this matters most</h3>
+    <ul>
+      <li><b>Switching cost.</b> A user who has uploaded five documents does not re-upload them somewhere else. Nothing else in the app creates that.</li>
+      <li><b>Expiry tracking is the notification nobody mutes.</b> "Renewal window opens in 1 month" is worth a push. "Come practice!" is not.</li>
+      <li><b>Status pills, not just presence.</b> Saved / Needed / Expiring, each with an icon as well as color — never color alone.</li>
+      <li><b>Camera-first capture.</b> Your users are photographing paper, not attaching PDFs from a desktop.</li>
+    </ul>
+    <div class="flag"><b>Security is non-negotiable here.</b> No permanent public URLs, signed short-lived links only, file type and size validation, sanitized filenames, and nothing about document contents in logs or analytics. And only claim encryption on this screen if it's actually true end-to-end — a false trust badge is worse than none.</div>
+  </div>
+</div>
+
+<!-- ============ FIND HELP ============ -->
+<h2 class="sec">5. Find help</h2>
+<p class="secnote">The closest thing you have to a solved screen. Main issues are trust provenance and filter clutter.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr">
+      <p class="eyebrow">Trusted resources near you</p>
+      <h4>Find help</h4>
+      <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 13px;margin-top:14px;display:flex;gap:9px;align-items:center"><i class="ti ti-search" style="color:#9FB0BA;font-size:17px"></i><span style="color:#9FB0BA;font-size:13.5px">Orlando, FL 32801</span></div>
+    </div>
+    <div class="body">
+      <div class="card" style="background:var(--teal-pale);padding:12px 14px">
+        <div style="display:flex;gap:10px"><i class="ti ti-bulb" style="color:var(--teal-deep);font-size:17px"></i><p style="margin:0;font-size:13px;color:var(--teal-deep);line-height:1.45">You're on the civics test step. <b>Legal aid</b> and <b>English classes</b> may help most.</p></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:11px;flex-wrap:wrap">
+        <span class="pill" style="background:var(--teal);color:#fff;padding:7px 14px;font-size:12.5px">Legal aid</span>
+        <span class="pill" style="background:#fff;color:var(--ink);padding:7px 14px;font-size:12.5px;border:1px solid var(--line)">Health</span>
+        <span class="pill" style="background:#fff;color:var(--ink);padding:7px 14px;font-size:12.5px;border:1px solid var(--line)">Classes</span>
+        <span class="pill" style="background:#fff;color:var(--ink);padding:7px 14px;font-size:12.5px;border:1px solid var(--line)">Housing</span>
+      </div>
+      <div class="card" style="margin-top:11px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><p style="margin:0 0 3px;font-size:15.5px;font-weight:700;color:var(--ink)">Legal Aid Society of Central Florida</p>
+          <p style="margin:0 0 8px;font-size:12.5px;color:var(--mute)">1.2 mi · Open until 5:00 PM</p></div>
+          <i class="ti ti-bookmark" style="color:#B4B2A9;font-size:19px"></i>
+        </div>
+        <span class="pill" style="background:var(--teal-pale);color:var(--teal-deep)"><i class="ti ti-discount-check"></i> Nonprofit · verified</span>
+        <p style="font-size:13px;color:var(--slate);margin:9px 0 12px;line-height:1.5">Free immigration help for low-income families in Orange County.</p>
+        <div style="display:flex;gap:8px">
+          <div class="btn" style="flex:1;padding:11px"><i class="ti ti-phone"></i> Call</div>
+          <div class="btn ghost" style="flex:1;padding:11px"><i class="ti ti-map-pin"></i> Directions</div>
+        </div>
+      </div>
+      <p class="disc">Listings come from public directories. PathwayUSA does not endorse or vet individual providers — confirm credentials before sharing personal information.</p>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div class="on"><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>What changed</h3>
+    <ul>
+      <li><b>Provenance is stated.</b> Ratings and distances currently appear without any indication of where they come from. If it's Google Places data, say so; if it's your own list, say that. Unsourced "4.7 (128)" on an immigration app invites the question you don't want asked.</li>
+      <li><b>Distance chips removed.</b> 5/10/25/50mi plus four categories plus search plus map toggle is four filter systems. Distance auto-expands when results are thin.</li>
+      <li><b>Category colors dropped.</b> Blue/red/orange/green icon tiles encoded nothing. One neutral treatment, selected state in teal.</li>
+      <li><b>Open/closed beats hours.</b> "Open until 5:00 PM" is actionable; "Mon–Fri 9AM–5PM" makes them do the math.</li>
+    </ul>
+    <div class="flag"><b>Don't invent provider data.</b> No fabricated ratings, no unverified "verified" badges. If you haven't confirmed nonprofit status, don't display the check.</div>
+  </div>
+</div>
+
+<!-- ============ LEGAL ============ -->
+<h2 class="sec">6. Legal</h2>
+<p class="secnote">The riskiest screen in the app. Current copy makes claims that could cost you the App Store listing and, worse, mislead someone about their case.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr">
+      <p class="eyebrow">Talk to a licensed attorney</p>
+      <h4>Legal help</h4>
+    </div>
+    <div class="body">
+      <div class="card" style="background:var(--amber-pale);padding:13px 15px">
+        <p style="margin:0;font-size:12.5px;color:var(--amber-dark);line-height:1.5"><b>PathwayUSA is not a law firm</b> and does not give legal advice. We connect you with independent attorneys who do.</p>
+      </div>
+      <div class="card" style="margin-top:11px">
+        <p style="font-size:14.5px;font-weight:700;color:var(--ink);margin:0 0 11px">When an attorney helps</p>
+        <div style="display:flex;gap:9px;margin-bottom:9px"><i class="ti ti-point" style="color:var(--teal);font-size:15px;margin-top:2px"></i><p style="margin:0;font-size:13.5px;color:var(--slate)">Your case has a complication — past denials, criminal record, missed deadlines</p></div>
+        <div style="display:flex;gap:9px;margin-bottom:9px"><i class="ti ti-point" style="color:var(--teal);font-size:15px;margin-top:2px"></i><p style="margin:0;font-size:13.5px;color:var(--slate)">You received a request for evidence or a notice you don't understand</p></div>
+        <div style="display:flex;gap:9px"><i class="ti ti-point" style="color:var(--teal);font-size:15px;margin-top:2px"></i><p style="margin:0;font-size:13.5px;color:var(--slate)">You want someone to review your forms before you file</p></div>
+      </div>
+      <div class="stack" style="margin-top:11px">
+        <div class="rowitem"><i class="ti ti-shield-check lead" style="color:var(--teal-deep)"></i><div class="txt"><p>Bar-verified attorneys</p><span>We check state bar standing</span></div></div>
+        <div class="rowitem"><i class="ti ti-lock lead" style="color:var(--teal-deep)"></i><div class="txt"><p>You control what's shared</p><span>Nothing sent without your OK</span></div></div>
+        <div class="rowitem"><i class="ti ti-coin lead" style="color:var(--teal-deep)"></i><div class="txt"><p>Fees shown upfront</p><span>Before any consultation</span></div></div>
+      </div>
+      <div class="btn" style="margin-top:11px">Browse attorneys near me</div>
+      <div class="btn ghost" style="margin-top:8px">Find free legal aid instead</div>
+      <p class="disc">PathwayUSA is not affiliated with USCIS or any government agency. Attorneys listed are independent and not employed by PathwayUSA.</p>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div class="on"><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>Copy that has to change</h3>
+    <ul>
+      <li><b>"Increase your approval chances significantly"</b> — remove entirely. You cannot claim to affect immigration outcomes. This is the single most dangerous line in the app.</li>
+      <li><b>"USCIS Compliance"</b> under Verified Attorneys — meaningless and implies government endorsement. Replaced with what you actually verify: state bar standing.</li>
+      <li><b>"Get professional legal advice tailored to your case"</b> — fine for the attorney to offer, not for you to promise. Reframed as "when an attorney helps," which is educational rather than promissory.</li>
+      <li><b>Free legal aid gets equal billing.</b> Many of your users cannot afford an attorney. Routing them only to paid options when nonprofit help exists is the kind of thing that erodes trust permanently.</li>
+    </ul>
+    <div class="flag"><b>Only claim verification you actually perform.</b> If you aren't checking bar standing today, that row says something else or doesn't exist. A false trust badge on an immigration app is a serious harm, not a marketing choice.</div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<h2 class="sec">7. Settings</h2>
+<p class="secnote">The clearest example of the color problem: toggles in orange, green, red, gray, and indigo with no consistent meaning.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr">
+      <p class="eyebrow">Account</p>
+      <h4>Settings</h4>
+    </div>
+    <div class="body">
+      <div class="stack">
+        <div class="rowitem"><i class="ti ti-language lead"></i><div class="txt"><p>Language</p><span>English</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-volume lead"></i><div class="txt"><p>Voice and reading</p><span>On · normal speed</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-bell lead"></i><div class="txt"><p>Reminders</p><span>5 of 8 on</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-lock lead"></i><div class="txt"><p>Privacy and app lock</p><span>Locks after 15 min</span></div><i class="ti ti-chevron-right chev"></i></div>
+      </div>
+      <div class="card" style="margin-top:11px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <p style="margin:0;font-size:15px;font-weight:700;color:var(--ink)">PathwayUSA Plus</p>
+          <span class="pill" style="background:#EEEDE8;color:var(--slate)">Free plan</span>
+        </div>
+        <p style="font-size:13px;color:var(--slate);margin:0 0 12px;line-height:1.5">Unlimited documents, weekly progress summaries, and priority support.</p>
+        <div class="btn">See what's included</div>
+      </div>
+      <div class="stack" style="margin-top:11px">
+        <div class="rowitem"><i class="ti ti-user lead"></i><div class="txt"><p>My immigration profile</p></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-help lead"></i><div class="txt"><p>Help and support</p></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-file-text lead"></i><div class="txt"><p>Privacy and terms</p></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-logout lead" style="color:var(--red-deep)"></i><div class="txt"><p style="color:var(--red-deep)">Sign out</p></div></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>What changed</h3>
+    <ul>
+      <li><b>Twenty-plus rows became four groups.</b> Notification toggles, reading speed, visual effects, and quiz personalization all move into sub-screens. Settings should be a table of contents, not the content.</li>
+      <li><b>One toggle color.</b> Teal for on, gray for off, everywhere. Red reserved for destructive actions only — currently "Document Expiry" is red simply for being enabled.</li>
+      <li><b>Indigo removed.</b> App Lock used a purple that appears nowhere else in the brand.</li>
+      <li><b>Upgrade is a card, not a row.</b> "Upgrade to Pro $6.99/mo" buried between profile links converts poorly and reads as a nag. Note the price here must match your landing page — those are currently out of sync.</li>
+    </ul>
+    <div class="flag"><b>Localization honesty:</b> Español and Français currently show "Soon" while Kreyòl shows as available. If Kreyòl isn't fully translated, that badge is a promise you'll break at the worst possible moment — mid-task, for the user who needs it most.</div>
+  </div>
+</div>
+
+<!-- ============ VOICE ============ -->
+<h2 class="sec">8. The voice layer</h2>
+<p class="secnote">Treated as a navigation system, not a read-aloud button. For a non-English-dominant, low-literacy-risk audience, this may be the most important feature in the product.</p>
+<div class="row">
+  <div class="phone">
+    <div class="hdr" style="padding-bottom:18px">
+      <p class="eyebrow">Now reading</p>
+      <h4>Study for the civics test</h4>
+    </div>
+    <div class="body">
+      <div class="card" style="text-align:center;padding:22px 18px">
+        <div class="wave" style="justify-content:center;height:34px;margin-bottom:18px">
+          <i style="height:10px"></i><i style="height:20px"></i><i style="height:32px"></i><i style="height:24px"></i><i style="height:34px"></i><i style="height:16px"></i><i style="height:26px"></i><i style="height:12px"></i><i style="height:22px"></i><i style="height:30px"></i><i style="height:14px"></i><i style="height:20px"></i>
+        </div>
+        <p style="font-size:15px;color:var(--ink);margin:0 0 6px;line-height:1.6">"USCIS will ask you up to ten questions from a list of one hundred. You need to answer six correctly…"</p>
+        <p style="font-size:12px;color:var(--mute);margin:0">0:42 of 1:30</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:11px">
+        <div class="btn ghost" style="flex:1;padding:12px"><i class="ti ti-rewind-backward-15"></i></div>
+        <div class="btn" style="flex:2;padding:12px"><i class="ti ti-player-pause"></i> Pause</div>
+        <div class="btn ghost" style="flex:1;padding:12px"><i class="ti ti-rewind-forward-15"></i></div>
+      </div>
+      <div class="stack" style="margin-top:11px">
+        <div class="rowitem"><i class="ti ti-language lead"></i><div class="txt"><p>English</p><span>Tap to change voice language</span></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="rowitem"><i class="ti ti-gauge lead"></i><div class="txt"><p>Normal speed</p><span>Slow · Normal · Fast</span></div><i class="ti ti-chevron-right chev"></i></div>
+      </div>
+      <div class="card" style="margin-top:11px;background:var(--teal-pale)">
+        <p style="margin:0 0 9px;font-size:13.5px;font-weight:700;color:var(--teal-deep)">Ask about this step</p>
+        <div style="background:#fff;border-radius:9px;padding:11px 13px;display:flex;gap:9px;align-items:center">
+          <i class="ti ti-microphone" style="color:var(--teal-deep);font-size:18px"></i>
+          <span style="font-size:13px;color:var(--mute)">"What documents do I need?"</span>
+        </div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div><i class="ti ti-home"></i><p>Home</p></div>
+      <div class="on"><i class="ti ti-school"></i><p>Study</p></div>
+      <div><i class="ti ti-map-2"></i><p>Roadmap</p></div>
+      <div><i class="ti ti-map-pin"></i><p>Find help</p></div>
+      <div><i class="ti ti-briefcase"></i><p>Legal</p></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h3>Design principles</h3>
+    <ul>
+      <li><b>Same position on every screen.</b> The play control sits in one consistent place. A user who can't read English reliably learns "the button in that spot talks to me" — that's the whole onboarding.</li>
+      <li><b>It reads the step, not the interface.</b> Reading button labels aloud is noise. Reading the plain-language explanation of what this step means is the value.</li>
+      <li><b>Voice input, not just output.</b> Typing a question in a second language is a real barrier. Speaking one isn't. This is where your RAG assistant belongs — scoped to the current step so answers stay grounded in your content.</li>
+      <li><b>Written text stays visible while playing.</b> Users following along build reading skill; users who can't still get the audio. Never make voice the only path to information.</li>
+    </ul>
+    <h3>Hard problems to plan for</h3>
+    <ul>
+      <li><b>Haitian Creole TTS is genuinely poor</b> across most major providers. Test it with native speakers before you ship it as a feature. Shipping bad Creole audio to Creole speakers is worse than shipping none — it signals you didn't check.</li>
+      <li><b>Pre-generate, don't synthesize live.</b> Roadmap steps are fixed content. Generate the audio once, store the files, serve them. Live TTS on every open costs money per user, breaks offline, and adds latency on poor connections — which your audience disproportionately has.</li>
+      <li><b>Offline matters.</b> Cached audio for the current step means the app works on the bus with no signal.</li>
+      <li><b>Never auto-play.</b> A phone that starts talking about immigration status in a public place can put someone in a genuinely unsafe position. Always user-initiated.</li>
+    </ul>
+    <div class="flag"><b>On the RAG assistant:</b> it must refuse to answer case-specific eligibility questions. "Do I qualify?" and "will I be approved?" have to route to a licensed attorney every time, not get a confident-sounding generated answer. Constrain it to explaining your own content and the screen the user is on.</div>
+  </div>
+</div>
+
+<h2 class="sec">Build order</h2>
+<p class="secnote">Ranked by risk removed and value delivered, not by effort.</p>
+<div style="background:#fff;border-radius:12px;padding:6px 24px 18px;max-width:860px">
+  <ol style="padding-left:20px">
+    <li style="margin:14px 0;font-size:15px"><b>Remove the fabricated content.</b> Fake stats, fake testimonial, "increase your approval chances," "USCIS Compliance." Copy-only, no engineering, removes real legal and store-review risk today.</li>
+    <li style="margin:14px 0;font-size:15px"><b>Fix the Home hierarchy.</b> Eligibility countdown as hero, one CTA, three list rows. Biggest perceived-quality jump for the least work.</li>
+    <li style="margin:14px 0;font-size:15px"><b>Consolidate color tokens.</b> Teal = progress, amber = time-sensitive, red = errors and destructive only. Touches every screen but is mechanical.</li>
+    <li style="margin:14px 0;font-size:15px"><b>Tag civics questions by topic.</b> Schema migration. Unlocks the readiness diagnostic, which is your real daily habit.</li>
+    <li style="margin:14px 0;font-size:15px"><b>Build documents properly.</b> Expiry tracking plus secure storage. Your strongest retention mechanic and your biggest security surface — treat them as one project.</li>
+    <li style="margin:14px 0;font-size:15px"><b>Ship voice on the roadmap steps.</b> Pre-generated audio, English first, one consistent control position. Validate Creole with native speakers before promising it.</li>
+    <li style="margin:14px 0;font-size:15px"><b>Add the scoped RAG assistant last.</b> It needs the content structure from the steps above to be grounded, and it needs hard refusal rules for eligibility questions before it touches a user.</li>
+  </ol>
+</div>
+
+</div>
+</body>
+</html>

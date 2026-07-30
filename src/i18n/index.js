@@ -11,7 +11,7 @@ const LANG_KEY = '@pathwayusa/lang';
 export const LANGUAGE_OPTIONS = [
   { code: 'en', label: 'EN', full: 'English'   },
   { code: 'es', label: 'ES', full: 'Español',  comingSoon: true },
-  { code: 'ht', label: 'KR', full: 'Kreyòl'   },
+  { code: 'ht', label: 'KR', full: 'Kreyòl',   comingSoon: true },
   { code: 'fr', label: 'FR', full: 'Français', comingSoon: true },
 ];
 

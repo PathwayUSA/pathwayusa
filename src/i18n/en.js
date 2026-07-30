@@ -10,9 +10,6 @@ export default {
   home_continue:         'Continue Your Journey',
   home_step_banner:      'Step 3 of 7 — File Form N-400',
   home_updates:          'Latest Updates',
-  home_naturalized:      'Naturalized',
-  home_resources:        'Resources',
-  home_attorneys:        'Attorneys',
 
   // Feature cards
   card_test_title:       'Citizenship\nTest',
@@ -193,14 +190,13 @@ export default {
   home_done_check:          'Done ✓',
   home_answer_correct:      '✓ Correct!',
   home_answer_incorrect:    '✗ Not quite — here is the right answer:',
-  home_community_story:     'Success Story',
   home_your_journey:        'Your Journey',
   home_tps_title:           'TPS Renewal Reminder',
   home_tps_sub:             'TPS status must be renewed periodically. Check uscis.gov for current renewal deadlines and file Form I-821 before your status expires.',
   home_tps_cta:             'View Renewal Steps',
 
   // ── Guide header ──────────────────────────────────────────
-  guide_header_title:       'Your Roadmap',
+  guide_header_title:       'My Path',
   guide_header_sub:         'Step by step to your citizenship',
 
   // ── Resources header ──────────────────────────────────────

@@ -42,6 +42,10 @@ import GuideScreen             from './src/screens/GuideScreen';
 import LegalPortalScreen       from './src/screens/LegalPortalScreen';
 import AttorneyMatchScreen     from './src/screens/AttorneyMatchScreen';
 import SettingsScreen          from './src/screens/SettingsScreen';
+import LanguageVoiceSettingsScreen        from './src/screens/settings/LanguageVoiceSettingsScreen';
+import RemindersSettingsScreen            from './src/screens/settings/RemindersSettingsScreen';
+import PrivacyAppLockSettingsScreen       from './src/screens/settings/PrivacyAppLockSettingsScreen';
+import MyImmigrationProfileSettingsScreen from './src/screens/settings/MyImmigrationProfileSettingsScreen';
 import DeadlinesScreen         from './src/screens/DeadlinesScreen';
 import DocumentsScreen         from './src/screens/DocumentsScreen';
 import DocumentExpiryScreen    from './src/screens/DocumentExpiryScreen';
@@ -106,11 +110,11 @@ const LINKING_CONFIG = {
 // ── Shared utilities ─────────────────────────────────────────────────────────
 
 const CLIENT_TAB_ICONS = {
-  Home:      { focused: 'home',      outline: 'home-outline'      },
-  Learn:     { focused: 'school',    outline: 'school-outline'    },
-  Resources: { focused: 'search',    outline: 'search-outline'    },
-  Guide:     { focused: 'map',       outline: 'map-outline'       },
-  Legal:     { focused: 'briefcase', outline: 'briefcase-outline' },
+  Home:      { focused: 'home',            outline: 'home-outline'            },
+  Learn:     { focused: 'school',          outline: 'school-outline'          },
+  Guide:     { focused: 'map',             outline: 'map-outline'             },
+  Documents: { focused: 'folder',          outline: 'folder-outline'          },
+  Resources: { focused: 'location',        outline: 'location-outline'        },
 };
 
 const ATTORNEY_TAB_ICONS = {
@@ -200,11 +204,11 @@ function MainTabs({ route }) {
         headerTitleStyle: { fontWeight: '800', fontSize: 17 },
       })}
     >
-      <Tab.Screen name="Home"      component={HomeScreen}        options={{ headerShown: false,        tabBarLabel: 'Home'      }} />
-      <Tab.Screen name="Learn"     component={LearningScreen}    options={{ title: 'Citizenship Quiz', tabBarLabel: 'Learn'     }} />
-      <Tab.Screen name="Resources" component={ResourcesScreen}   options={{ title: 'Local Resources',  tabBarLabel: 'Resources' }} />
-      <Tab.Screen name="Guide"     component={GuideScreen}       options={{ title: 'My Roadmap',       tabBarLabel: 'Guide'     }} />
-      <Tab.Screen name="Legal"     component={LegalPortalScreen} options={{ title: 'Legal Portal',     tabBarLabel: 'Legal'     }} />
+      <Tab.Screen name="Home"      component={HomeScreen}      options={{ headerShown: false, tabBarLabel: 'Home'  }} />
+      <Tab.Screen name="Learn"     component={LearningScreen}  options={{ headerShown: false, tabBarLabel: 'Study' }} />
+      <Tab.Screen name="Guide"     component={GuideScreen}     options={{ headerShown: false, tabBarLabel: 'Path'  }} />
+      <Tab.Screen name="Documents" component={DocumentsScreen} options={{ title: 'Documents', tabBarLabel: 'Documents' }} />
+      <Tab.Screen name="Resources" component={ResourcesScreen} options={{ headerShown: false, tabBarLabel: 'Help' }} />
     </Tab.Navigator>
   );
 }
@@ -221,9 +225,13 @@ function AppStack({ firstSession = false }) {
     <Stack.Navigator>
       <Stack.Screen name="AppMain" options={{ headerShown: false }} component={MainTabs} initialParams={{ firstSession }} />
       <Stack.Screen name="Settings"    component={SettingsScreen}    options={{ title: 'Settings',    ...headerOpts }} />
+      <Stack.Screen name="LanguageVoiceSettings"        component={LanguageVoiceSettingsScreen}        options={{ title: 'Language and Voice',     ...headerOpts }} />
+      <Stack.Screen name="RemindersSettings"            component={RemindersSettingsScreen}            options={{ title: 'Reminders',              ...headerOpts }} />
+      <Stack.Screen name="PrivacyAppLockSettings"       component={PrivacyAppLockSettingsScreen}       options={{ title: 'Privacy and App Lock',   ...headerOpts }} />
+      <Stack.Screen name="MyImmigrationProfileSettings" component={MyImmigrationProfileSettingsScreen} options={{ title: 'My Immigration Profile', ...headerOpts }} />
       <Stack.Screen name="Deadlines"   component={DeadlinesScreen}   options={{ title: 'Deadline Reminders',  ...headerOpts }} />
-      <Stack.Screen name="Documents"   component={DocumentsScreen}   options={{ title: 'Document Checklist',  ...headerOpts }} />
       <Stack.Screen name="DocumentExpiry" component={DocumentExpiryScreen} options={{ title: 'Document Expiry Dates', ...headerOpts }} />
+      <Stack.Screen name="Legal"       component={LegalPortalScreen} options={{ title: 'Legal Portal',        ...headerOpts }} />
       <Stack.Screen name="CaseTracker"  component={CaseTrackerScreen}  options={{ title: 'USCIS Case Tracker', ...headerOpts }} />
       <Stack.Screen name="Upgrade"     component={UpgradeScreen}     options={{ title: 'Upgrade to Pro',     ...headerOpts }} />
       <Stack.Screen name="ClientDetail" component={ClientDetailScreen} options={{ title: 'Client Details',    ...headerOpts }} />

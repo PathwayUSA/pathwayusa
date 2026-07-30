@@ -10,9 +10,6 @@ export default {
   home_continue:         'Continúa tu Viaje',
   home_step_banner:      'Paso 3 de 7 — Presentar Formulario N-400',
   home_updates:          'Últimas Noticias',
-  home_naturalized:      'Naturalizados',
-  home_resources:        'Recursos',
-  home_attorneys:        'Abogados',
 
   // Feature cards
   card_test_title:       'Examen de\nCiudadanía',
@@ -140,14 +137,13 @@ export default {
   home_done_check:          'Listo ✓',
   home_answer_correct:      '✓ ¡Correcto!',
   home_answer_incorrect:    '✗ No exactamente — aquí está la respuesta correcta:',
-  home_community_story:     'Historia de Éxito',
   home_your_journey:        'Tu Viaje',
   home_tps_title:           'Recordatorio de Renovación TPS',
   home_tps_sub:             'El estatus TPS debe renovarse periódicamente. Consulta uscis.gov para los plazos actuales y presenta el formulario I-821 antes de que expire tu estatus.',
   home_tps_cta:             'Ver Pasos de Renovación',
 
   // ── Guide header ──────────────────────────────────────────
-  guide_header_title:       'Tu Hoja de Ruta',
+  guide_header_title:       'Mi Camino',
   guide_header_sub:         'Paso a paso hacia tu ciudadanía',
 
   // ── Resources header ──────────────────────────────────────

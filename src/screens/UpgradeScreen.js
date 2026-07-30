@@ -10,7 +10,6 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { startCheckout, openBillingPortal } from '../services/stripe';
 import { SHADOWS } from '../theme';
 import { successHaptic, lightHaptic } from '../utils/haptics';
-import UserAvatar from '../components/UserAvatar';
 
 const { width } = Dimensions.get('window');
 const NAVY      = '#0F2A3D';
@@ -136,32 +135,6 @@ export default function UpgradeScreen({ navigation }) {
             </TouchableOpacity>
           )}
 
-          {/* Trust row */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 8 }}>
-            <View style={{ flexDirection: 'row' }}>
-              {['trust-a', 'trust-b', 'trust-c', 'trust-d'].map((s, i) => (
-                <UserAvatar
-                  key={s}
-                  seed={s}
-                  size={30}
-                  style={{
-                    marginLeft: i > 0 ? -10 : 0,
-                    zIndex: 4 - i,
-                    borderWidth: 1.5,
-                    borderColor: 'rgba(255,255,255,0.5)',
-                  }}
-                />
-              ))}
-            </View>
-            <View style={{ gap: 3 }}>
-              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.9)', fontWeight: '700' }}>
-                Trusted by 2.1M+ immigrants
-              </Text>
-              <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)' }}>
-                ⭐⭐⭐⭐⭐ 4.8 average rating
-              </Text>
-            </View>
-          </View>
         </LinearGradient>
 
         {/* ── Active Pro banner ── */}

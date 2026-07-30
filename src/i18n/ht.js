@@ -10,9 +10,6 @@ export default {
   home_continue:         'Kontinye Vwayaj Ou',
   home_step_banner:      'Etap 3 nan 7 — Ranpli Fòm N-400',
   home_updates:          'Dènye Nouvèl',
-  home_naturalized:      'Natiralize',
-  home_resources:        'Resous',
-  home_attorneys:        'Avoka',
 
   // Feature cards
   card_test_title:       'Egzamen\nSitwayènte',
@@ -140,14 +137,13 @@ export default {
   home_done_check:          'Fini ✓',
   home_answer_correct:      '✓ Kòrèk!',
   home_answer_incorrect:    '✗ Pa egzakteman — men bon repons nan:',
-  home_community_story:     'Istwa Siksè',
   home_your_journey:        'Vwayaj Ou',
   home_tps_title:           'Rapèl Renouvèlman TPS',
   home_tps_sub:             'Estati TPS dwe renouvle peryodikman. Tcheke uscis.gov pou dèlè renouvèlman aktyèl ak depoze Fòm I-821 anvan estati ou ekspire.',
   home_tps_cta:             'Wè Etap Renouvèlman',
 
   // ── Guide header ──────────────────────────────────────────
-  guide_header_title:       'Fèy Wout Ou',
+  guide_header_title:       'Wout Mwen',
   guide_header_sub:         'Etap pa etap pou sitwayènte ou',
 
   // ── Resources header ──────────────────────────────────────

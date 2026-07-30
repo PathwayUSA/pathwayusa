@@ -191,10 +191,20 @@ function makeStyles(colors) {
       marginTop: 3,
       lineHeight: 17,
     },
+
+    // ── Hero variant — for the navy header hero position on Home ──────────────
+    heroWrap: { gap: 4 },
+    heroEyebrow: { color: '#9FB0BA', fontSize: 12.5, marginBottom: 2 },
+    heroCountdown: { color: '#fff', fontSize: 28, fontWeight: '900', lineHeight: 34 },
+    heroDate: { color: colors.primaryLight ?? '#B7E4D8', fontSize: 13, marginTop: 2 },
+    heroBarBg: { height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.15)', overflow: 'hidden', marginTop: 14 },
+    heroBarFill: { height: 5, borderRadius: 3, backgroundColor: '#fff' },
+    heroPromptRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    heroPromptTitle: { color: '#fff', fontSize: 20, fontWeight: '800', flexShrink: 1 },
   });
 }
 
-export default function CitizenshipCountdownCard({ profile, navigation }) {
+export default function CitizenshipCountdownCard({ profile, navigation, variant = 'card' }) {
   const { colors } = useTheme();
   const { updateProfile } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -237,25 +247,50 @@ export default function CitizenshipCountdownCard({ profile, navigation }) {
     eligible.setFullYear(eligible.getFullYear() + pathYears);
 
     // Shift by abroad days that exceed the physical-presence allowance.
-    // 5-yr: must be present 913+ days; 3-yr: 547+ days.
-    const requiredPresence = pathYears === 3 ? 547 : 913;
+    // 5-yr path: must be physically present 913+ days (30 months);
+    // 3-yr path: 548+ days (18 months) — matches TravelTrackerScreen's calcStats.
+    const requiredPresence = pathYears === 3 ? 548 : 913;
     const totalPeriodDays  = pathYears * 365;
     const allowedAbroad    = totalPeriodDays - requiredPresence;
     const excess           = Math.max(0, abroadDays - allowedAbroad);
     if (excess > 0) eligible.setDate(eligible.getDate() + Math.round(excess));
 
+    // INA 334(a): Form N-400 may be filed up to 90 days before the
+    // continuous-residence anniversary above. That earlier date is the
+    // actionable "you can apply" moment the hero countdown tracks;
+    // `eligible` (the full anniversary) is kept separately for the detail line.
+    const filingEligible = new Date(eligible);
+    filingEligible.setDate(filingEligible.getDate() - 90);
+
     const today    = new Date();
-    const totalMs  = eligible.getTime() - gcStart.getTime();
+    const totalMs  = filingEligible.getTime() - gcStart.getTime();
     const elapsed  = Math.max(0, today.getTime() - gcStart.getTime());
     const pct      = Math.min(100, (elapsed / totalMs) * 100);
-    const remaining = eligible.getTime() - today.getTime();
+    const remaining = filingEligible.getTime() - today.getTime();
     const isPast   = remaining <= 0;
     const absDays  = Math.ceil(Math.abs(remaining) / 86400000);
     const y        = Math.floor(absDays / 365);
     const mo       = Math.floor((absDays % 365) / 30);
     const d        = absDays % 30;
-    return { eligibleDate: eligible, pct, isPast, y, mo, d, excess };
+    return { eligibleDate: eligible, filingEligibleDate: filingEligible, pct, isPast, y, mo, d, excess };
   }, [gcDate, pathYears, abroadDays]);
+
+  // No green card date — prompt to set it (hero variant: navy-header prompt)
+  if (!gcDate && variant === 'hero') {
+    return (
+      <TouchableOpacity
+        onPress={() => navigation?.navigate('TravelTracker')}
+        activeOpacity={0.85}
+      >
+        <View style={styles.heroPromptRow}>
+          <Text style={styles.heroPromptTitle}>Add your Green Card date →</Text>
+        </View>
+        <Text style={[styles.heroDate, { marginTop: 4 }]}>
+          See exactly when you can apply for U.S. citizenship
+        </Text>
+      </TouchableOpacity>
+    );
+  }
 
   // No green card date — prompt to set it
   if (!gcDate) {
@@ -282,6 +317,64 @@ export default function CitizenshipCountdownCard({ profile, navigation }) {
           <Ionicons name="chevron-forward" size={18} color="#BDC3C7" />
         </View>
       </TouchableOpacity>
+    );
+  }
+
+  if (variant === 'hero') {
+    return (
+      <View style={styles.heroWrap}>
+        <Text style={styles.heroEyebrow}>
+          {calc.isPast ? 'You may be able to apply for citizenship' : 'You can apply for citizenship in'}
+        </Text>
+        {calc.isPast ? (
+          <Text style={styles.heroCountdown}>Now 🎉</Text>
+        ) : (
+          <Text style={styles.heroCountdown}>
+            {calc.y > 0
+              ? `${calc.y} year${calc.y > 1 ? 's' : ''}${calc.mo > 0 ? `, ${calc.mo} month${calc.mo > 1 ? 's' : ''}` : ''}`
+              : calc.mo > 0
+              ? `${calc.mo} month${calc.mo > 1 ? 's' : ''}`
+              : `${calc.d} day${calc.d !== 1 ? 's' : ''}`}
+          </Text>
+        )}
+        <Text style={styles.heroDate}>Earliest filing date · {fmtDate(calc.filingEligibleDate)}</Text>
+        <View style={styles.heroBarBg}>
+          <View style={[styles.heroBarFill, { width: `${Math.round(calc.pct)}%` }]} />
+        </View>
+
+        <Modal
+          visible={showMarriedModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowMarriedModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalSheet}>
+              <Ionicons name="heart-outline" size={36} color={colors.primary} style={{ alignSelf: 'center' }} />
+              <Text style={styles.modalTitle}>Are you married to{'\n'}a U.S. citizen?</Text>
+              <Text style={styles.modalSub}>
+                This determines your naturalization timeline — 3 years if married to a citizen, 5 years otherwise.
+              </Text>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity
+                  style={[styles.modalBtn, { backgroundColor: colors.primary }]}
+                  onPress={() => handleMarriedAnswer(true)}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.modalBtnTxt}>Yes — 3-Year Path</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalBtnSecondary}
+                  onPress={() => handleMarriedAnswer(false)}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.modalBtnSecondaryTxt}>No — 5-Year Path</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
     );
   }
 
@@ -329,7 +422,7 @@ export default function CitizenshipCountdownCard({ profile, navigation }) {
         {/* Countdown text */}
         <View style={styles.right}>
           {calc?.isPast ? (
-            <Text style={styles.eligibleNow}>You may be eligible now! 🎉</Text>
+            <Text style={styles.eligibleNow}>You may be able to apply now! 🎉</Text>
           ) : (
             <>
               <Text style={styles.countdown}>
@@ -338,12 +431,15 @@ export default function CitizenshipCountdownCard({ profile, navigation }) {
                 {calc.d}d remaining
               </Text>
               <Text style={styles.eligibleDate}>
-                Eligible {fmtDate(calc.eligibleDate)}
+                Earliest filing date {fmtDate(calc.filingEligibleDate)}
               </Text>
             </>
           )}
           <Text style={styles.meta}>
             Green card: {fmtMonth(gcDate)}
+          </Text>
+          <Text style={styles.meta}>
+            Full {pathYears}-year mark: {fmtDate(calc.eligibleDate)}
           </Text>
           {calc?.excess > 0 && (
             <Text style={styles.meta}>
@@ -366,7 +462,7 @@ export default function CitizenshipCountdownCard({ profile, navigation }) {
 
       <View style={styles.footer}>
         <Text style={styles.disclaimer}>
-          Estimate only · Travel history affects exact date · Consult an attorney to confirm eligibility
+          Estimate only · Reflects the 90-day early filing window (INA 334(a)) · Travel history affects exact date · Consult an attorney to confirm eligibility
         </Text>
       </View>
 

@@ -10,9 +10,6 @@ export default {
   home_continue:         'Continuer votre Parcours',
   home_step_banner:      'Étape 3 sur 7 — Soumettre le Formulaire N-400',
   home_updates:          'Dernières Nouvelles',
-  home_naturalized:      'Naturalisés',
-  home_resources:        'Ressources',
-  home_attorneys:        'Avocats',
 
   // Feature cards
   card_test_title:       'Test de\nCitoyenneté',
@@ -140,14 +137,13 @@ export default {
   home_done_check:          'Terminé ✓',
   home_answer_correct:      '✓ Correct!',
   home_answer_incorrect:    '✗ Pas tout à fait — voici la bonne réponse:',
-  home_community_story:     'Histoire de Succès',
   home_your_journey:        'Votre Parcours',
   home_tps_title:           'Rappel Renouvellement TPS',
   home_tps_sub:             'Le statut TPS doit être renouvelé périodiquement. Consultez uscis.gov pour les délais actuels et déposez le formulaire I-821 avant expiration.',
   home_tps_cta:             'Voir les Étapes de Renouvellement',
 
   // ── Guide header ──────────────────────────────────────────
-  guide_header_title:       'Votre Feuille de Route',
+  guide_header_title:       'Mon Chemin',
   guide_header_sub:         'Étape par étape vers votre citoyenneté',
 
   // ── Resources header ──────────────────────────────────────

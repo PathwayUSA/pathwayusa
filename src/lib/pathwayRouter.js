@@ -349,7 +349,7 @@ const GC_CITIZENSHIP_PATH = {
       title: 'Study for Civics Test',
       form: null,
       description: 'USCIS will ask you up to 10 questions from the official 100 civics questions. You must answer 6 correctly. Use PathwayUSA\'s daily quiz to prepare!',
-      timeframe: 'Study 2–3 months before interview',
+      timeframe: 'Most people study 2–3 months',
       important: false,
     },
     {

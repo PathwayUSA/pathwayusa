@@ -10,7 +10,6 @@ const DAILY_REMINDER_ID_KEY   = '@pathwayusa/daily_reminder_id';
 const NOTIF_ASKED_KEY         = '@pathwayusa/notification_permission_asked';
 const DEADLINE_NOTIF_KEY      = '@pathwayusa/deadline_notif_ids';
 const DOC_EXPIRY_NOTIF_KEY    = '@pathwayusa/doc_expiry_notif_ids';
-const INACTIVITY_NOTIF_KEY    = '@pathwayusa/inactivity_notif_id';
 const ELIGIBILITY_NOTIF_KEY   = '@pathwayusa/eligibility_notif_ids';
 const WEEKLY_NOTIF_KEY        = '@pathwayusa/weekly_notif_id';
 
@@ -133,8 +132,11 @@ export async function scheduleDeadlineNotifications(deadline) {
       const label = daysBefore === 1 ? 'tomorrow' : `in ${daysBefore} days`;
       const id = await Notifications.scheduleNotificationAsync({
         content: {
+          // Lock-screen text stays generic on purpose — no deadline title/case
+          // detail here. The specific deadline only appears after unlock,
+          // inside the app (via `data.deadlineId`).
           title: daysBefore === 1 ? '🚨 Deadline Tomorrow!' : '📅 Upcoming Deadline',
-          body: `"${deadline.title}" is due ${label}. Tap to start preparing.`,
+          body: `You have a deadline ${label}. Tap to see details.`,
           sound: true,
           data: { deadlineId: deadline.id },
         },
@@ -203,8 +205,10 @@ export async function scheduleDocumentExpiryNotifications(doc) {
       const label = daysBefore === 7 ? 'in 7 days' : `in ${daysBefore} days`;
       const id = await Notifications.scheduleNotificationAsync({
         content: {
+          // Lock-screen text stays generic — no document name/type here.
+          // The specific document only appears after unlock, inside the app.
           title: '📄 Document Expiring Soon',
-          body: `Your ${doc.doc_name} expires ${label}. Start renewing now if needed.`,
+          body: `One of your documents expires ${label}. Tap to see details.`,
           sound: true,
           data: { docExpiryId: doc.id },
         },
@@ -250,58 +254,6 @@ export async function cancelAllDocumentExpiryNotifications() {
   } catch {}
 }
 
-// ── Inactivity Reminder ───────────────────────────────────────────────────────
-
-export async function scheduleInactivityReminder({ lastActionAt, stepName, userName }) {
-  if (IS_EXPO_GO) return;
-  try {
-    const { status } = await Notifications.getPermissionsAsync();
-    if (status !== 'granted') return;
-
-    const existingId = await AsyncStorage.getItem(INACTIVITY_NOTIF_KEY);
-    if (existingId) await Notifications.cancelScheduledNotificationAsync(existingId).catch(() => {});
-
-    // Fire 14 days after last action, at 10am
-    const base = new Date(lastActionAt);
-    base.setDate(base.getDate() + 14);
-    base.setHours(10, 0, 0, 0);
-    if (base.getTime() <= Date.now()) return;
-
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('inactivity-reminder', {
-        name: 'Progress Reminders',
-        importance: Notifications.AndroidImportance.HIGH,
-        sound: true,
-      }).catch(() => {});
-    }
-
-    const name = userName ?? 'You';
-    const id = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "⏸️ Don't lose your momentum",
-        body: `${name}, you haven't made progress in 2 weeks. Your current step is "${stepName}". Tap to continue.`,
-        sound: true,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: base,
-        channelId: Platform.OS === 'android' ? 'inactivity-reminder' : undefined,
-      },
-    });
-    await AsyncStorage.setItem(INACTIVITY_NOTIF_KEY, id);
-  } catch {}
-}
-
-export async function cancelInactivityReminder() {
-  try {
-    const id = await AsyncStorage.getItem(INACTIVITY_NOTIF_KEY);
-    if (id) {
-      await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
-      await AsyncStorage.removeItem(INACTIVITY_NOTIF_KEY);
-    }
-  } catch {}
-}
-
 // ── Citizenship Eligibility Milestones ────────────────────────────────────────
 
 export async function scheduleEligibilityMilestones({ gcDate, pathYears }) {
@@ -330,27 +282,13 @@ export async function scheduleEligibilityMilestones({ gcDate, pathYears }) {
       }).catch(() => {});
     }
 
+    // Lock-screen text stays generic on purpose — no mention of citizenship or
+    // immigration status here. Full context only appears after unlock, in-app.
     const milestones = [
-      {
-        offsetMs: 365 * 86400000,
-        title: '🗓️ 1 year to citizenship eligibility',
-        body: "You're 1 year away from citizenship eligibility! Keep going.",
-      },
-      {
-        offsetMs: 180 * 86400000,
-        title: '6 months to citizenship',
-        body: '6 months until you can apply for citizenship. Start preparing now.',
-      },
-      {
-        offsetMs: 30 * 86400000,
-        title: '⏰ 30 days to eligibility',
-        body: 'You may be eligible to apply for citizenship in 30 days! Tap to see your checklist.',
-      },
-      {
-        offsetMs: 0,
-        title: '🎉 You may now be eligible!',
-        body: 'You may now be eligible to apply for U.S. Citizenship! Open PathwayUSA to see your next steps.',
-      },
+      { offsetMs: 365 * 86400000, title: '🗓️ Milestone Update', body: "You're getting closer to an important milestone. Open PathwayUSA for details." },
+      { offsetMs: 180 * 86400000, title: 'Milestone Update',     body: 'An important milestone is approaching. Open PathwayUSA for details.' },
+      { offsetMs: 30 * 86400000,  title: '⏰ Milestone Update',  body: 'A milestone is coming up soon. Open PathwayUSA for details.' },
+      { offsetMs: 0,              title: '🎉 Milestone Reached', body: 'Open PathwayUSA to see what this means for you.' },
     ];
 
     const ids = [];
@@ -462,7 +400,6 @@ export async function cancelAllDeadlineNotifications() {
 export async function cancelAllUserNotifications() {
   await Promise.all([
     cancelDailyReminder(),
-    cancelInactivityReminder(),
     cancelEligibilityMilestones(),
     cancelWeeklySummary(),
     cancelAllDeadlineNotifications(),
@@ -503,17 +440,6 @@ export async function scheduleAllUserNotifications({
     }
   } else {
     await cancelAllDeadlineNotifications();
-  }
-
-  // 2. Inactivity reminder — fires 14 days after last_step_action_at if no new completion
-  if (prefs.inactivity_reminders !== false && profile?.last_step_action_at && currentStep?.title) {
-    await scheduleInactivityReminder({
-      lastActionAt: profile.last_step_action_at,
-      stepName: currentStep.title,
-      userName: profile.full_name?.split(' ')[0],
-    });
-  } else if (prefs.inactivity_reminders === false) {
-    await cancelInactivityReminder();
   }
 
   // 3. Eligibility milestones — Green Card path only, only if green_card_date is set
