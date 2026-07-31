@@ -68,7 +68,6 @@ import CelebrationScreen       from './src/screens/CelebrationScreen';
 import RFEScreen               from './src/screens/RFEScreen';
 import VisaBulletinScreen      from './src/screens/VisaBulletinScreen';
 import FormExplainerScreen     from './src/screens/FormExplainerScreen';
-import SuccessStoriesScreen    from './src/screens/SuccessStoriesScreen';
 import FamilyScreen            from './src/screens/FamilyScreen';
 import AppointmentPrepScreen   from './src/screens/AppointmentPrepScreen';
 import PasswordResetScreen     from './src/screens/PasswordResetScreen';
@@ -250,7 +249,6 @@ function AppStack({ firstSession = false }) {
       <Stack.Screen name="RFE"              component={RFEScreen}              options={{ title: 'RFE Response Guide',   ...headerOpts }} />
       <Stack.Screen name="VisaBulletin"     component={VisaBulletinScreen}     options={{ title: 'Visa Bulletin',        ...headerOpts }} />
       <Stack.Screen name="FormExplainer"    component={FormExplainerScreen}    options={{ title: 'Form Field Guide',     ...headerOpts }} />
-      <Stack.Screen name="SuccessStories"   component={SuccessStoriesScreen}   options={{ title: 'Success Stories',      ...headerOpts }} />
       <Stack.Screen name="Family"           component={FamilyScreen}           options={{ title: 'Family Mode',          ...headerOpts }} />
       <Stack.Screen name="AppointmentPrep"  component={AppointmentPrepScreen}  options={{ title: 'Appointment Coach',    ...headerOpts }} />
       <Stack.Screen name="TravelTracker"    component={TravelTrackerScreen}    options={{ title: 'Travel Tracker',       ...headerOpts }} />

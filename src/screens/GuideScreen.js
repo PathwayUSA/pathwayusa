@@ -180,7 +180,7 @@ export default function GuideScreen({ navigation }) {
                 </Text>
               ) : null}
               {step.timeframe ? (
-                <Text style={styles.currentStepTime}>Est. time: {step.timeframe}</Text>
+                <Text style={styles.currentStepTime}>{step.timeframe}</Text>
               ) : null}
               <TouchableOpacity
                 style={styles.continueBtn}

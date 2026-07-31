@@ -285,12 +285,6 @@ export default function ProfileScreen({ navigation }) {
         );
       })()}
 
-      {/* Stats */}
-      <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>YOUR STATS</Text>
-      <View style={styles.statsGrid}>
-        <StatCard label="Quizzes" value="—" icon="school-outline" color="#8b5cf6" bgColor="#ede9fe" />
-      </View>
-
       {/* Referral */}
       <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>REFERRAL CODE</Text>
       <View style={[styles.referralCard, { backgroundColor: colors.card || '#fff' }, SHADOWS.small]}>
@@ -314,15 +308,6 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.actionBody}>
             <Text style={[styles.actionLabel, { color: colors.text }]}>Journey Journal</Text>
             <Text style={[styles.actionSub, { color: colors.textSecondary }]}>Write about your immigration journey</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <View style={styles.divider} />
-        <TouchableOpacity style={styles.actionRow} onPress={() => navigation.navigate('SuccessStories')}>
-          <Ionicons name="people-outline" size={20} color={colors.primary} />
-          <View style={styles.actionBody}>
-            <Text style={[styles.actionLabel, { color: colors.text }]}>Success Stories</Text>
-            <Text style={[styles.actionSub, { color: colors.textSecondary }]}>Read and share immigration journeys</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
         </TouchableOpacity>

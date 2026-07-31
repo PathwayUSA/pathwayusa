@@ -26,7 +26,7 @@ const WHY_CONNECT = [
   'Get professional legal advice tailored to your case',
   'Avoid costly mistakes on your immigration forms',
   'Direct messaging with your attorney in the app',
-  'Track your case status in real time',
+  'See updates from your attorney in the app',
 ];
 
 const HOW_IT_WORKS = [
