@@ -65,13 +65,14 @@ function calcStats(gcDate, pathYears, trips) {
   const inUS       = Math.max(0, td - abroad);
   const hasOver180 = trips.some((t) => tripDays(t) > 180);
   const hasOver150 = trips.some((t) => tripDays(t) > 150 && tripDays(t) <= 180);
+  const longestTripDays = trips.reduce((max, t) => Math.max(max, tripDays(t)), 0);
   const current    = trips.find((t) => !t.return_date) ?? null;
   const currentDays = current ? daysBetween(current.departure_date, todayStr()) : 0;
   const pct        = Math.min(1, inUS / required);
   const stillNeeded = Math.max(0, required - inUS);
   const eligDate   = new Date(Date.now() + stillNeeded * 86400000)
     .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  return { td, abroad, inUS, hasOver180, hasOver150, current, currentDays, pct, required, stillNeeded, eligDate };
+  return { td, abroad, inUS, hasOver180, hasOver150, longestTripDays, current, currentDays, pct, required, stillNeeded, eligDate };
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -207,7 +208,7 @@ export default function TravelTrackerScreen() {
         AsyncStorage.setItem(TRAVEL_STATS_KEY, JSON.stringify({
           daysInUS: s.inUS, daysAbroad: s.abroad, pct: s.pct,
           tripCount: rows.length, hasWarning: s.hasOver150 || s.hasOver180,
-          hasRisk: s.hasOver180, required: s.required,
+          hasRisk: s.hasOver180, longestTripDays: s.longestTripDays, required: s.required,
         })).catch(() => {});
       }
     }

@@ -201,6 +201,13 @@ function makeStyles(colors) {
     heroBarFill: { height: 5, borderRadius: 3, backgroundColor: '#fff' },
     heroPromptRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     heroPromptTitle: { color: '#fff', fontSize: 20, fontWeight: '800', flexShrink: 1 },
+    heroDisclaimerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
+    heroDisclaimer: { color: 'rgba(255,255,255,0.42)', fontSize: 10.5, lineHeight: 15, flexShrink: 1 },
+    heroDisclaimerLink: { color: 'rgba(255,255,255,0.55)', fontSize: 10.5, textDecorationLine: 'underline' },
+    riskBody: { padding: 18, alignItems: 'center', gap: 10 },
+    riskTitle: { fontSize: 15, fontWeight: '800', color: '#1A1A2E', textAlign: 'center' },
+    riskSub: { fontSize: 13, color: '#7F8C8D', textAlign: 'center', lineHeight: 19 },
+    riskLink: { fontSize: 13, fontWeight: '700', color: colors.primary },
   });
 }
 
@@ -209,16 +216,18 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
   const { updateProfile } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
-  const [abroadDays, setAbroadDays] = useState(0);
+  const [travelData, setTravelData] = useState({ daysAbroad: 0, hasRisk: false, tripCount: 0 });
   const [showMarriedModal, setShowMarriedModal] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(TRAVEL_STATS_KEY)
       .then((raw) => {
-        if (raw) {
-          const stats = JSON.parse(raw);
-          setAbroadDays(stats.daysAbroad ?? 0);
-        }
+        const s = raw ? JSON.parse(raw) : {};
+        setTravelData({
+          daysAbroad: s.daysAbroad  ?? 0,
+          hasRisk:    s.hasRisk     ?? false,
+          tripCount:  s.tripCount   ?? 0,
+        });
       })
       .catch(() => {});
   }, []);
@@ -250,9 +259,11 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
     // 5-yr path: must be physically present 913+ days (30 months);
     // 3-yr path: 548+ days (18 months) — matches TravelTrackerScreen's calcStats.
     const requiredPresence = pathYears === 3 ? 548 : 913;
-    const totalPeriodDays  = pathYears * 365;
-    const allowedAbroad    = totalPeriodDays - requiredPresence;
-    const excess           = Math.max(0, abroadDays - allowedAbroad);
+    // Use real calendar days in the eligibility period — not pathYears × 365 —
+    // so leap years are counted correctly.
+    const actualPeriodDays = Math.round((eligible.getTime() - gcStart.getTime()) / 86400000);
+    const allowedAbroad    = actualPeriodDays - requiredPresence;
+    const excess           = Math.max(0, travelData.daysAbroad - allowedAbroad);
     if (excess > 0) eligible.setDate(eligible.getDate() + Math.round(excess));
 
     // INA 334(a): Form N-400 may be filed up to 90 days before the
@@ -273,7 +284,7 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
     const mo       = Math.floor((absDays % 365) / 30);
     const d        = absDays % 30;
     return { eligibleDate: eligible, filingEligibleDate: filingEligible, pct, isPast, y, mo, d, excess };
-  }, [gcDate, pathYears, abroadDays]);
+  }, [gcDate, pathYears, travelData.daysAbroad]);
 
   // No green card date — prompt to set it (hero variant: navy-header prompt)
   if (!gcDate && variant === 'hero') {
@@ -320,6 +331,19 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
     );
   }
 
+  // A trip > 6 months presumptively breaks continuous residence — unsafe to show a date
+  if (travelData.hasRisk && variant === 'hero') {
+    return (
+      <TouchableOpacity onPress={() => navigation?.navigate('TravelTracker')} activeOpacity={0.85}>
+        <Text style={styles.heroEyebrow}>Citizenship eligibility</Text>
+        <Text style={styles.heroPromptTitle}>Review your trip history →</Text>
+        <Text style={[styles.heroDate, { marginTop: 4 }]}>
+          A trip over 6 months can reset your residence clock. Tap to review before we estimate your date.
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
   if (variant === 'hero') {
     return (
       <View style={styles.heroWrap}>
@@ -342,6 +366,23 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
           <View style={[styles.heroBarFill, { width: `${Math.round(calc.pct)}%` }]} />
         </View>
 
+        {/* Estimate attribution + uscis.gov link */}
+        <View style={styles.heroDisclaimerRow}>
+          <Text style={styles.heroDisclaimer}>
+            {'Estimate · '}
+            {travelData.tripCount === 0 ? 'no trips logged' : `${travelData.daysAbroad}d abroad logged`}
+            {' · '}{pathYears}yr path
+          </Text>
+          <TouchableOpacity onPress={() => Linking.openURL('https://www.uscis.gov/citizenship')} activeOpacity={0.8}>
+            <Text style={styles.heroDisclaimerLink}>uscis.gov →</Text>
+          </TouchableOpacity>
+        </View>
+        {pathYears === 3 && (
+          <Text style={styles.heroDisclaimer}>
+            3-yr path also requires living with your spouse and their U.S. citizenship for all 3 years
+          </Text>
+        )}
+
         <Modal
           visible={showMarriedModal}
           transparent
@@ -353,7 +394,7 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
               <Ionicons name="heart-outline" size={36} color={colors.primary} style={{ alignSelf: 'center' }} />
               <Text style={styles.modalTitle}>Are you married to{'\n'}a U.S. citizen?</Text>
               <Text style={styles.modalSub}>
-                This determines your naturalization timeline — 3 years if married to a citizen, 5 years otherwise.
+                The 3-year path requires: married to and living with a U.S. citizen, AND your spouse must have been a U.S. citizen for the full 3 years. Otherwise the 5-year path applies.
               </Text>
               <View style={styles.modalBtns}>
                 <TouchableOpacity
@@ -374,6 +415,35 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
             </View>
           </View>
         </Modal>
+      </View>
+    );
+  }
+
+  // A trip > 6 months presumptively breaks continuous residence — unsafe to show a date
+  if (travelData.hasRisk) {
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="ribbon" size={15} color="rgba(255,255,255,0.9)" />
+          <Text style={styles.cardHeaderLabel}>
+            Citizenship Eligibility · {pathYears}-Year Path
+          </Text>
+        </View>
+        <View style={styles.riskBody}>
+          <Ionicons name="warning-outline" size={24} color="#E67E22" />
+          <Text style={styles.riskTitle}>Trip review needed</Text>
+          <Text style={styles.riskSub}>
+            One of your logged trips is longer than 6 months and may have reset your continuous residence clock. We can't safely estimate your filing date without reviewing it.
+          </Text>
+          <TouchableOpacity onPress={() => navigation?.navigate('TravelTracker')} activeOpacity={0.85}>
+            <Text style={styles.riskLink}>Review in Travel Tracker →</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.footer}>
+          <Text style={styles.disclaimer}>
+            Estimate only · A single trip of 181+ days presumptively breaks continuous residence · Consult an attorney to confirm your eligibility
+          </Text>
+        </View>
       </View>
     );
   }
@@ -462,8 +532,16 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
 
       <View style={styles.footer}>
         <Text style={styles.disclaimer}>
-          Estimate only · Reflects the 90-day early filing window (INA 334(a)) · Travel history affects exact date · Consult an attorney to confirm eligibility
+          {'Estimate only · Reflects the 90-day early filing window (INA 334(a)) · '}
+          {travelData.tripCount === 0 ? 'No trips logged — log travel for accuracy' : `${travelData.daysAbroad}d abroad logged`}
+          {pathYears === 3 ? ' · 3-yr path also requires living with your spouse and their U.S. citizenship for all 3 years' : ''}
+          {' · Consult an attorney to confirm eligibility · '}
         </Text>
+        <TouchableOpacity onPress={() => Linking.openURL('https://www.uscis.gov/citizenship')} activeOpacity={0.8}>
+          <Text style={[styles.disclaimer, { color: colors.primary, textDecorationLine: 'underline' }]}>
+            Verify at uscis.gov →
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <Modal
@@ -477,7 +555,7 @@ export default function CitizenshipCountdownCard({ profile, navigation, variant 
             <Ionicons name="heart-outline" size={36} color={colors.primary} style={{ alignSelf: 'center' }} />
             <Text style={styles.modalTitle}>Are you married to{'\n'}a U.S. citizen?</Text>
             <Text style={styles.modalSub}>
-              This determines your naturalization timeline — 3 years if married to a citizen, 5 years otherwise.
+              The 3-year path requires: married to and living with a U.S. citizen, AND your spouse must have been a U.S. citizen for the full 3 years. Otherwise the 5-year path applies.
             </Text>
             <View style={styles.modalBtns}>
               <TouchableOpacity

@@ -602,14 +602,14 @@ export default function HomeScreen({ navigation }) {
               screen: 'Documents',
             },
             {
-              icon: 'location-outline', label: 'Find help near you',
-              meta: 'Legal aid, health, housing',
-              screen: 'Resources',
-            },
-            {
               icon: 'map-outline', label: 'See my full roadmap',
               meta: `${doneSteps} of ${totalSteps} steps done`,
               screen: 'Guide',
+            },
+            {
+              icon: 'location-outline', label: 'Find help near you',
+              meta: 'Legal aid, health, housing',
+              screen: 'Resources',
             },
           ].map((row, i, arr) => (
             <TouchableOpacity
