@@ -7,10 +7,10 @@ import { useTheme } from '../context/ThemeContext';
 import { SHADOWS } from '../theme';
 
 const CAT_THEME = {
-  'USCIS Updates':  { bg: '#e3f2fd', color: '#1565c0', icon: 'document-text-outline' },
-  'Policy Changes': { bg: '#fce4ec', color: '#c62828', icon: 'shield-checkmark-outline' },
-  'Community News': { bg: '#e8f5e9', color: '#2e7d32', icon: 'people-outline' },
-  'Legal Aid':      { bg: '#f3e5f5', color: '#6a1b9a', icon: 'briefcase-outline' },
+  'USCIS Updates':  { bg: '#E8F4F1', color: '#2A8B7A', icon: 'document-text-outline' },
+  'Policy Changes': { bg: '#FFF4E0', color: '#E67E22', icon: 'shield-checkmark-outline' },
+  'Community News': { bg: '#E8F4F1', color: '#2A8B7A', icon: 'people-outline' },
+  'Legal Aid':      { bg: '#E8F4F1', color: '#2A8B7A', icon: 'briefcase-outline' },
 };
 
 function formatDate(dateStr) {

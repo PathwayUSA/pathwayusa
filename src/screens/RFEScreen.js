@@ -15,7 +15,7 @@ const RFE_TYPES = [
   {
     id: 'relationship',
     icon: 'heart-outline',
-    color: '#e91e63',
+    color: '#2A8B7A',
     title: 'Insufficient Evidence of Relationship',
     what: 'USCIS does not have enough evidence that the qualifying relationship is genuine. Common for spousal petitions.',
     documents: [
@@ -49,7 +49,7 @@ Sincerely,
   {
     id: 'medical',
     icon: 'medical-outline',
-    color: '#9c27b0',
+    color: '#2A8B7A',
     title: 'Missing or Incomplete Medical Examination',
     what: 'Your I-693 Medical Examination is missing, incomplete, was signed by an unauthorized civil surgeon, or has expired.',
     documents: [
@@ -75,7 +75,7 @@ Sincerely,
   {
     id: 'criminal',
     icon: 'shield-outline',
-    color: '#f44336',
+    color: '#2A8B7A',
     title: 'Criminal History Questions',
     what: 'USCIS has questions about your criminal history — arrests, charges, or convictions disclosed on your application.',
     documents: [
@@ -104,7 +104,7 @@ Sincerely,
   {
     id: 'employment',
     icon: 'briefcase-outline',
-    color: '#ff9800',
+    color: '#2A8B7A',
     title: 'Employment History Gaps',
     what: 'USCIS needs clarification about periods where you were not employed or had inconsistent employment history.',
     documents: [
@@ -134,7 +134,7 @@ Sincerely,
   {
     id: 'travel',
     icon: 'airplane-outline',
-    color: '#2196f3',
+    color: '#2A8B7A',
     title: 'Travel History Questions',
     what: 'USCIS is questioning trips outside the U.S. — possibly affecting your continuous residence claim for naturalization.',
     documents: [
@@ -163,7 +163,7 @@ Sincerely,
   {
     id: 'financial',
     icon: 'cash-outline',
-    color: '#4caf50',
+    color: '#2A8B7A',
     title: 'Missing Financial Documents',
     what: 'USCIS needs more evidence of financial support — typically for I-864 Affidavit of Support cases.',
     documents: [
@@ -191,7 +191,7 @@ Sincerely,
   {
     id: 'biometrics',
     icon: 'finger-print-outline',
-    color: '#00bcd4',
+    color: '#2A8B7A',
     title: 'Biometrics Issues',
     what: 'Your fingerprints could not be processed or your biometrics appointment was missed.',
     documents: [
@@ -215,7 +215,7 @@ Sincerely,
   {
     id: 'address',
     icon: 'home-outline',
-    color: '#795548',
+    color: '#2A8B7A',
     title: 'Address Inconsistencies',
     what: 'Addresses listed on your forms do not match records or documents are missing for certain address periods.',
     documents: [

@@ -158,7 +158,7 @@ export default function SettingsScreen({ navigation }) {
       {/* ── Quiz Personalization ── */}
       <View style={[styles.section, { backgroundColor: colors.card || '#fff' }]}>
         <SectionHeader
-          icon="location-outline" iconBg="#E3F2FD" iconColor="#1565C0"
+          icon="location-outline" iconBg={colors.primaryLight} iconColor={colors.primary}
           title="Quiz Personalization" subtitle="See your governor, senators & capital in civics questions"
         />
         <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}>
@@ -286,20 +286,20 @@ export default function SettingsScreen({ navigation }) {
       {/* ── Help & Support ── */}
       <View style={[styles.section, { backgroundColor: colors.card || '#fff' }]}>
         <SectionHeader
-          icon="help-circle-outline" iconBg="#e3f2fd" iconColor="#1976d2"
+          icon="help-circle-outline" iconBg={colors.primaryLight} iconColor={colors.primary}
           title="Help & Support"
         />
-        <RowLink icon="help-buoy-outline"    label="FAQ"                       iconColor="#1976d2"  onPress={() => navigation.navigate('FAQ')} />
+        <RowLink icon="help-buoy-outline"    label="FAQ"                       iconColor={colors.primary} onPress={() => navigation.navigate('FAQ')} />
         <View style={styles.divider} />
         <RowLink icon="book-outline"         label="Immigration Glossary"       iconColor={colors.primary} onPress={() => navigation.navigate('Glossary')} />
         <View style={styles.divider} />
-        <RowLink icon="calculator-outline"   label="Cost Calculator"            iconColor="#f57c00"  onPress={() => navigation.navigate('CostCalculator')} />
+        <RowLink icon="calculator-outline"   label="Cost Calculator"            iconColor={colors.primary} onPress={() => navigation.navigate('CostCalculator')} />
         <View style={styles.divider} />
-        <RowLink icon="mail-outline"         label="Contact Support"            iconColor="#43a047"  onPress={() => Linking.openURL('mailto:support@pathwayusa.app')} />
+        <RowLink icon="mail-outline"         label="Contact Support"            iconColor={colors.primary} onPress={() => Linking.openURL('mailto:support@pathwayusa.app')} />
         <View style={styles.divider} />
-        <RowLink icon="star-outline"         label="Rate PathwayUSA"            iconColor="#f59e0b"  onPress={() => Linking.openURL('https://apps.apple.com/app/pathwayusa')} />
+        <RowLink icon="star-outline"         label="Rate PathwayUSA"            iconColor="#7F8C8D"  onPress={() => Linking.openURL('https://apps.apple.com/app/pathwayusa')} />
         <View style={styles.divider} />
-        <RowLink icon="share-outline"        label="Share the App"              iconColor="#43a047"  onPress={handleShareApp} />
+        <RowLink icon="share-outline"        label="Share the App"              iconColor={colors.primary} onPress={handleShareApp} />
         <View style={styles.divider} />
         <RowLink icon="gift-outline"          label="Refer Friends"              iconColor={colors.primary} onPress={() => navigation.navigate('Referral')} />
       </View>
@@ -307,12 +307,12 @@ export default function SettingsScreen({ navigation }) {
       {/* ── Legal ── */}
       <View style={[styles.section, { backgroundColor: colors.card || '#fff' }]}>
         <SectionHeader
-          icon="shield-outline" iconBg="#fce4ec" iconColor="#c62828"
+          icon="shield-outline" iconBg={colors.primaryLight} iconColor={colors.primary}
           title="Legal"
         />
-        <RowLink icon="lock-closed-outline"  label="Privacy Policy"             iconColor="#c62828"  onPress={() => navigation.navigate('Policy', { tab: 'privacy' })} />
+        <RowLink icon="lock-closed-outline"  label="Privacy Policy"             iconColor={colors.primary} onPress={() => navigation.navigate('Policy', { tab: 'privacy' })} />
         <View style={styles.divider} />
-        <RowLink icon="document-text-outline" label="Terms of Service"          iconColor="#c62828"  onPress={() => navigation.navigate('Policy', { tab: 'terms' })} />
+        <RowLink icon="document-text-outline" label="Terms of Service"          iconColor={colors.primary} onPress={() => navigation.navigate('Policy', { tab: 'terms' })} />
         <View style={styles.divider} />
         <RowLink icon="information-circle-outline" label="About PathwayUSA"    iconColor={colors.primary} onPress={() => navigation.navigate('About')} />
       </View>

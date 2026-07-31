@@ -38,7 +38,7 @@ function timeStr(dateStr) {
   return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-const AVATAR_COLORS = ['#1565c0', '#6a1b9a', '#2e7d32', '#e65100', '#c2185b', '#00838f'];
+const AVATAR_COLORS = ['#0F2A3D', '#1A3F5C', '#1D5C73', '#236B7E', '#1E6B5E', '#2A8B7A'];
 function avatarColor(name) {
   let h = 0;
   for (const c of (name ?? 'A')) h = ((h << 5) - h + c.charCodeAt(0)) | 0;

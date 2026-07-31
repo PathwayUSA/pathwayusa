@@ -20,7 +20,7 @@ const TABS = ['notif_all', 'notif_reminders', 'notif_updates'];
 const TAB_TYPES = [null, 'reminder', 'update'];
 
 const REMINDER_STYLE = { icon: 'notifications', color: '#E67E22', bg: '#FFF4E0' };
-const INACTIVITY_STYLE = { icon: 'map', color: '#27AE60', bg: '#EAF7EE' };
+const INACTIVITY_STYLE = { icon: 'map', color: '#7F8C8D', bg: '#F5F7F5' };
 
 // Same 14-day threshold used for the scheduled push in lib/notifications.js —
 // keep the in-app nudge and the push reminder agreeing on what "inactive" means.

@@ -369,7 +369,7 @@ export default function AttorneyClientsScreen({ navigation }) {
   }), [clients]);
 
   const avatarColor = (name) => {
-    const COLORS = ['#1565c0', '#6a1b9a', '#2e7d32', '#e65100', '#c2185b', '#00838f'];
+    const COLORS = ['#0F2A3D', '#1A3F5C', '#1D5C73', '#236B7E', '#1E6B5E', '#2A8B7A'];
     let h = 0;
     for (const c of (name ?? 'A')) h = ((h << 5) - h + c.charCodeAt(0)) | 0;
     return COLORS[Math.abs(h) % COLORS.length];
