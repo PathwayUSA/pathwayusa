@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions,
-  ActivityIndicator, Animated, Modal, Share, Alert, RefreshControl, Switch, Linking,
+  ActivityIndicator, Animated, Modal, Share, Alert, RefreshControl, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -43,7 +43,6 @@ const KEYS = {
   flashProgress:'@pathwayusa/flashcard_progress_v2',
   onboarded:    '@pathwayusa/quiz_onboarded_v2',
   stats:        '@pathwayusa/quiz_stats_v2',
-  autoPlay:     '@pathwayusa/quiz_auto_play',
   zipCode:      '@pathwayusa/user_zip_code',
 };
 
@@ -415,7 +414,7 @@ function FlashcardCard({ question, onFlip, side, scaleAnim, styles, colors }) {
 
 function PracticeView({ questions, flashProgress, onUpdateProgress, onDone, onBack, styles, colors }) {
   const { lang }                  = useLanguage();
-  const { speaking, speak, stop } = useSpeech(lang);
+  const { speaking, speak, stop, available } = useSpeech(lang);
   const pulseAnim  = useRef(new Animated.Value(1)).current;
   const pulseLoop  = useRef(null);
 
@@ -563,9 +562,10 @@ function PracticeView({ questions, flashProgress, onUpdateProgress, onDone, onBa
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSpeak}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 20, minHeight: 40, marginTop: 4 }}
+          disabled={!available}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 20, minHeight: 40, marginTop: 4, opacity: available ? 1 : 0.4 }}
           activeOpacity={0.7}
-          accessibilityLabel={speaking ? 'Stop audio' : (side === 'front' ? 'Read question aloud' : 'Read answer aloud')}
+          accessibilityLabel={!available ? 'Read aloud unavailable in this language' : speaking ? 'Stop audio' : (side === 'front' ? 'Read question aloud' : 'Read answer aloud')}
         >
           <Animated.View style={speaking ? { transform: [{ scale: pulseAnim }] } : {}}>
             <Ionicons
@@ -575,7 +575,7 @@ function PracticeView({ questions, flashProgress, onUpdateProgress, onDone, onBa
             />
           </Animated.View>
           <Text style={{ fontSize: 14, fontWeight: '600', color: speaking ? colors.primary : '#ccc' }}>
-            {speaking ? 'Playing…' : (side === 'front' ? 'Read question' : 'Read answer')}
+            {!available ? 'Read aloud unavailable' : speaking ? 'Playing…' : (side === 'front' ? 'Read question' : 'Read answer')}
           </Text>
         </TouchableOpacity>
         {side === 'front' && <Text style={styles.flashHint}>Tap card to reveal answer</Text>}
@@ -599,13 +599,12 @@ function PracticeView({ questions, flashProgress, onUpdateProgress, onDone, onBa
 
 // ── TestQuizView ──────────────────────────────────────────────────────────────
 
-function TestQuizView({ questions, onFinish, mode, autoPlay, userState, navigation, styles, colors }) {
-  const { lang }                       = useLanguage();
-  const { speaking, speak, stop }      = useSpeech(lang);
+function TestQuizView({ questions, onFinish, mode, userState, navigation, styles, colors }) {
+  const { lang }                              = useLanguage();
+  const { speaking, speak, stop, available }  = useSpeech(lang);
   const [speakingTarget, setSpeakingTarget] = useState(null); // 'question' | 'answer'
   const pulseAnim   = useRef(new Animated.Value(1)).current;
   const pulseLoop   = useRef(null);
-  const autoTimer   = useRef(null);
 
   const [quizIndex, setQuizIndex] = useState(0);
   const [selected, setSelected]   = useState(null);
@@ -633,22 +632,11 @@ function TestQuizView({ questions, onFinish, mode, autoPlay, userState, navigati
     }
   }, [speaking]);
 
-  // Auto-play when the question index advances
-  useEffect(() => {
-    if (!autoPlay || !q) return;
-    clearTimeout(autoTimer.current);
-    stop();
-    autoTimer.current = setTimeout(() => {
-      setSpeakingTarget('question');
-      speak(q.question);
-    }, 80);
-    return () => clearTimeout(autoTimer.current);
-  }, [quizIndex, autoPlay]);
-
   // Stop speech on unmount
-  useEffect(() => () => { clearTimeout(autoTimer.current); stop(); }, []);
+  useEffect(() => () => stop(), []);
 
   const handleSpeak = (target) => {
+    if (!available) return;
     if (speakingTarget === target && speaking) { stop(); return; }
     stop();
     setSpeakingTarget(target);
@@ -684,9 +672,10 @@ function TestQuizView({ questions, onFinish, mode, autoPlay, userState, navigati
     return (
       <TouchableOpacity
         onPress={() => handleSpeak(target)}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 6, minHeight: 36 }}
+        disabled={!available}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 6, minHeight: 36, opacity: available ? 1 : 0.4 }}
         activeOpacity={0.7}
-        accessibilityLabel={active ? 'Stop audio' : label}
+        accessibilityLabel={!available ? 'Read aloud unavailable in this language' : active ? 'Stop audio' : label}
       >
         <Animated.View style={active ? { transform: [{ scale: pulseAnim }] } : {}}>
           <Ionicons
@@ -696,7 +685,7 @@ function TestQuizView({ questions, onFinish, mode, autoPlay, userState, navigati
           />
         </Animated.View>
         <Text style={{ fontSize: 13, fontWeight: '600', color: active ? colors.primary : '#ccc' }}>
-          {active ? 'Playing…' : label}
+          {!available ? 'Unavailable' : active ? 'Playing…' : label}
         </Text>
       </TouchableOpacity>
     );
@@ -860,7 +849,7 @@ function EnhancedResultsView({ answers, mode, passThreshold, onRetry, onHome, st
 
 // ── ModeSelectView ────────────────────────────────────────────────────────────
 
-function ModeSelectView({ allQuestions, categories, wrongCounts, flashProgress, onStartTest, onStartPractice, onChangeVersion, testVersion, quizSize, passThreshold, autoPlay, onAutoPlayChange, userState, styles, colors }) {
+function ModeSelectView({ allQuestions, categories, wrongCounts, flashProgress, onStartTest, onStartPractice, onChangeVersion, testVersion, quizSize, passThreshold, userState, styles, colors }) {
   const [selectedCat, setSelectedCat] = useState('all');
   const [expandedCards, setExpandedCards] = useState(new Set());
   const weakCount = allQuestions.filter((q) => (wrongCounts[q.id] || 0) > 0).length;
@@ -967,23 +956,6 @@ function ModeSelectView({ allQuestions, categories, wrongCounts, flashProgress, 
               <Text style={[styles.modeCount, { color: '#8B5CF6' }]}>{weakCount} to review</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Audio settings */}
-        <View style={{ marginHorizontal: 16, marginTop: 14, backgroundColor: '#fff', borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12, ...SHADOWS.small }}>
-          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primaryLight ?? '#e0faf5', justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name={autoPlay ? 'volume-high' : 'volume-medium-outline'} size={20} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>Auto-read questions aloud</Text>
-            <Text style={{ fontSize: 12, color: '#888', marginTop: 2 }}>Speaks each question when it appears in test mode</Text>
-          </View>
-          <Switch
-            value={autoPlay}
-            onValueChange={onAutoPlayChange}
-            trackColor={{ false: '#e0e0e0', true: colors.primary + '80' }}
-            thumbColor={autoPlay ? colors.primary : '#bbb'}
-          />
         </View>
 
         {/* Category selector for Practice / Test */}
@@ -1187,12 +1159,13 @@ function TipsTab({ tipFavorites, onToggleFav, styles, colors }) {
 
 function GuideTab({ allQuestions, categories, testVersion, userState, styles, colors, lang }) {
   const [catFilter, setCatFilter] = useState('all');
-  const { speaking, speak, stop } = useSpeech(lang);
+  const { speaking, speak, stop, available } = useSpeech(lang);
   const [speakingId, setSpeakingId] = useState(null);
 
   const filtered = catFilter === 'all' ? allQuestions : allQuestions.filter((q) => q.category === catFilter);
 
   const handleSpeak = (q) => {
+    if (!available) return;
     if (speakingId === q.id) { stop(); setSpeakingId(null); return; }
     stop();
     speak(`Question ${q.id}. ${q.question}. Answer: ${q.correct}. ${q.explanation}`);
@@ -1240,9 +1213,14 @@ function GuideTab({ allQuestions, categories, testVersion, userState, styles, co
             <Text style={styles.guideCardAnswer}>{q.correct}</Text>
           )}
           <Text style={styles.guideCardExplanation}>{q.explanation}</Text>
-          <TouchableOpacity style={styles.guideSpeakBtn} onPress={() => handleSpeak(q)} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={[styles.guideSpeakBtn, !available && { opacity: 0.4 }]}
+            onPress={() => handleSpeak(q)}
+            disabled={!available}
+            activeOpacity={0.7}
+          >
             <Ionicons name={speakingId === q.id ? 'stop-circle-outline' : 'volume-medium-outline'} size={16} color={colors.primary} />
-            <Text style={styles.guideSpeakTxt}>{speakingId === q.id ? 'Stop' : 'Read aloud'}</Text>
+            <Text style={styles.guideSpeakTxt}>{!available ? 'Unavailable' : speakingId === q.id ? 'Stop' : 'Read aloud'}</Text>
           </TouchableOpacity>
         </View>
       ))}
@@ -1365,7 +1343,6 @@ export default function LearningScreen() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showNotifPrePrompt, setShowNotifPrePrompt] = useState(false);
   const [showTestVersionModal, setShowTestVersionModal] = useState(false);
-  const [autoPlay, setAutoPlay] = useState(false);
   const [userState, setUserState] = useState(null);
 
   const quizQuestions = useMemo(() => {
@@ -1400,15 +1377,13 @@ export default function LearningScreen() {
       AsyncStorage.getItem(KEYS.tipFavorites),
       AsyncStorage.getItem(KEYS.onboarded),
       AsyncStorage.getItem(DAILY_QUIZ_KEY),
-      AsyncStorage.getItem(KEYS.autoPlay),
       AsyncStorage.getItem(KEYS.zipCode),
-    ]).then(([wc, fp, st, tf, ob, dq, ap, zc]) => {
+    ]).then(([wc, fp, st, tf, ob, dq, zc]) => {
       try { if (wc) setWrongCounts(JSON.parse(wc)); } catch {}
       try { if (fp) setFlashProgress(JSON.parse(fp)); } catch {}
       try { if (st) setStats(JSON.parse(st)); } catch {}
       try { if (tf) setTipFavorites(new Set(JSON.parse(tf))); } catch {}
       if (!ob) setShowOnboarding(true);
-      try { if (ap) setAutoPlay(JSON.parse(ap)); } catch {}
       try { if (zc) setUserState(getStateFromZip(zc)); } catch {}
       try {
         if (dq) {
@@ -1447,11 +1422,6 @@ export default function LearningScreen() {
     setShowOnboarding(false);
     await AsyncStorage.setItem(KEYS.onboarded, '1');
   };
-
-  const saveAutoPlay = useCallback(async (val) => {
-    setAutoPlay(val);
-    await AsyncStorage.setItem(KEYS.autoPlay, JSON.stringify(val));
-  }, []);
 
   const saveStats = useCallback(async (newStats) => {
     setStats(newStats);
@@ -1653,7 +1623,6 @@ export default function LearningScreen() {
           questions={questions}
           onFinish={handleTestFinish}
           mode={currentMode}
-          autoPlay={autoPlay}
           userState={userState}
           navigation={navigation}
           styles={styles}
@@ -1720,8 +1689,6 @@ export default function LearningScreen() {
           testVersion={testVersion}
           quizSize={quizSize}
           passThreshold={passThreshold}
-          autoPlay={autoPlay}
-          onAutoPlayChange={saveAutoPlay}
           userState={userState}
           styles={styles}
           colors={colors}
