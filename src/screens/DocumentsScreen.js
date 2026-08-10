@@ -58,6 +58,12 @@ const PATHS = {
 
 const PATH_KEYS = Object.keys(PATHS);
 
+// Pre-storage-migration rows have a local device URI in photo_uri instead of a
+// client-documents storage path — those files never existed server-side.
+const isLocalUri = (uri) => typeof uri === 'string' && (uri.startsWith('file://') || uri.startsWith('blob:'));
+
+const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 function makeStyles(colors) {
   return StyleSheet.create({
     container:   { flex: 1, backgroundColor: colors.background },
@@ -87,6 +93,14 @@ function makeStyles(colors) {
     expiryTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
     expirySub:   { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
 
+    reuploadBanner: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFF8E1',
+      borderRadius: 14, padding: 14, marginBottom: 20, borderWidth: 1, borderColor: '#FFE0A3',
+    },
+    reuploadIcon:  { width: 38, height: 38, borderRadius: 10, backgroundColor: '#FFECB3', justifyContent: 'center', alignItems: 'center' },
+    reuploadTitle: { fontSize: 14, fontWeight: '700', color: '#7A5900' },
+    reuploadSub:   { fontSize: 12, color: '#9A7300', marginTop: 2 },
+
     docRow: {
       backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
       flexDirection: 'row', alignItems: 'center', gap: 12, ...SHADOWS.small,
@@ -94,8 +108,9 @@ function makeStyles(colors) {
     checkbox:    { width: 26, height: 26, borderRadius: 8, borderWidth: 2, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
     docName:     { flex: 1, fontSize: 14, fontWeight: '500', lineHeight: 20 },
     docNameDone: { textDecorationLine: 'line-through' },
-    thumbnail:   { width: 40, height: 40, borderRadius: 8, flexShrink: 0 },
+    thumbnail:   { width: 40, height: 40, borderRadius: 8, flexShrink: 0, backgroundColor: '#eee' },
     cameraBtn:   { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
+    reuploadBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#FFECB3', justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
   });
 }
 
@@ -110,6 +125,20 @@ export default function DocumentsScreen({ navigation }) {
   const [search, setSearch] = useState('');
   const [docs, setDocs]   = useState({});
   const [loading, setLoading] = useState(true);
+  const [signedUrls, setSignedUrls] = useState({}); // storage path -> short-lived signed URL
+  const [uploadingDoc, setUploadingDoc] = useState(null);
+
+  const resolveSignedUrls = useCallback(async (rows) => {
+    const paths = rows.map((d) => d.photo_uri).filter((p) => p && !isLocalUri(p));
+    if (paths.length === 0) return;
+    const { data, error } = await supabase.storage.from('client-documents').createSignedUrls(paths, 300);
+    if (error || !data) return;
+    setSignedUrls((prev) => {
+      const next = { ...prev };
+      data.forEach((s) => { if (s.signedUrl) next[s.path] = s.signedUrl; });
+      return next;
+    });
+  }, []);
 
   const loadDocs = useCallback(async () => {
     if (!user) return;
@@ -117,11 +146,13 @@ export default function DocumentsScreen({ navigation }) {
       .from('user_documents')
       .select('*')
       .eq('user_id', user.id);
+    const rows = data ?? [];
     const map = {};
-    (data ?? []).forEach((d) => { map[d.document_name] = d; });
+    rows.forEach((d) => { map[d.document_name] = d; });
     setDocs(map);
     setLoading(false);
-  }, [user]);
+    resolveSignedUrls(rows);
+  }, [user, resolveSignedUrls]);
 
   useEffect(() => { loadDocs(); }, [loadDocs]);
 
@@ -154,17 +185,42 @@ export default function DocumentsScreen({ navigation }) {
       aspect: [4, 3],
     });
     if (result.canceled) return;
-    const uri = result.assets[0].uri;
+    const asset = result.assets[0];
     const existing = docs[docName];
-    if (existing) {
-      await supabase.from('user_documents').update({ photo_uri: uri, checked: true }).eq('id', existing.id);
-      setDocs((prev) => ({ ...prev, [docName]: { ...prev[docName], photo_uri: uri, checked: true } }));
-    } else {
-      const { data } = await supabase
-        .from('user_documents')
-        .insert({ user_id: user.id, document_name: docName, checked: true, photo_uri: uri })
-        .select().single();
-      if (data) setDocs((prev) => ({ ...prev, [docName]: data }));
+
+    setUploadingDoc(docName);
+    try {
+      const rawExt = asset.uri.split('.').pop()?.split('?')[0]?.toLowerCase();
+      const ext    = rawExt && rawExt.length <= 4 ? rawExt : 'jpg';
+      const path   = `${user.id}/${slugify(docName)}-${Date.now()}.${ext}`;
+      const blob   = await fetch(asset.uri).then((r) => r.blob());
+
+      const { error: upErr } = await supabase.storage
+        .from('client-documents')
+        .upload(path, blob, { contentType: blob.type || `image/${ext}`, upsert: true });
+      if (upErr) throw upErr;
+
+      // Best-effort cleanup of the previous object so replacing a photo doesn't
+      // leave an orphaned file behind. Nothing to delete for legacy local URIs.
+      if (existing?.photo_uri && !isLocalUri(existing.photo_uri) && existing.photo_uri !== path) {
+        supabase.storage.from('client-documents').remove([existing.photo_uri]).catch(() => {});
+      }
+
+      if (existing) {
+        await supabase.from('user_documents').update({ photo_uri: path, checked: true }).eq('id', existing.id);
+        setDocs((prev) => ({ ...prev, [docName]: { ...prev[docName], photo_uri: path, checked: true } }));
+      } else {
+        const { data } = await supabase
+          .from('user_documents')
+          .insert({ user_id: user.id, document_name: docName, checked: true, photo_uri: path })
+          .select().single();
+        if (data) setDocs((prev) => ({ ...prev, [docName]: data }));
+      }
+      await resolveSignedUrls([{ photo_uri: path }]);
+    } catch {
+      Alert.alert('Upload failed', 'Could not save that photo. Please try again.');
+    } finally {
+      setUploadingDoc(null);
     }
   };
 
@@ -174,6 +230,7 @@ export default function DocumentsScreen({ navigation }) {
     : allDocs;
   const completed   = allDocs.filter((d) => docs[d]?.checked).length;
   const pct         = allDocs.length > 0 ? completed / allDocs.length : 0;
+  const legacyCount = Object.values(docs).filter((d) => isLocalUri(d?.photo_uri)).length;
 
   if (!isPro) {
     return <PaywallPrompt featureName="Document Checklist" />;
@@ -221,6 +278,22 @@ export default function DocumentsScreen({ navigation }) {
           <Ionicons name="chevron-forward" size={18} color="#BDC3C7" />
         </TouchableOpacity>
 
+        {legacyCount > 0 && (
+          <View style={styles.reuploadBanner}>
+            <View style={styles.reuploadIcon}>
+              <Ionicons name="warning-outline" size={20} color="#9A7300" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.reuploadTitle}>
+                {legacyCount === 1 ? '1 photo needs re-uploading' : `${legacyCount} photos need re-uploading`}
+              </Text>
+              <Text style={styles.reuploadSub}>
+                Saved before we moved to secure storage — those files were never actually kept. Tap the marked document below to re-add it.
+              </Text>
+            </View>
+          </View>
+        )}
+
         <View style={styles.searchWrap}>
           <Ionicons name="search" size={16} color="#BDC3C7" />
           <TextInput
@@ -246,9 +319,12 @@ export default function DocumentsScreen({ navigation }) {
           </Text>
         ) : (
           currentDocs.map((docName) => {
-            const doc     = docs[docName];
-            const checked = doc?.checked ?? false;
-            const photo   = doc?.photo_uri ?? null;
+            const doc       = docs[docName];
+            const checked   = doc?.checked ?? false;
+            const photoPath = doc?.photo_uri ?? null;
+            const needsReupload = isLocalUri(photoPath);
+            const signedUrl = photoPath && !needsReupload ? signedUrls[photoPath] : null;
+            const isUploading = uploadingDoc === docName;
             return (
               <View key={docName} style={styles.docRow}>
                 <TouchableOpacity
@@ -264,13 +340,23 @@ export default function DocumentsScreen({ navigation }) {
                   </GlossaryText>
                   <StatusBadge
                     style={{ marginTop: 4 }}
-                    label={checked ? 'Uploaded' : 'Missing'}
-                    tone={checked ? 'success' : 'warning'}
+                    label={needsReupload ? 'Needs re-upload' : checked ? 'Uploaded' : 'Missing'}
+                    tone={needsReupload ? 'warning' : checked ? 'success' : 'warning'}
                   />
                 </View>
-                {photo ? (
+                {isUploading ? (
+                  <View style={styles.cameraBtn}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  </View>
+                ) : needsReupload ? (
+                  <TouchableOpacity style={styles.reuploadBtn} onPress={() => pickPhoto(docName)} activeOpacity={0.8}>
+                    <Ionicons name="warning-outline" size={18} color="#9A7300" />
+                  </TouchableOpacity>
+                ) : photoPath ? (
                   <TouchableOpacity onPress={() => pickPhoto(docName)}>
-                    <Image source={{ uri: photo }} style={styles.thumbnail} />
+                    {signedUrl
+                      ? <Image source={{ uri: signedUrl }} style={styles.thumbnail} />
+                      : <View style={styles.thumbnail} />}
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity style={styles.cameraBtn} onPress={() => pickPhoto(docName)} activeOpacity={0.8}>

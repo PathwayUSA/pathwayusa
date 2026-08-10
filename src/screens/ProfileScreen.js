@@ -10,7 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, REDIRECT_URL } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { supabase } from '../lib/supabase';
 import { lightHaptic, mediumHaptic, successHaptic } from '../utils/haptics';
@@ -85,22 +85,25 @@ export default function ProfileScreen({ navigation }) {
         quality: 0.7,
       });
       if (!result.canceled && result.assets?.[0]) {
-        const asset  = result.assets[0];
-        const ext    = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
-        const path   = `${user.id}.${ext}`;
-        let finalUrl = asset.uri;
-        try {
-          const blob = await fetch(asset.uri).then((r) => r.blob());
-          const { error: upErr } = await supabase.storage
-            .from('avatars')
-            .upload(path, blob, { contentType: `image/${ext}`, upsert: true });
-          if (!upErr) {
-            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
-            finalUrl = publicUrl;
-          }
-        } catch {}
-        await AsyncStorage.setItem('@pathwayusa/avatar_uri', finalUrl);
-        await updateProfile({ avatar_url: finalUrl });
+        const asset = result.assets[0];
+        const ext   = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
+        // Folder-per-user path — matches the client-documents RLS pattern
+        // (storage.foldername(name)[1] = auth.uid()) rather than a bare
+        // filename, so the same policy shape works across both buckets.
+        const path  = `${user.id}/avatar.${ext}`;
+
+        const blob = await fetch(asset.uri).then((r) => r.blob());
+        const { error: upErr } = await supabase.storage
+          .from('avatars')
+          .upload(path, blob, { contentType: `image/${ext}`, upsert: true });
+        if (upErr) {
+          Alert.alert('Upload failed', 'Could not save your photo. Please try again.');
+          return;
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+        await AsyncStorage.setItem('@pathwayusa/avatar_uri', publicUrl);
+        await updateProfile({ avatar_url: publicUrl });
       }
     } finally {
       setAvatarLoading(false);
@@ -125,7 +128,7 @@ export default function ProfileScreen({ navigation }) {
     if (!user?.email) return;
     setChangingPw(true);
     const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-      redirectTo: 'pathwayusa://reset-password',
+      redirectTo: REDIRECT_URL,
     });
     setChangingPw(false);
     if (!error) { setPwSent(true); }

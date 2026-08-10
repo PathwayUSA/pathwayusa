@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, REDIRECT_URL } from '../context/AuthContext';
 import { useVisualEffects } from '../context/VisualEffectsContext';
 import { supabase } from '../lib/supabase';
 import { useSubscription } from '../hooks/useSubscription';
@@ -61,7 +61,7 @@ export default function SettingsScreen({ navigation }) {
     if (!email) return;
     setPwSending(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'pathwayusa://reset-password',
+      redirectTo: REDIRECT_URL,
     });
     setPwSending(false);
     if (!error) { setPwSent(true); Alert.alert('Check your email', 'A password reset link has been sent.'); }

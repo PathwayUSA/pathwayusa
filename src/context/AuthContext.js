@@ -1,8 +1,18 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { Platform } from 'react-native';
 import * as Linking from 'expo-linking';
 import { supabase } from '../lib/supabase';
 
-const REDIRECT_URL  = 'pathwayusa://auth/callback';
+// Native: a custom URL scheme the OS deep-links back into the app.
+// Web: the app's own origin — Supabase just appends the code/tokens to
+// whatever we pass here, and on web that has to be a real, loadable URL
+// (a browser can't navigate to `pathwayusa://...`). Exported so every
+// screen that triggers an email round-trip (password reset, etc.) uses the
+// same value instead of hardcoding a redirect that only half-matches the
+// deep-link listener below.
+export const REDIRECT_URL = Platform.OS === 'web'
+  ? (typeof window !== 'undefined' ? window.location.origin : '')
+  : 'pathwayusa://auth/callback';
 
 const AuthContext = createContext({});
 
@@ -90,13 +100,27 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // ── Deep-link handler ────────────────────────────────────────────────────────
+  // ── Deep-link handler (native) ──────────────────────────────────────────────
   // Supabase email verification and password-reset links redirect to
   // pathwayusa://auth/callback#access_token=...&refresh_token=...&type=...
   // We parse the fragment and call setSession() so the supabase client is
   // authenticated. For type=recovery we gate the main app behind a password-
   // reset screen before allowing navigation.
+  //
+  // Web takes a different path below: PKCE + detectSessionInUrl (see
+  // lib/supabase.js) makes supabase-js detect and exchange the `?code=`
+  // param itself on init, before this ever runs — there are no tokens in
+  // the URL for us to parse manually, and no custom scheme for `Linking`
+  // to catch. We only need to read `type=recovery` off the query string.
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      if (typeof window === 'undefined') return;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('type') === 'recovery') setPendingPasswordReset(true);
+      if (window.location.href.includes('payment-success')) setPendingPaymentSuccess(true);
+      return;
+    }
+
     let mounted = true;
 
     function processUrl(url) {
