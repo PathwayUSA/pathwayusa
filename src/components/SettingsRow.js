@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Switch, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../theme';
+import { COLORS, TYPOGRAPHY } from '../theme';
 
 export function SectionHeader({ icon, iconBg, iconColor, title, subtitle }) {
   return (
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 16, paddingBottom: 12 },
   sectionIcon:   { width: 44, height: 44, borderRadius: 13, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
   sectionMeta:   { flex: 1 },
-  sectionTitle:  { fontSize: 18, fontWeight: '800', color: '#111' },
+  sectionTitle:  { fontSize: TYPOGRAPHY.subheadingSize, fontWeight: TYPOGRAPHY.subheadingWeight, lineHeight: TYPOGRAPHY.subheadingLineHeight, color: '#111' },
   sectionSub:    { fontSize: 14, color: '#888', marginTop: 2 },
 
   rowLink:      { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16, gap: 12, minHeight: 56 },

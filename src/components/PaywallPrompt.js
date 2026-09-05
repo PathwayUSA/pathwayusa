@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 export default function PaywallPrompt({ featureName }) {
   const { colors } = useTheme();
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   container:  { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   card:       { width: '100%', backgroundColor: '#fff', borderRadius: 24, padding: 28, alignItems: 'center', ...SHADOWS.medium },
   iconWrap:   { width: 72, height: 72, borderRadius: 20, backgroundColor: '#F5A62320', justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-  title:      { fontSize: 22, fontWeight: '900', marginBottom: 10, textAlign: 'center' },
+  title:      { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 10, textAlign: 'center' },
   body:       { fontSize: 14, lineHeight: 21, textAlign: 'center', marginBottom: 24 },
   upgradeBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 16, paddingVertical: 15, paddingHorizontal: 28, marginBottom: 12, backgroundColor: '#F5A623' },
   upgradeTxt: { color: '#fff', fontSize: 15, fontWeight: '800' },

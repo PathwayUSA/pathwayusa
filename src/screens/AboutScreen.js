@@ -5,7 +5,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 
 const APP_VERSION = '1.0.0';
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     marginBottom: 8, gap: 8,
   },
   logoWrap:     { width: 80, height: 80, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
-  appName:      { fontSize: 28, fontWeight: '900', color: '#fff' },
+  appName:      { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
   tagline:      { fontSize: 14, color: 'rgba(255,255,255,0.85)', textAlign: 'center' },
   versionBadge: { backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 5, marginTop: 4 },
   versionText:  { color: '#fff', fontSize: 12, fontWeight: '700' },

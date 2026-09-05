@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n';
 import PathwayLogo from '../components/PathwayLogo';
@@ -21,6 +21,7 @@ export default function LoginScreen({ navigation }) {
   const [showPw, setShowPw]         = useState(false);
   const [loading, setLoading]       = useState(false);
   const [errors, setErrors]         = useState({});
+  const [formError, setFormError]   = useState('');
 
   const validate = () => {
     const e = {};
@@ -33,10 +34,17 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!validate()) return;
+    setFormError('');
     setLoading(true);
     const { error } = await signIn(email.trim(), password);
     setLoading(false);
-    if (error) Alert.alert('Sign In Failed', error.message);
+    if (error) {
+      if (Platform.OS === 'web') {
+        setFormError(error.message);
+      } else {
+        Alert.alert('Sign In Failed', error.message);
+      }
+    }
     // Success → AuthContext updates user → App.js routes automatically
   };
 
@@ -109,6 +117,7 @@ export default function LoginScreen({ navigation }) {
             {errors.password ? <Text style={styles.errTxt}>{errors.password}</Text> : null}
           </View>
 
+          {formError ? <Text style={styles.formErrTxt}>{formError}</Text> : null}
           <TouchableOpacity
             style={[styles.submitBtn, loading && styles.submitDisabled]}
             onPress={handleLogin}
@@ -150,7 +159,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 28 },
 
   authHero:  { alignItems: 'center', marginBottom: 28 },
-  authTitle: { fontSize: 28, fontWeight: '900', color: '#1a1a2e', marginTop: 20, marginBottom: 6, textAlign: 'center' },
+  authTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#1a1a2e', lineHeight: TYPOGRAPHY.displayLineHeight, marginTop: 20, marginBottom: 6, textAlign: 'center' },
   authSub:   { fontSize: 16, color: '#7F8C8D', lineHeight: 23, textAlign: 'center' },
 
   card: { backgroundColor: '#fff', borderRadius: 20, padding: 24, ...SHADOWS.medium },
@@ -176,7 +185,8 @@ const styles = StyleSheet.create({
   submitDisabled: { opacity: 0.7 },
   submitTxt:  { color: '#fff', fontSize: 18, fontWeight: '800' },
 
-  switchRow:  { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
-  switchTxt:  { fontSize: 16, color: '#888' },
-  switchLink: { fontSize: 16, color: TEAL, fontWeight: '700' },
+  switchRow:   { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
+  switchTxt:   { fontSize: 16, color: '#888' },
+  switchLink:  { fontSize: 16, color: TEAL, fontWeight: '700' },
+  formErrTxt:  { fontSize: 14, color: '#f44336', textAlign: 'center', marginBottom: 12 },
 });

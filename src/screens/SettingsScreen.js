@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, Alert, Linking, Share,
+  ActivityIndicator, Alert, Linking, Share, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -69,6 +69,10 @@ export default function SettingsScreen({ navigation }) {
   };
 
   const handleSignOut = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Sign out of your account?')) signOut();
+      return;
+    }
     Alert.alert('Sign Out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },

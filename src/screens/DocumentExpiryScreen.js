@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { supabase } from '../lib/supabase';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import PaywallPrompt from '../components/PaywallPrompt';
 import StatusBadge from '../components/StatusBadge';
 import {
@@ -61,7 +61,7 @@ function makeStyles(colors) {
 
     emptyBox:   { alignItems: 'center', paddingVertical: 56 },
     emptyIcon:  { fontSize: 48, marginBottom: 12 },
-    emptyTitle: { fontSize: 18, fontWeight: '800', color: colors.text ?? '#1A1A2E', marginBottom: 6 },
+    emptyTitle: { fontSize: TYPOGRAPHY.subheadingSize, fontWeight: TYPOGRAPHY.subheadingWeight, lineHeight: TYPOGRAPHY.subheadingLineHeight, color: colors.text ?? '#1A1A2E', marginBottom: 6 },
     emptySub:   { fontSize: 14, color: '#7F8C8D', textAlign: 'center', lineHeight: 20, paddingHorizontal: 24 },
 
     card: {
@@ -84,7 +84,7 @@ function makeStyles(colors) {
 
     overlay:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
     sheet:      { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 48 },
-    sheetTitle: { fontSize: 20, fontWeight: '800', color: '#1A1A2E', marginBottom: 20 },
+    sheetTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#1A1A2E', marginBottom: 20 },
     label:      { fontSize: 14, fontWeight: '700', color: '#1A1A2E', marginBottom: 6 },
     input: {
       backgroundColor: '#f5f5f5', borderRadius: 12, paddingHorizontal: 16,

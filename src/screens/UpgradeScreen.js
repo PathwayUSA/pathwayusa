@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSubscription } from '../context/SubscriptionContext';
 import { startCheckout, openBillingPortal } from '../services/stripe';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { successHaptic, lightHaptic } from '../utils/haptics';
 
 const { width } = Dimensions.get('window');
@@ -107,7 +107,7 @@ export default function UpgradeScreen({ navigation }) {
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         >
           <Text style={{ fontSize: 52 }}>👑</Text>
-          <Text style={{ fontSize: 32, fontWeight: '900', color: '#fff', textAlign: 'center', lineHeight: 40 }}>
+          <Text style={{ fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#fff', textAlign: 'center' }}>
             Go Premium
           </Text>
           <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.82)', textAlign: 'center', lineHeight: 22, maxWidth: 280 }}>
@@ -153,7 +153,7 @@ export default function UpgradeScreen({ navigation }) {
 
         {/* ── Plan comparison ── */}
         <View style={{ paddingHorizontal: 20, marginTop: 28 }}>
-          <Text style={{ fontSize: 20, fontWeight: '900', color: '#1A1A2E', marginBottom: 16 }}>
+          <Text style={{ fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#1A1A2E', marginBottom: 16 }}>
             Choose Your Plan
           </Text>
           <View style={{ flexDirection: 'row', gap: 12 }}>

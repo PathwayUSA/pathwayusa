@@ -10,7 +10,7 @@ import { useAuth }     from '../../context/AuthContext';
 import { useTheme }    from '../../context/ThemeContext';
 import { useAttorney } from '../../context/AttorneyContext';
 import { supabase }    from '../../lib/supabase';
-import { SHADOWS }     from '../../theme';
+import { SHADOWS, TYPOGRAPHY } from '../../theme';
 import CommandPulse    from '../../components/effects/CommandPulse';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ function makeStyles(colors) {
     avatarTxt:  { fontSize: 20, fontWeight: '900', color: '#fff' },
     headerInfo: { flex: 1 },
     greetTxt:   { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
-    nameTxt:    { fontSize: 20, fontWeight: '900', color: '#fff' },
+    nameTxt:    { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     dateTxt:    { fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 2 },
     onlinePill: { backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
     onlineTxt:  { fontSize: 12, color: '#a5ffde', fontWeight: '700' },
@@ -102,7 +102,7 @@ function makeStyles(colors) {
     // Sections
     section:      { paddingHorizontal: 16, marginBottom: 4, marginTop: 8 },
     sectionRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    sectionTitle: { fontSize: 16, fontWeight: '800', color: '#1a1a2e' },
+    sectionTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: '#1a1a2e' },
     seeAllTxt:    { fontSize: 13, color: colors.primary, fontWeight: '700' },
 
     // Quick actions

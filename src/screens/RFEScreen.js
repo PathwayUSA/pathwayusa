@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useSpeech } from '../hooks/useSpeech';
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   content:   { padding: 16, gap: 10 },
 
   hero:     { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 20, padding: 20, marginBottom: 4 },
-  heroTitle:{ fontSize: 18, fontWeight: '900', color: '#fff' },
+  heroTitle:{ fontSize: TYPOGRAPHY.subheadingSize, fontWeight: TYPOGRAPHY.subheadingWeight, lineHeight: TYPOGRAPHY.subheadingLineHeight, color: '#fff' },
   heroSub:  { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
 
   introCard: { borderRadius: 16, padding: 14 },

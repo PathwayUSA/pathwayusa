@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
 
   header:      { paddingHorizontal: 20, paddingBottom: 32 },
   headerIcon:  { marginBottom: 12 },
-  headerTitle: { fontSize: 28, fontWeight: '900', color: '#fff', marginBottom: 6 },
+  headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 6 },
   headerSub:   { fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 20 },
 
   body: { flex: 1, paddingHorizontal: 20, paddingTop: 24 },

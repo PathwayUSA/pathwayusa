@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n';
 
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     borderRadius: 20, borderWidth: 1, borderColor: 'rgba(58,123,213,0.4)',
   },
   badgeTxt:    { fontSize: 11, color: NAVY_ACCENT, fontWeight: '700' },
-  headerTitle: { fontSize: 28, fontWeight: '900', color: NAVY_TEXT, marginBottom: 6 },
+  headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: NAVY_TEXT, lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 6 },
   headerSub:   { fontSize: 14, color: 'rgba(232,237,243,0.65)', marginBottom: 20 },
 
   modeToggle: {

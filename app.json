@@ -19,7 +19,8 @@
         {
           "locationWhenInUsePermission": "So we can find immigration help near you."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": false,

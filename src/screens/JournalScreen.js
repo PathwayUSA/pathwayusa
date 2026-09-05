@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSpeech } from '../hooks/useSpeech';
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
 
   hero:        { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 12 },
   heroContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroTitle:   { fontSize: 22, fontWeight: '900', color: '#fff' },
+  heroTitle:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
   heroSub:     { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
   heroIconWrap:{ width: 52, height: 52, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
 
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   list:  { padding: 16, gap: 12 },
   empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
   emptyEmoji: { fontSize: 48 },
-  emptyTitle: { fontSize: 20, fontWeight: '800' },
+  emptyTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight },
   emptySub:   { fontSize: 14, lineHeight: 22, textAlign: 'center', maxWidth: 280 },
 
   entryCard:    { borderRadius: 18, padding: 16, gap: 10 },

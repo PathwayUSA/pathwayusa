@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ConfettiView from './ConfettiView';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 export default function CelebrationModal({ visible, title, subtitle, iconName, onClose }) {
   const scale   = useRef(new Animated.Value(0.6)).current;
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.medium,
   },
   icon:     { marginBottom: 16 },
-  title:    { fontSize: 24, fontWeight: '900', color: '#1a1a2e', textAlign: 'center', marginBottom: 8 },
+  title:    { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#1a1a2e', textAlign: 'center', marginBottom: 8 },
   subtitle: { fontSize: 15, color: '#666', textAlign: 'center', lineHeight: 22, marginBottom: 20 },
   btn: {
     backgroundColor: '#1a1a2e',

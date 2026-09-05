@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { TYPOGRAPHY } from '../theme';
 
 const LOCK_TIMEOUT_KEY = '@pathwayusa/lock_timeout';
 const DEFAULT_TIMEOUT  = 5 * 60 * 1000; // 5 minutes
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
   },
   card:    { width: 300, borderRadius: 24, padding: 28, alignItems: 'center', gap: 14 },
   iconWrap:{ width: 72, height: 72, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  title:   { fontSize: 20, fontWeight: '900' },
+  title:   { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight },
   sub:     { fontSize: 14, lineHeight: 20, textAlign: 'center' },
   btn:     { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14, marginTop: 4 },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },

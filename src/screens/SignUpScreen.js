@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n';
 import PathwayLogo from '../components/PathwayLogo';
@@ -25,6 +25,8 @@ export default function SignUpScreen({ navigation }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading]         = useState(false);
   const [errors, setErrors]           = useState({});
+  const [formError, setFormError]     = useState('');
+  const [sent, setSent]               = useState(false);
 
   const clear = (key) => setErrors((p) => ({ ...p, [key]: null }));
 
@@ -43,20 +45,29 @@ export default function SignUpScreen({ navigation }) {
 
   const handleSignUp = async () => {
     if (!validate()) return;
+    setFormError('');
     setLoading(true);
     const { data, error } = await signUp(email.trim(), password, name.trim(), inviteCode.trim());
     setLoading(false);
     if (error) {
-      Alert.alert('Sign Up Failed', error.message);
+      if (Platform.OS === 'web') {
+        setFormError(error.message);
+      } else {
+        Alert.alert('Sign Up Failed', error.message);
+      }
       return;
     }
     if (!data?.session) {
       // Email confirmation required
-      Alert.alert(
-        'Check Your Email',
-        'We sent a confirmation link to your email. Please verify it, then sign in.',
-        [{ text: 'Sign In', onPress: () => navigation.navigate('Login') }],
-      );
+      if (Platform.OS === 'web') {
+        setSent(true);
+      } else {
+        Alert.alert(
+          'Check Your Email',
+          'We sent a confirmation link to your email. Please verify it, then sign in.',
+          [{ text: 'Sign In', onPress: () => navigation.navigate('Login') }],
+        );
+      }
     }
     // If session exists, AuthContext detects it → routes to onboarding automatically
   };
@@ -194,26 +205,42 @@ export default function SignUpScreen({ navigation }) {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={[styles.submitBtn, loading && styles.submitDisabled]}
-            onPress={handleSignUp}
-            activeOpacity={0.85}
-            disabled={loading}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <View style={styles.submitInner}>
-                  <Text style={styles.submitTxt}>{t('auth_create_account')}</Text>
-                  <Ionicons name="arrow-forward" size={18} color="#fff" />
-                </View>}
-          </TouchableOpacity>
+          {sent ? (
+            <View style={styles.sentBox}>
+              <Ionicons name="checkmark-circle-outline" size={40} color={TEAL} style={{ marginBottom: 12 }} />
+              <Text style={styles.sentTitle}>Check Your Email</Text>
+              <Text style={styles.sentMsg}>
+                We sent a confirmation link to {email}. Please verify it, then sign in.
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 16 }}>
+                <Text style={styles.switchLink}>{t('auth_sign_in')}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {formError ? <Text style={styles.formErrTxt}>{formError}</Text> : null}
+              <TouchableOpacity
+                style={[styles.submitBtn, loading && styles.submitDisabled]}
+                onPress={handleSignUp}
+                activeOpacity={0.85}
+                disabled={loading}
+              >
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <View style={styles.submitInner}>
+                      <Text style={styles.submitTxt}>{t('auth_create_account')}</Text>
+                      <Ionicons name="arrow-forward" size={18} color="#fff" />
+                    </View>}
+              </TouchableOpacity>
 
-          <View style={styles.switchRow}>
-            <Text style={styles.switchTxt}>{t('auth_already_account')} </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.switchLink}>{t('auth_sign_in')}</Text>
-            </TouchableOpacity>
-          </View>
+              <View style={styles.switchRow}>
+                <Text style={styles.switchTxt}>{t('auth_already_account')} </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <Text style={styles.switchLink}>{t('auth_sign_in')}</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
 
         <View style={{ height: insets.bottom + 24 }} />
@@ -238,7 +265,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 28 },
 
   authHero:  { alignItems: 'center', marginBottom: 28 },
-  authTitle: { fontSize: 28, fontWeight: '900', color: '#1a1a2e', marginTop: 20, marginBottom: 6, textAlign: 'center' },
+  authTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#1a1a2e', lineHeight: TYPOGRAPHY.displayLineHeight, marginTop: 20, marginBottom: 6, textAlign: 'center' },
   authSub:   { fontSize: 16, color: '#7F8C8D', lineHeight: 23, textAlign: 'center' },
 
   card: { backgroundColor: '#fff', borderRadius: 20, padding: 24, ...SHADOWS.medium },
@@ -270,4 +297,9 @@ const styles = StyleSheet.create({
   switchRow:  { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
   switchTxt:  { fontSize: 16, color: '#888' },
   switchLink: { fontSize: 16, color: TEAL, fontWeight: '700' },
+
+  formErrTxt: { fontSize: 14, color: '#f44336', textAlign: 'center', marginBottom: 12 },
+  sentBox:    { alignItems: 'center', paddingVertical: 24 },
+  sentTitle:  { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#1a1a2e', marginBottom: 8 },
+  sentMsg:    { fontSize: 15, color: '#7F8C8D', lineHeight: 22, textAlign: 'center' },
 });

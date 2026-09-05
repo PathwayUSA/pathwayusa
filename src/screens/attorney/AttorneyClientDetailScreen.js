@@ -11,7 +11,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAttorney } from '../../context/AttorneyContext';
 import { supabase } from '../../lib/supabase';
 import { getStepTitle, getStatusTheme } from '../../lib/immigrationSteps';
-import { SHADOWS } from '../../theme';
+import { SHADOWS, TYPOGRAPHY } from '../../theme';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ function makeStyles(colors) {
     clientRow:   { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 },
     avatar:      { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center' },
     cAvtTxt:     { fontSize: 22, fontWeight: '900', color: '#fff' },
-    clientName:  { fontSize: 18, fontWeight: '900', color: '#1a1a2e' },
+    clientName:  { fontSize: TYPOGRAPHY.subheadingSize, fontWeight: TYPOGRAPHY.subheadingWeight, lineHeight: TYPOGRAPHY.subheadingLineHeight, color: '#1a1a2e' },
     clientMeta:  { fontSize: 13, color: '#888', marginTop: 2 },
     infoGrid:    { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 4 },
     infoItem:    { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: '45%' },

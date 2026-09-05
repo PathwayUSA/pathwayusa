@@ -8,14 +8,14 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { BADGE_DEFS, hasBadge } from '../lib/badges';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 function makeStyles(colors) {
   return StyleSheet.create({
     safe:        { flex: 1, backgroundColor: colors.primary },
     container:   { flex: 1, backgroundColor: colors.background },
     header:      { backgroundColor: colors.primary, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
-    headerTitle: { fontSize: 24, fontWeight: '900', color: '#fff' },
+    headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     headerSub:   { fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 4 },
     progress:    { fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: '700', marginTop: 10 },
 

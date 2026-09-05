@@ -3,7 +3,7 @@ import {
   View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 // Know Your Rights card — hardcoded offline text in 3 languages
 const KYR = {
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   headerLeft:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
   redDot:      { width: 12, height: 12, borderRadius: 6, backgroundColor: '#d32f2f' },
-  sheetTitle:  { fontSize: 20, fontWeight: '900', color: '#1a1a1a' },
+  sheetTitle:  { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#1a1a1a' },
   closeBtn:    { padding: 4 },
   sheetSub:    { fontSize: 13, color: '#666', marginBottom: 16, lineHeight: 19 },
 

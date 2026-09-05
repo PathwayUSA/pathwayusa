@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -148,7 +148,7 @@ function makeStyles(colors) {
       backgroundColor: '#EAF7EE',
       alignItems: 'center', justifyContent: 'center',
     },
-    completionTitle: { fontSize: 26, fontWeight: '900', color: '#1A1A2E', textAlign: 'center' },
+    completionTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#1A1A2E', lineHeight: TYPOGRAPHY.displayLineHeight, textAlign: 'center' },
     completionSub: { fontSize: 15, color: '#7F8C8D', textAlign: 'center', lineHeight: 22 },
     nextStepBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: 16, height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, ...SHADOWS.medium },
     nextStepBtnTxt: { fontSize: 17, fontWeight: '900', color: '#fff' },

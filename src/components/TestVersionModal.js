@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTestVersion } from '../context/TestVersionContext';
 import { useAuth } from '../context/AuthContext';
 import DragHandle from './DragHandle';
+import { TYPOGRAPHY } from '../theme';
 
 const OPTIONS = [
   {
@@ -80,7 +81,7 @@ export default function TestVersionModal({ visible, onDismiss }) {
 const styles = StyleSheet.create({
   overlay:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   sheet:      { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, gap: 12 },
-  title:      { fontSize: 22, fontWeight: '900', color: '#1a1a2e', marginBottom: 2 },
+  title:      { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#1a1a2e', marginBottom: 2 },
   sub:        { fontSize: 15, color: '#666', lineHeight: 22, marginBottom: 4 },
   option:     { flexDirection: 'row', alignItems: 'center', borderRadius: 16, padding: 16, gap: 12 },
   optIcon:    { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },

@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useTheme } from '../context/ThemeContext';
 import { useSpeech } from '../hooks/useSpeech';
@@ -446,7 +446,7 @@ const s = StyleSheet.create({
   header:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
   backBtn:       { padding: 4 },
   headerContent: { flex: 1 },
-  headerTitle:   { fontSize: 20, fontWeight: '900', color: '#fff' },
+  headerTitle:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
   headerSub:     { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
 
   pickerLabel:   { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
@@ -462,7 +462,7 @@ const s = StyleSheet.create({
   progressBarOuter: { height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3, overflow: 'hidden' },
   progressBarInner: { height: 6, backgroundColor: '#fff', borderRadius: 3 },
 
-  sectionTitle:  { fontSize: 16, fontWeight: '800' },
+  sectionTitle:  { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize },
   sectionSub:    { fontSize: 13, marginBottom: 10 },
 
   dayCard:       { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, padding: 14 },
@@ -480,7 +480,7 @@ const s = StyleSheet.create({
   detailRoot:    { flex: 1 },
   detailHeader:  { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 20, paddingBottom: 20 },
   detailDayNum:  { fontSize: 12, color: 'rgba(255,255,255,0.8)', fontWeight: '700', textTransform: 'uppercase' },
-  detailTitle:   { fontSize: 20, fontWeight: '900', color: '#fff', marginTop: 2 },
+  detailTitle:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, marginTop: 2 },
 
   tipBox:        { flexDirection: 'row', gap: 10, borderWidth: 1, borderRadius: 14, padding: 14, alignItems: 'flex-start' },
   tipTxt:        { flex: 1, fontSize: 14, lineHeight: 20 },

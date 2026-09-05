@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, Linking } from 'react-
 import Svg, { Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -200,7 +200,7 @@ function makeStyles(colors) {
     heroBarBg: { height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.15)', overflow: 'hidden', marginTop: 14 },
     heroBarFill: { height: 5, borderRadius: 3, backgroundColor: '#fff' },
     heroPromptRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    heroPromptTitle: { color: '#fff', fontSize: 20, fontWeight: '800', flexShrink: 1 },
+    heroPromptTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#fff', flexShrink: 1 },
     heroDisclaimerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
     heroDisclaimer: { color: 'rgba(255,255,255,0.42)', fontSize: 10.5, lineHeight: 15, flexShrink: 1 },
     heroDisclaimerLink: { color: 'rgba(255,255,255,0.55)', fontSize: 10.5, textDecorationLine: 'underline' },

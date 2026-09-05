@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../i18n';
 import { supabase } from '../lib/supabase';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { lightHaptic } from '../utils/haptics';
 import { BADGE_DEFS } from '../lib/badges';
 
@@ -274,7 +274,7 @@ function makeStyles(colors) {
       ...SHADOWS.small,
     },
     backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    headerTitle: { fontSize: 17, fontWeight: '900', color: '#1A1A2E' },
+    headerTitle: { fontSize: TYPOGRAPHY.subheadingSize, fontWeight: TYPOGRAPHY.subheadingWeight, lineHeight: TYPOGRAPHY.subheadingLineHeight, color: '#1A1A2E' },
     markAllBtn: { paddingVertical: 6, paddingHorizontal: 4 },
     markAllTxt: { fontSize: 13, fontWeight: '700' },
 
@@ -317,7 +317,7 @@ function makeStyles(colors) {
     unreadDot: { width: 9, height: 9, borderRadius: 5, marginTop: 6, flexShrink: 0 },
 
     emptyBox: { alignItems: 'center', paddingVertical: 60, gap: 12 },
-    emptyTitle: { fontSize: 18, fontWeight: '900', color: '#1A1A2E' },
+    emptyTitle: { fontSize: TYPOGRAPHY.subheadingSize, fontWeight: TYPOGRAPHY.subheadingWeight, lineHeight: TYPOGRAPHY.subheadingLineHeight, color: '#1A1A2E' },
     emptySub: { fontSize: 14, color: '#7F8C8D', textAlign: 'center', lineHeight: 21, paddingHorizontal: 32 },
   });
 }

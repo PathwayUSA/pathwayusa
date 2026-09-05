@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../i18n';
 import { useSpeech } from '../hooks/useSpeech';
@@ -100,7 +100,7 @@ function makeStyles(colors) {
 
     // Hero banner
     heroBanner: { paddingHorizontal: 20, paddingVertical: 24 },
-    heroTitle: { fontSize: 26, fontWeight: '900', color: '#fff', marginBottom: 6 },
+    heroTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 6 },
     heroFreeBadge: {
       alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.2)',
       paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
@@ -122,7 +122,7 @@ function makeStyles(colors) {
 
     // Mode cards
     modesSection: { paddingHorizontal: 16, paddingTop: 18 },
-    modesSectionTitle: { fontSize: 19, fontWeight: '800', color: colors.text, marginBottom: 14 },
+    modesSectionTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: colors.text, marginBottom: 14 },
     modesRow: { flexDirection: 'row', gap: 10 },
     modeCard: {
       flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 14,
@@ -136,7 +136,7 @@ function makeStyles(colors) {
 
     // Category section
     catSection: { paddingHorizontal: 16, paddingTop: 18 },
-    catSectionTitle: { fontSize: 19, fontWeight: '800', color: colors.text, marginBottom: 14 },
+    catSectionTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: colors.text, marginBottom: 14 },
     catChip: {
       paddingHorizontal: 20, paddingVertical: 10, borderRadius: 999,
       backgroundColor: '#e8e8ea', marginRight: 8, minHeight: 44,
@@ -194,7 +194,7 @@ function makeStyles(colors) {
     flashBtnTxt: { fontSize: 17, fontWeight: '800', color: '#fff' },
     flashDoneWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
     flashDoneIcon: { marginBottom: 20 },
-    flashDoneTitle: { fontSize: 26, fontWeight: '900', color: colors.text, marginBottom: 10 },
+    flashDoneTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: colors.text, lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 10 },
     flashDoneSub: { fontSize: 17, color: '#666', textAlign: 'center', lineHeight: 26 },
     flashDoneStats: { flexDirection: 'row', gap: 20, marginVertical: 24 },
     flashDoneStat: { alignItems: 'center', gap: 4 },
@@ -308,7 +308,7 @@ function makeStyles(colors) {
     tipsScroll: { flex: 1, backgroundColor: '#f9f9fc' },
     tipsContent: { paddingHorizontal: 16, paddingBottom: 100 },
     tipsHeader: { paddingHorizontal: 20, paddingVertical: 22 },
-    tipsHeaderTitle: { fontSize: 24, fontWeight: '900', color: '#fff' },
+    tipsHeaderTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     tipsHeaderSub: { fontSize: 16, color: 'rgba(255,255,255,0.88)', marginTop: 6, lineHeight: 24 },
     tipCard: {
       backgroundColor: '#fff', borderRadius: 18, padding: 18, marginBottom: 14, ...SHADOWS.small,
@@ -366,7 +366,7 @@ function makeStyles(colors) {
     // Onboarding modal
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
     modalSheet: { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28 },
-    modalTitle: { fontSize: 26, fontWeight: '900', color: '#1a1a2e', marginBottom: 8 },
+    modalTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#1a1a2e', lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 8 },
     modalSub: { fontSize: 17, color: '#888', marginBottom: 24, lineHeight: 26 },
     onboardCard: {
       flexDirection: 'row', alignItems: 'flex-start', gap: 14,
@@ -1286,7 +1286,7 @@ function DailyDoneView({ onHome, colors, navigation }) {
         <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: '#FFF8E1', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
           <Ionicons name="star" size={44} color="#FFC107" />
         </View>
-        <Text style={{ fontSize: 28, fontWeight: '900', color: '#1a1c1e', textAlign: 'center' }}>
+        <Text style={{ fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#1a1c1e', textAlign: 'center' }}>
           Great work today!
         </Text>
         <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', lineHeight: 26, marginHorizontal: 4 }}>

@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth }  from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import { SHADOWS }  from '../../theme';
+import { SHADOWS, TYPOGRAPHY }  from '../../theme';
 import CircularProgress from '../../components/CircularProgress';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -134,7 +134,7 @@ function makeStyles(colors) {
     container: { flex: 1, backgroundColor: colors.background },
 
     header:    { backgroundColor: colors.primary, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10 },
-    headerTxt: { fontSize: 20, fontWeight: '900', color: '#fff', flex: 1 },
+    headerTxt: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#fff', flex: 1 },
     headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
 
     // Health summary bar

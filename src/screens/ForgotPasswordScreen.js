@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n';
 
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', marginBottom: 20,
   },
   headerIcon:  { marginBottom: 12 },
-  headerTitle: { fontSize: 28, fontWeight: '900', color: '#fff', marginBottom: 6 },
+  headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 6 },
   headerSub:   { fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 20 },
 
   body: { flex: 1, paddingHorizontal: 20, paddingTop: 24 },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   // Success state
   successWrap:  { alignItems: 'center', paddingVertical: 8, gap: 12 },
   successIcon:  { marginBottom: 4 },
-  successTitle: { fontSize: 22, fontWeight: '900', color: '#1a1a2e' },
+  successTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#1a1a2e' },
   successMsg:   { fontSize: 14, color: '#666', textAlign: 'center', lineHeight: 22 },
   backSignInBtn: {
     backgroundColor: '#1DB89A', paddingVertical: 14, paddingHorizontal: 32,

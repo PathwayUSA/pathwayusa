@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { QUESTIONS } from '../data/civicsQuestions';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 function getRecoveryQuestions() {
   const dayBase = Math.floor(Date.now() / 86400000);
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   backdrop:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   card:        { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28, gap: 14, minHeight: 380 },
   iconRow:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  title:       { fontSize: 22, fontWeight: '900', color: '#1a1a2e', textAlign: 'center' },
+  title:       { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#1a1a2e', textAlign: 'center' },
   sub:         { fontSize: 14, color: '#666', textAlign: 'center', lineHeight: 21 },
   optionBox:   { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#e3f2fd', borderRadius: 14, padding: 14 },
   optTitle:    { fontSize: 14, fontWeight: '700', color: '#1565c0' },

@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import { SHADOWS } from '../../theme';
+import { SHADOWS, TYPOGRAPHY } from '../../theme';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ function makeStyles(colors) {
     header:     { backgroundColor: colors.primary, padding: 20, alignItems: 'center', gap: 12, paddingTop: 20 },
     avatar:     { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,255,255,0.25)', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)' },
     avatarTxt:  { fontSize: 28, fontWeight: '900', color: '#fff' },
-    headerName: { fontSize: 20, fontWeight: '900', color: '#fff' },
+    headerName: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#fff' },
     headerSub:  { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
     proBadge:   { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
     proBadgeTxt:{ fontSize: 12, fontWeight: '800', color: '#fff' },
@@ -142,6 +142,10 @@ export default function AttorneySettingsScreen() {
   };
 
   const handleSignOut = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Sign out of your account?')) signOut();
+      return;
+    }
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },

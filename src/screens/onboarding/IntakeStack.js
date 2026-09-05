@@ -17,6 +17,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useOnboardingRefresh } from '../../context/OnboardingContext';
 import { supabase } from '../../lib/supabase';
 import PathwayLogo from '../../components/PathwayLogo';
+import { TYPOGRAPHY } from '../../theme';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -848,7 +849,7 @@ const s = StyleSheet.create({
   welcomeContent:   { paddingHorizontal: 28, alignItems: 'center' },
   decCircle1:       { position: 'absolute', width: 320, height: 320, borderRadius: 160, backgroundColor: 'rgba(255,255,255,0.04)', top: -120, right: -100 },
   decCircle2:       { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.05)', bottom: 80, left: -60 },
-  welcomeHeadline:  { fontSize: 30, fontWeight: '800', color: WHITE, textAlign: 'center', lineHeight: 38, marginBottom: 14 },
+  welcomeHeadline:  { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: WHITE, textAlign: 'center', marginBottom: 14 },
   welcomeSub:       { fontSize: 15, color: 'rgba(255,255,255,0.78)', textAlign: 'center', lineHeight: 23, marginBottom: 36 },
   trustWrap:        { alignSelf: 'stretch', gap: 14, marginBottom: 28 },
   trustRow:         { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -870,7 +871,7 @@ const s = StyleSheet.create({
   screenHeaderTop:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   stepLabel:        { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.7)', letterSpacing: 0.3 },
   saveExitTxt:      { fontSize: 13, fontWeight: '600', color: WHITE, textDecorationLine: 'underline' },
-  screenHeaderTitle:{ fontSize: 22, fontWeight: '800', color: WHITE, lineHeight: 30, marginBottom: 4 },
+  screenHeaderTitle:{ fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: WHITE, marginBottom: 4 },
   screenHeaderSub:  { fontSize: 14, color: 'rgba(255,255,255,0.8)', lineHeight: 20 },
 
   screenPad: { padding: 20, paddingBottom: 8 },

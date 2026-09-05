@@ -9,7 +9,10 @@ const isWeb = Platform.OS === 'web';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage,
+    // Web: use supabase's built-in localStorage adapter so its internal
+    // navigator-lock mechanism and detectSessionInUrl/PKCE exchange work
+    // against the same storage — AsyncStorage is native-only meaningful.
+    storage: Platform.OS === 'web' ? undefined : AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
     // Web: the redirect lands back on the same origin/tab, so the code

@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 
 const VB_KEY = '@pathwayusa/visa_bulletin_prefs';
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   content:   { padding: 16, gap: 12 },
 
   hero:     { borderRadius: 20, padding: 20, gap: 6, marginBottom: 4 },
-  heroTitle:{ fontSize: 20, fontWeight: '900', color: '#fff' },
+  heroTitle:{ fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#fff' },
   heroSub:  { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
 
   infoCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, borderRadius: 16, padding: 14 },

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 export default function NotificationPermissionModal({ visible, onEnable, onDismiss }) {
   const { colors } = useTheme();
@@ -82,11 +82,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontFamily: TYPOGRAPHY.displayFamily,
+    fontSize: TYPOGRAPHY.displaySize,
+    letterSpacing: TYPOGRAPHY.displayLetterSpacing,
+    lineHeight: TYPOGRAPHY.displayLineHeight,
     color: '#1A1A2E',
     textAlign: 'center',
-    lineHeight: 30,
   },
   body: {
     fontSize: 15,

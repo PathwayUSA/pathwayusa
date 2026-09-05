@@ -60,3 +60,38 @@ export const SPACING = {
   xl:  28,
   xxl: 40,
 };
+
+// Type scale — all font size/weight constants live here so a single
+// edit propagates everywhere. Outfit is the display face for headings;
+// body and below stay on the system default.
+export const TYPOGRAPHY = {
+  // ── Display (Outfit) ────────────────────────────────────────────────────
+  displayFamily:        'Outfit_800ExtraBold',
+  headingFamily:        'Outfit_700Bold',
+
+  displaySize:          32,
+  displayLetterSpacing: -0.64,   // −0.02em at 32px
+  displayLineHeight:    35,      // ≈1.1×
+
+  headingSize:          20,
+  headingLineHeight:    26,
+
+  // ── Content scale (system font) ─────────────────────────────────────────
+  // Subheading: modal titles, card-section headings, prominent in-content labels
+  subheadingSize:       17,
+  subheadingWeight:     '700',
+  subheadingLineHeight: 23,
+
+  // Body: main readable content
+  bodySize:             15,
+  bodyLineHeight:       22,
+
+  // Secondary: supporting text, descriptions, subtitles
+  secondarySize:        13,
+  secondaryLineHeight:  19,
+
+  // Label: uppercase eyebrow tags, tiny category chips
+  labelSize:            11,
+  labelWeight:          '700',
+  labelTracking:        0.8,
+};

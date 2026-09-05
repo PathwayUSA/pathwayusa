@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ConstellationBackground from '../components/effects/ConstellationBackground';
 import { useLanguage, LANGUAGE_OPTIONS } from '../i18n';
+import { TYPOGRAPHY } from '../theme';
 
 export default function WelcomeScreen({ navigation }) {
   const insets       = useSafeAreaInsets();
@@ -117,8 +118,10 @@ const styles = StyleSheet.create({
     top: -11, left: -11,
   },
   appName: {
-    fontSize: 40, fontWeight: '900', color: '#fff',
-    letterSpacing: 0.4, marginBottom: 12,
+    fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize,
+    letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight,
+    color: '#fff',
+    marginBottom: 12,
     textShadowColor: 'rgba(29,184,154,0.55)',
     textShadowRadius: 14,
     textShadowOffset: { width: 0, height: 0 },

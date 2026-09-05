@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -336,7 +336,7 @@ const s = StyleSheet.create({
   backBtn:       { padding: 4 },
   addBtn:        { padding: 4 },
   headerContent: { flex: 1 },
-  headerTitle:   { fontSize: 22, fontWeight: '900', color: '#fff' },
+  headerTitle:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#fff' },
   headerSub:     { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
 
   summaryBar:    { flexDirection: 'row', marginHorizontal: 16, marginTop: 14, marginBottom: 4, borderRadius: 14, padding: 14 },
@@ -364,7 +364,7 @@ const s = StyleSheet.create({
   notes:         { fontSize: 13, lineHeight: 18, fontStyle: 'italic' },
 
   emptyWrap:     { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  emptyTitle:    { fontSize: 20, fontWeight: '800', marginTop: 16, textAlign: 'center' },
+  emptyTitle:    { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, marginTop: 16, textAlign: 'center' },
   emptySub:      { fontSize: 14, textAlign: 'center', lineHeight: 20, marginTop: 8 },
   emptyBtn:      { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 24, paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14 },
   emptyBtnTxt:   { color: '#fff', fontSize: 16, fontWeight: '700' },

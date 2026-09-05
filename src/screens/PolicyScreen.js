@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../i18n';
 import { useSpeech } from '../hooks/useSpeech';
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   tabText:   { fontSize: 13, fontWeight: '700' },
   content:   { paddingHorizontal: 20, paddingTop: 4 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  heading:   { fontSize: 20, fontWeight: '800' },
+  heading:   { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight },
   speakBtn:  { flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7 },
   speakText: { fontSize: 13, fontWeight: '600' },
   body:      { fontSize: 14, lineHeight: 24 },

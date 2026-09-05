@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { awardBadge } from '../lib/badges';
 
 function makeStyles(colors) {
@@ -15,11 +15,11 @@ function makeStyles(colors) {
     safe:        { flex: 1, backgroundColor: colors.primary },
     container:   { flex: 1, backgroundColor: colors.background },
     header:      { backgroundColor: colors.primary, padding: 20, paddingTop: 20, gap: 6 },
-    headerTitle: { fontSize: 24, fontWeight: '900', color: '#fff' },
+    headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     headerSub:   { fontSize: 14, color: 'rgba(255,255,255,0.75)' },
     content:     { padding: 20, gap: 16, paddingBottom: 60 },
     section:     { backgroundColor: '#fff', borderRadius: 20, padding: 18, gap: 14, ...SHADOWS.small },
-    sectionTitle:{ fontSize: 16, fontWeight: '800', color: '#1a1a2e' },
+    sectionTitle:{ fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: '#1a1a2e' },
     sectionSub:  { fontSize: 13, color: '#666', lineHeight: 19 },
 
     rewardRow:   { gap: 10 },

@@ -12,7 +12,7 @@ import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { getStateFromZip } from '../lib/zipToState';
 import { STATE_DATA } from '../data/stateRepresentatives';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -80,7 +80,7 @@ function makeStyles(colors) {
     flex:        { flex: 1, backgroundColor: '#f9f9fc' },
     hero:        { paddingHorizontal: 24, paddingBottom: 28, alignItems: 'center' },
     heroIcon:    { width: 64, height: 64, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-    heroTitle:   { fontSize: 24, fontWeight: '900', color: '#fff', textAlign: 'center', marginBottom: 6 },
+    heroTitle:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, textAlign: 'center', marginBottom: 6 },
     heroSub:     { fontSize: 14, color: 'rgba(255,255,255,0.82)', textAlign: 'center', lineHeight: 21 },
 
     scroll:      { flex: 1 },
@@ -106,7 +106,7 @@ function makeStyles(colors) {
     // Confirmation
     confWrap:    { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
     confIcon:    { width: 88, height: 88, borderRadius: 28, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
-    confTitle:   { fontSize: 26, fontWeight: '900', color: colors.text, textAlign: 'center', marginBottom: 12 },
+    confTitle:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: colors.text, lineHeight: TYPOGRAPHY.displayLineHeight, textAlign: 'center', marginBottom: 12 },
     confBody:    { fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 25, marginBottom: 28 },
     confSub:     { fontSize: 13, color: '#aaa', textAlign: 'center', lineHeight: 20, marginBottom: 32 },
     confBtn:     { backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16, paddingHorizontal: 36, alignSelf: 'stretch', alignItems: 'center' },

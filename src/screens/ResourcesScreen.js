@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -103,7 +103,7 @@ function makeStyles(colors) {
     // Header
     header: { paddingHorizontal: 20, paddingBottom: 24 },
     headerTopBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-    headerTitle: { fontSize: 28, fontWeight: '900', color: '#fff', lineHeight: 36 },
+    headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     headerSub: { fontSize: 14, color: 'rgba(255,255,255,0.78)', marginTop: 6, lineHeight: 20 },
     mapBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.6)' },
     mapBtnTxt: { fontSize: 13, fontWeight: '700', color: '#fff' },
@@ -130,7 +130,7 @@ function makeStyles(colors) {
     // Categories
     catSection: { paddingHorizontal: 20, marginTop: 22 },
     catHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-    catTitle: { fontSize: 16, fontWeight: '900', color: '#1A1A2E' },
+    catTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: '#1A1A2E' },
     catSeeAll: { fontSize: 14, fontWeight: '700', color: colors.primary },
     catGrid: { flexDirection: 'row', gap: 10 },
     catTile: { flex: 1, alignItems: 'center', gap: 8, paddingVertical: 16, borderRadius: 16, backgroundColor: '#fff', ...SHADOWS.small },
@@ -144,7 +144,7 @@ function makeStyles(colors) {
     // Resources list
     resultsSection: { paddingHorizontal: 20, marginTop: 22 },
     resultsHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-    resultsTitle: { fontSize: 16, fontWeight: '900', color: '#1A1A2E', flex: 1 },
+    resultsTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: '#1A1A2E', flex: 1 },
     savedToggle: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, borderWidth: 1.5, borderColor: colors.primary },
     savedToggleActive: { backgroundColor: colors.primary },
     savedToggleTxt: { fontSize: 12, fontWeight: '700', color: colors.primary },

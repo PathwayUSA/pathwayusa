@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useFonts, Outfit_700Bold, Outfit_800ExtraBold } from '@expo-google-fonts/outfit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -200,7 +201,7 @@ function MainTabs({ route }) {
         tabBarLabelStyle: { fontSize: 12, fontWeight: '700', marginTop: 3 },
         headerStyle:      { backgroundColor: '#1A1A2E' },
         headerTintColor:  '#fff',
-        headerTitleStyle: { fontWeight: '800', fontSize: 17 },
+        headerTitleStyle: { fontFamily: 'Outfit_700Bold', fontSize: 18 },
       })}
     >
       <Tab.Screen name="Home"      component={HomeScreen}      options={{ headerShown: false, tabBarLabel: 'Home'  }} />
@@ -434,6 +435,17 @@ function RootNavigator() {
 // ── Root ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [fontsLoaded] = useFonts({ Outfit_700Bold, Outfit_800ExtraBold });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0d7a6e' }}>
+        <PathwayLogo variant="white" size={140} />
+        <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" style={{ marginTop: 32 }} />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <LanguageProvider>

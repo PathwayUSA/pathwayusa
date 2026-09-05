@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { TYPOGRAPHY } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 const NUM_CONFETTI = 60;
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
 
   heroWrap:  { alignItems: 'center', gap: 8 },
   congrats:  { fontSize: 13, fontWeight: '800', color: '#FFD700', textTransform: 'uppercase', letterSpacing: 2 },
-  heroName:  { fontSize: 36, fontWeight: '900', color: '#fff', textAlign: 'center' },
+  heroName:  { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#fff', textAlign: 'center' },
   heroDesc:  { fontSize: 15, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 23, maxWidth: 300 },
   heroDate:  { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
 
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
   certTitle:   { fontSize: 11, fontWeight: '900', letterSpacing: 2, color: '#8b6914', textAlign: 'center' },
   certDivider: { width: 80, height: 1.5, backgroundColor: '#c8a84b', marginVertical: 4 },
   certBody:    { fontSize: 13, color: '#555', textAlign: 'center' },
-  certName:    { fontSize: 26, fontWeight: '900', color: '#002868', textAlign: 'center' },
+  certName:    { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#002868', textAlign: 'center' },
   certDate:    { fontSize: 12, color: '#888' },
   certMotivation: { fontSize: 13, color: '#666', textAlign: 'center', fontStyle: 'italic', lineHeight: 20, marginTop: 4 },
   certSeal:    { fontSize: 15, fontWeight: '800', color: '#002868', marginTop: 8 },

@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -102,7 +102,7 @@ function makeStyles(colors) {
 
     tripsSection: { paddingHorizontal: 16, paddingTop: 20 },
     tripsSectionHdr: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
-    tripsSectionTitle: { fontSize: 20, fontWeight: '800', color: '#1a1a2e' },
+    tripsSectionTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: '#1a1a2e' },
     logBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, minHeight: 42 },
     logBtnTxt: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
@@ -133,7 +133,7 @@ function makeStyles(colors) {
     setupRoot: { flex: 1, backgroundColor: '#f9f9fc', padding: 20, justifyContent: 'center' },
     setupCard: { backgroundColor: '#fff', borderRadius: 24, padding: 24, gap: 14, ...SHADOWS.medium },
     setupIconWrap: { width: 56, height: 56, borderRadius: 16, backgroundColor: colors.primaryLight ?? '#e0faf5', justifyContent: 'center', alignItems: 'center' },
-    setupTitle: { fontSize: 24, fontWeight: '900', color: '#1a1a2e', lineHeight: 30 },
+    setupTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#1a1a2e', lineHeight: TYPOGRAPHY.displayLineHeight },
     setupSub: { fontSize: 15, color: '#666', lineHeight: 23, marginBottom: 4 },
 
     fieldLabel: { fontSize: 14, fontWeight: '700', color: '#555', marginBottom: 6 },
@@ -153,7 +153,7 @@ function makeStyles(colors) {
     // Modal
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
     modalSheet: { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, gap: 12 },
-    modalTitle: { fontSize: 22, fontWeight: '900', color: '#1a1a2e' },
+    modalTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#1a1a2e' },
     stillAbroadRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
     modalBtns: { flexDirection: 'row', gap: 10, marginTop: 4 },
     modalCancelBtn: { borderWidth: 1.5, borderColor: '#ddd', borderRadius: 14, paddingVertical: 18, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center', minHeight: 58 },

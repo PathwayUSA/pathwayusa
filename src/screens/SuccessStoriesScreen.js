@@ -7,7 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   hero:      { paddingHorizontal: 20, paddingVertical: 20 },
   heroContent:{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroTitle: { fontSize: 22, fontWeight: '900', color: '#fff' },
+  heroTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, lineHeight: TYPOGRAPHY.displayLineHeight, color: '#fff' },
   heroSub:   { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
   heroEmoji: { fontSize: 40 },
 

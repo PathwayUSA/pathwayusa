@@ -11,7 +11,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAttorney } from '../../context/AttorneyContext';
 import { supabase } from '../../lib/supabase';
 import { getStepTitle } from '../../lib/immigrationSteps';
-import { SHADOWS } from '../../theme';
+import { SHADOWS, TYPOGRAPHY } from '../../theme';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -36,7 +36,7 @@ function makeStyles(colors) {
     safe:       { flex: 1, backgroundColor: colors.primary },
     container:  { flex: 1, backgroundColor: colors.background },
     header:     { backgroundColor: colors.primary, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10 },
-    headerTxt:  { fontSize: 20, fontWeight: '900', color: '#fff', flex: 1 },
+    headerTxt:  { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#fff', flex: 1 },
     headerSub:  { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
 
     sortBar:    { flexDirection: 'row', backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee', paddingHorizontal: 16, paddingVertical: 10, gap: 8 },

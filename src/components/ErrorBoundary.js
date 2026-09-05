@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { TYPOGRAPHY } from '../theme';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -41,7 +42,7 @@ export default class ErrorBoundary extends React.Component {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, backgroundColor: '#fafafa' },
-  title:     { fontSize: 20, fontWeight: '800', color: '#1a1a2e', marginTop: 16, marginBottom: 8 },
+  title:     { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, lineHeight: TYPOGRAPHY.headingLineHeight, color: '#1a1a2e', marginTop: 16, marginBottom: 8 },
   body:      { fontSize: 14, color: '#666', textAlign: 'center', lineHeight: 21, marginBottom: 28 },
   btn:       { backgroundColor: '#1a9e89', paddingVertical: 14, paddingHorizontal: 36, borderRadius: 14 },
   btnTxt:    { color: '#fff', fontSize: 15, fontWeight: '800' },

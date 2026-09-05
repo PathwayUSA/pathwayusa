@@ -214,9 +214,10 @@ export function AuthProvider({ children }) {
   const forgotPassword = (email) =>
     supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: REDIRECT_URL });
 
-  const signOut = () => {
+  const signOut = async () => {
     setProfile(null);
-    return supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    return { error };
   };
 
   const deleteAccount = async () => {

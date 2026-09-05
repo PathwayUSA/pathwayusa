@@ -6,7 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -41,7 +41,7 @@ function makeStyles(colors) {
 
     // Header
     header: { paddingHorizontal: 24, paddingBottom: 28, alignItems: 'center', gap: 8 },
-    headerTitle: { fontSize: 24, fontWeight: '900', color: '#fff', textAlign: 'center' },
+    headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, textAlign: 'center' },
     headerSub: { fontSize: 14, color: 'rgba(255,255,255,0.78)', textAlign: 'center', lineHeight: 21, maxWidth: 280 },
 
     // Trust row
@@ -54,7 +54,7 @@ function makeStyles(colors) {
 
     // Section card
     sectionCard: { marginHorizontal: 20, marginTop: 20, backgroundColor: '#fff', borderRadius: 16, padding: 20, gap: 14, ...SHADOWS.small },
-    sectionTitle: { fontSize: 16, fontWeight: '900', color: '#1A1A2E' },
+    sectionTitle: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize, color: '#1A1A2E' },
 
     // Why connect bullets
     bulletRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },

@@ -1,14 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Alert, Share, Image, ActivityIndicator, TextInput, RefreshControl,
+  Alert, Share, Image, ActivityIndicator, TextInput, RefreshControl, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth, REDIRECT_URL } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
@@ -153,6 +153,10 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleSignOut = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Sign out of your account?')) signOut();
+      return;
+    }
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },
@@ -370,7 +374,7 @@ const styles = StyleSheet.create({
   avatarEdit:        { position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
 
   nameRow:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  heroName:    { fontSize: 22, fontWeight: '900', color: '#fff' },
+  heroName:    { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
   editNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   nameInput:   { fontSize: 20, fontWeight: '800', color: '#fff', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.5)', minWidth: 160, paddingBottom: 2 },
 

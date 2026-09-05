@@ -9,7 +9,7 @@ import { useAuth }     from '../../context/AuthContext';
 import { useTheme }    from '../../context/ThemeContext';
 import { useAttorney } from '../../context/AttorneyContext';
 import { supabase }    from '../../lib/supabase';
-import { SHADOWS }     from '../../theme';
+import { SHADOWS, TYPOGRAPHY } from '../../theme';
 
 const { width } = Dimensions.get('window');
 const BAR_MAX_W = width - 120;
@@ -308,7 +308,7 @@ const as = StyleSheet.create({
   loadTxt:    { fontSize: 14 },
 
   header:     { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle:{ fontSize: 22, fontWeight: '900', color: '#fff' },
+  headerTitle:{ fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
   headerSub:  { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
   onlinePill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
   onlineTxt:  { fontSize: 12, color: '#a5ffde', fontWeight: '700' },
@@ -317,7 +317,7 @@ const as = StyleSheet.create({
   periodTab:  { flex: 1, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' },
   periodTxt:  { fontSize: 13 },
 
-  sectionTitle:{ fontSize: 16, fontWeight: '800' },
+  sectionTitle:{ fontFamily: TYPOGRAPHY.headingFamily, fontSize: TYPOGRAPHY.headingSize },
 
   cardGrid:   { flexDirection: 'row', gap: 12 },
   statCard:   { flex: 1, borderRadius: 16, padding: 14, gap: 6 },

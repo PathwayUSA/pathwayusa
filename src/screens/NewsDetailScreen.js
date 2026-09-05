@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { SHADOWS } from '../theme';
+import { SHADOWS, TYPOGRAPHY } from '../theme';
 
 const CAT_THEME = {
   'USCIS Updates':  { bg: '#E8F4F1', color: '#2A8B7A', icon: 'document-text-outline' },
@@ -30,7 +30,7 @@ function makeStyles(colors) {
     catText:  { fontSize: 12, fontWeight: '700' },
     dateText: { fontSize: 13, color: colors.textSecondary },
 
-    title:   { fontSize: 22, fontWeight: '900', color: colors.text, lineHeight: 31, marginBottom: 20 },
+    title:   { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: colors.text, lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 20 },
     divider: { height: 1, backgroundColor: colors.border, marginBottom: 18 },
 
     sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 18 },
