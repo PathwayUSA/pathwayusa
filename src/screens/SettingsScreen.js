@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { THEME_DEFINITIONS } from '../themes';
+import { isNewsAdmin } from '../lib/news';
 import { useAuth, REDIRECT_URL } from '../context/AuthContext';
 import { useVisualEffects } from '../context/VisualEffectsContext';
 import { supabase } from '../lib/supabase';
@@ -23,8 +25,10 @@ import { SectionHeader, RowLink, RowToggle } from '../components/SettingsRow';
 const ZIP_KEY = '@pathwayusa/user_zip_code';
 
 export default function SettingsScreen({ navigation }) {
-  const { colors } = useTheme();
+  const { colors, themeName } = useTheme();
   const { profile, user, updateProfile, signOut, deleteAccount, refreshProfile } = useAuth();
+  const [newsAdmin, setNewsAdmin] = useState(false);
+  useEffect(() => { isNewsAdmin(user?.id).then(setNewsAdmin).catch(() => {}); }, [user?.id]);
   const { enabled: vfxEnabled, toggle: toggleVfx } = useVisualEffects();
   const insets = useSafeAreaInsets();
   const { plan, isPro, isFree, subscriptionStatus, renewsAt, refresh: refreshSub } = useSubscription();
@@ -143,6 +147,23 @@ export default function SettingsScreen({ navigation }) {
           iconColor={colors.primary}
           onPress={() => navigation.navigate('MyImmigrationProfileSettings')}
         />
+        <View style={styles.divider} />
+        <RowLink
+          icon="color-palette-outline" label="App Colors"
+          iconColor={colors.primary}
+          value={THEME_DEFINITIONS[themeName]?.name}
+          onPress={() => navigation.navigate('ThemeSettings')}
+        />
+        {newsAdmin && (
+          <>
+            <View style={styles.divider} />
+            <RowLink
+              icon="newspaper-outline" label="News Review (admin)"
+              iconColor={colors.primary}
+              onPress={() => navigation.navigate('NewsReview')}
+            />
+          </>
+        )}
       </View>
 
       {/* ── Visual Effects ── */}

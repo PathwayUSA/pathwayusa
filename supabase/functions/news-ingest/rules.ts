@@ -15,6 +15,32 @@ const IMMIGRATION = /immigra|visa|naturaliz|citizenship|asylum|refugee|parole|gr
 // Notices worth showing even though they're not rules.
 const NEWSWORTHY_NOTICE = /temporary protected status|designation of|termination of the designation|extension of the designation|parole|automatic extension|employment authorization|fee|registration|special immigrant|diversity|visa bulletin|processing/i;
 
+// Press releases about a specific enforcement action against a named person —
+// filtered out entirely, never inserted as a row at all (not even hidden).
+// Targets case-outcome language (someone WAS arrested/convicted/sentenced),
+// not general policy topics that merely mention "fraud" or "enforcement" —
+// a rule change about fraud prevention is still eligible for the feed.
+export const ENFORCEMENT_PRESS_RELEASE = /plead(?:ed|s)? guilty|pled guilty|guilty plea|\barrest(ed|s)?\b|\bcharged with\b|has been charged|have been charged|\bindict(ed|ment)?\b|federal grand jury|convicted of|\bconvict(ed|ion)?\b|\bsentenc(ed|ing)\b|denaturali[sz](e|ation|ed)|\bsmuggl(ing|er|ed)\b|\btraffick(ing|er|ed)\b|visa fraud scheme|marriage fraud scheme|fugitive from justice|u\.s\. attorney('|’)s office|department of justice announced|admits? to (immigration )?fraud|pleads? guilty|prison sentence|years in (federal )?prison/i;
+
+// Removal/deportation/detention/asylum/criminal matters — never auto-published
+// even when the AI summary is otherwise clean. These still go through AI
+// summarization and get queued for review; they just can't skip the human
+// step the way a routine fee-schedule notice can.
+const SENSITIVE_TOPIC = /removal proceeding|notice to appear|deportation|\bdeport(ed|ation)?\b|detain(ed|er|ment)?\b|detention (facility|center)|asylum (seeker|claim|application|officer|interview)|credible fear|withholding of removal|criminal (history|record|conviction|charge|background|offense)|inadmissib(le|ility)|deportable|expedited removal/i;
+
+/** Does this press release describe a specific enforcement action (arrest,
+ * conviction, sentencing, denaturalization case)? These never enter the feed. */
+export function isEnforcementPressRelease(text: string): boolean {
+  return ENFORCEMENT_PRESS_RELEASE.test(text);
+}
+
+/** Heuristic, keyword-only check — used as a floor under the AI's own
+ * `sensitive` classification, not a replacement for it. Either one saying
+ * "sensitive" is enough to hold the item for review. */
+export function mentionsSensitiveTopic(text: string): boolean {
+  return SENSITIVE_TOPIC.test(text);
+}
+
 export interface FrDoc {
   document_number: string;
   title: string;
@@ -30,6 +56,7 @@ export function isNewsworthyFr(d: FrDoc): boolean {
   const text = `${d.title} ${d.abstract ?? ""}`;
   if (!OFFICIAL_URL.test(d.html_url)) return false;
   if (PAPERWORK.test(d.title)) return false;
+  if (isEnforcementPressRelease(text)) return false;
   if (!IMMIGRATION.test(text)) return false;
   if (d.type === "Rule" || d.type === "Proposed Rule" || d.type === "Presidential Document") return true;
   return NEWSWORTHY_NOTICE.test(text);
@@ -47,6 +74,7 @@ export interface AiNews {
   deadline: string | null;
   effective_date: string | null;
   video_id: string | null;
+  sensitive: boolean;
 }
 
 // Direct instructions to the reader are not allowed — the app educates, it
@@ -82,6 +110,10 @@ export function checkAi(raw: any, allowedVideoIds: string[] = []): { ok: true; v
     // Only accept a video we actually offered (from an official channel).
     video_id: typeof raw.matching_video_id === "string" && allowedVideoIds.includes(raw.matching_video_id)
       ? raw.matching_video_id : null,
+    // Fail closed: anything other than an explicit `false` is treated as
+    // sensitive, so a malformed or missing field holds for review rather
+    // than silently auto-publishing.
+    sensitive: raw.sensitive !== false,
   };
   if (!value.headline || !value.summary) return { ok: false, reason: "summary missing" };
   if (kind === "deadline" && !value.deadline) value.kind = "change"; // never claim a deadline the text didn't give
@@ -125,10 +157,12 @@ Reply with JSON only, no other text, in exactly this shape:
   },
   "deadline": "YYYY-MM-DD only if the notice states a date people must act by, else null",
   "effective_date": "YYYY-MM-DD if stated, else null",
-  "matching_video_id": "the id of one video from the OFFICIAL VIDEOS list that explains this same announcement, or null"
+  "matching_video_id": "the id of one video from the OFFICIAL VIDEOS list that explains this same announcement, or null",
+  "sensitive": true | false
 }
 Only pick a video if its title clearly covers the same topic. When in doubt, use null.
-"kind" is "good" for changes that make things easier (fee waivers, extensions, new benefits), "deadline" only when the notice states a date people must act by, otherwise "change".`;
+"kind" is "good" for changes that make things easier (fee waivers, extensions, new benefits), "deadline" only when the notice states a date people must act by, otherwise "change".
+"sensitive" is true if the notice is substantially about removal or deportation, immigration detention, asylum or refugee claims, or criminal history/background checks — these always wait for a human to publish them, even when your summary is otherwise fine. A rule that only tangentially touches one of these (for example, a fee-schedule update that lists asylum applications among many other form types) is not sensitive on that basis alone — judge the notice's actual subject, not every word it contains. If genuinely unsure, answer true.`;
 
 /** Parse a YouTube channel RSS feed into videos. */
 export function parseYoutubeFeed(xml: string): { id: string; title: string; published: string }[] {

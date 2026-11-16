@@ -18,6 +18,7 @@ import { getPathway } from '../lib/pathwayRouter';
 import { getMissionData, buildDefaultMissionData } from '../lib/stepMissionData';
 import { ONBOARDING_KEY, ONBOARDING_DATA_KEY } from './onboarding/IntakeStack';
 import { useOnboardingRefresh } from '../context/OnboardingContext';
+import NewsHomeCard from '../components/NewsHomeCard';
 import PathwayLogo from '../components/PathwayLogo';
 import CitizenshipCountdownCard from '../components/CitizenshipCountdownCard';
 import NotificationPermissionModal from '../components/NotificationPermissionModal';
@@ -70,18 +71,18 @@ function getDailyQuestion() {
 
 function makeStyles(colors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     // Header
-    header: { paddingHorizontal: 24, paddingBottom: 28 },
+    header: { paddingHorizontal: 24, paddingBottom: 44 },
     headerTopBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 },
     settingsBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
     greeting: { fontSize: 15, color: 'rgba(255,255,255,0.72)', marginBottom: 10 },
     heroTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight, marginBottom: 8 },
     heroSub: { fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 21 },
 
-    progressBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primary, borderRadius: 12, height: 48 },
-    progressBtnTxt: { fontSize: 15, fontWeight: '800', color: '#fff' },
+    progressBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: colors.primary, borderRadius: 16, height: 56 },
+    progressBtnTxt: { fontSize: 17, fontWeight: '900', color: '#fff' },
 
     // Voice control bar — placeholder for Phase 7
     voiceBar: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: '#16324F', marginHorizontal: 20, marginTop: 12, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11, opacity: 0.6 },
@@ -90,23 +91,24 @@ function makeStyles(colors) {
     voiceBarSub: { fontSize: 11.5, color: '#9FB0BA', marginTop: 1 },
 
     // List rows — documents, find help, full roadmap
-    listSection: { marginHorizontal: 20, marginTop: 20, backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', ...SHADOWS.small },
-    listRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-    listRowLabel: { fontSize: 14.5, fontWeight: '600', color: '#1A1A2E' },
-    listRowMeta: { fontSize: 12, color: '#7F8C8D', marginTop: 2 },
+    listSection: { marginHorizontal: 20, marginTop: 20, backgroundColor: '#fff', borderRadius: 20, overflow: 'hidden', ...SHADOWS.small },
+    listRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 16, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
+    listRowIcon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+    listRowLabel: { fontFamily: TYPOGRAPHY.headingFamily, fontSize: 17, color: '#1A1A2E' },
+    listRowMeta: { fontSize: 13.5, color: '#7F8C8D', marginTop: 2 },
 
     // Daily challenge card
     challengeCard: { marginHorizontal: 20, marginTop: 20, backgroundColor: '#fff', borderRadius: 20, padding: 18, gap: 14, ...SHADOWS.small },
     challengeHdr: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     challengeHdrText: { flex: 1, gap: 1 },
-    challengeLabel: { fontSize: 11, fontWeight: '900', color: '#F5A623', textTransform: 'uppercase', letterSpacing: 0.8 },
+    challengeLabel: { fontSize: 11, fontWeight: '900', color: '#B45309', textTransform: 'uppercase', letterSpacing: 0.8 }, // amber-700: readable on white (gold was 2:1)
     challengeStreakTxt: { fontSize: 20, fontWeight: '900', color: '#1A1A2E' },
     donePill: { backgroundColor: '#EAF7EE', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
     donePillTxt: { fontSize: 12, fontWeight: '700', color: '#27AE60' },
     weekRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 2 },
     weekDot: { alignItems: 'center', gap: 5 },
     weekCircle: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-    weekDayLabel: { fontSize: 10, fontWeight: '600', color: '#BDC3C7' },
+    weekDayLabel: { fontSize: 11, fontWeight: '700', color: '#7F8C8D' },
     challengeQ: { fontSize: 16, fontWeight: '700', color: '#1A1A2E', lineHeight: 24 },
     challengeOpts: { gap: 8 },
     challengeOpt: { borderWidth: 1.5, borderColor: '#E8ECE8', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14 },
@@ -132,12 +134,16 @@ function makeStyles(colors) {
     skipBannerTxt: { fontSize: 13, fontWeight: '700', color: colors.primaryDark, flex: 1 },
 
     // Today card (current step)
-    currentStepCard: { marginHorizontal: 20, marginTop: 12, backgroundColor: '#fff', borderRadius: 20, borderLeftWidth: 5, borderLeftColor: colors.primary, padding: 20, gap: 12, ...SHADOWS.small },
-    currentStepHdr: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    currentStepIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-    currentStepLabel: { fontSize: 10, fontWeight: '900', color: colors.primary, textTransform: 'uppercase', letterSpacing: 1 },
-    currentStepTitle: { fontSize: 15, fontWeight: '800', color: '#1A1A2E', lineHeight: 21 },
-    docProgressTxt: { fontSize: 13, color: '#7F8C8D', lineHeight: 19 },
+    currentStepCard: { marginHorizontal: 20, marginTop: -16, backgroundColor: '#fff', borderRadius: 24, borderWidth: 2.5, borderColor: colors.primary, padding: 20, gap: 14, ...SHADOWS.medium },
+    currentStepHdr: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    currentStepIcon: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+    currentStepLabel: { fontSize: 11, fontWeight: '900', color: colors.primaryDark, textTransform: 'uppercase', letterSpacing: 1 },
+    currentStepTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: 21, color: '#1A1A2E', lineHeight: 26, marginTop: 2 },
+    docProgressTxt: { fontSize: 15, color: '#5F6B6D', lineHeight: 22 },
+    stepProgressRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    stepProgressTrack: { flex: 1, height: 10, borderRadius: 5, backgroundColor: colors.primaryLight, overflow: 'hidden' },
+    stepProgressFill: { height: 10, borderRadius: 5, backgroundColor: colors.primary },
+    stepProgressTxt: { fontSize: 13, fontWeight: '800', color: colors.primaryDark },
   });
 }
 
@@ -437,7 +443,7 @@ export default function HomeScreen({ navigation }) {
           end={{ x: 0.3, y: 1 }}
         >
           <View style={styles.headerTopBar}>
-            <PathwayLogo variant="icon" size={32} />
+            <PathwayLogo variant="white" size={84} />
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity
                 style={styles.settingsBtn}
@@ -479,7 +485,7 @@ export default function HomeScreen({ navigation }) {
 
         {/* ── TODAY CARD — current step, one sentence of context, one button ──── */}
         {totalSteps > 0 && completedCount >= totalSteps && completedCount > 0 ? (
-          <View style={[styles.currentStepCard, { borderLeftColor: '#27AE60', backgroundColor: '#EAF7EE' }]}>
+          <View style={[styles.currentStepCard, { borderColor: '#27AE60', backgroundColor: '#EAF7EE' }]}>
             <Text style={{ fontSize: 28, textAlign: 'center' }}>🎉</Text>
             <Text style={{ fontSize: 16, fontWeight: '900', color: '#27AE60', textAlign: 'center' }}>
               You've completed your journey!
@@ -496,7 +502,7 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.currentStepCard}>
             <View style={styles.currentStepHdr}>
               <View style={styles.currentStepIcon}>
-                <Ionicons name="flag" size={20} color={colors.primary} />
+                <Ionicons name="flag" size={26} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.currentStepLabel}>
@@ -508,10 +514,16 @@ export default function HomeScreen({ navigation }) {
               </View>
             </View>
             {currentStep.description ? (
-              <Text style={styles.docProgressTxt} numberOfLines={1}>
+              <Text style={styles.docProgressTxt} numberOfLines={2}>
                 {currentStep.description}
               </Text>
             ) : null}
+            <View style={styles.stepProgressRow} accessibilityLabel={`${doneSteps} of ${totalSteps} steps done`}>
+              <View style={styles.stepProgressTrack}>
+                <View style={[styles.stepProgressFill, { width: `${Math.max(Math.round((doneSteps / totalSteps) * 100), 3)}%` }]} />
+              </View>
+              <Text style={styles.stepProgressTxt}>{doneSteps}/{totalSteps} done</Text>
+            </View>
             <TouchableOpacity
               style={styles.progressBtn}
               onPress={() => {
@@ -527,7 +539,7 @@ export default function HomeScreen({ navigation }) {
               activeOpacity={0.85}
               accessibilityRole="button"
             >
-              <Text style={styles.progressBtnTxt}>Continue Step →</Text>
+              <Text style={styles.progressBtnTxt}>Continue Step</Text>
               <Ionicons name="arrow-forward" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -619,7 +631,9 @@ export default function HomeScreen({ navigation }) {
               activeOpacity={0.8}
               accessibilityRole="button"
             >
-              <Ionicons name={row.icon} size={20} color={colors.primary} />
+              <View style={[styles.listRowIcon, { backgroundColor: colors.primaryLight }]}>
+                <Ionicons name={row.icon.replace('-outline', '')} size={24} color={colors.primary} />
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.listRowLabel}>{row.label}</Text>
                 <Text style={styles.listRowMeta}>{row.meta}</Text>
@@ -628,6 +642,12 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* ── OFFICIAL IMMIGRATION UPDATES ────────────────────────────────────── */}
+        <NewsHomeCard
+          navigation={navigation}
+          userCtx={{ status: intakeStatus, goals: intakeGoals, country: intakeData?.country_of_birth ?? profile?.country_of_birth ?? null }}
+        />
 
         {/* ── DAILY CHALLENGE CARD ───────────────────────────────────────────── */}
         {challengeQ && (
@@ -672,7 +692,7 @@ export default function HomeScreen({ navigation }) {
                     <Text style={[
                       styles.weekDayLabel,
                       isToday && { color: colors.primary, fontWeight: '800' },
-                      isFuture && { color: '#E8ECE8' },
+                      isFuture && { color: '#B0B7BB' },
                     ]}>
                       {day}
                     </Text>

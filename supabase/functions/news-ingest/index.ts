@@ -1,7 +1,11 @@
-// news-ingest — reads OFFICIAL immigration sources, writes an educational
-// plain-language summary with AI, and queues it for admin review (status
-// "hidden"). Nothing goes live until a news admin taps Publish in the
-// NewsReview screen — see rationale in the project history for this change.
+// news-ingest — reads OFFICIAL immigration sources and writes an educational
+// plain-language summary with AI. Items auto-publish immediately UNLESS the
+// AI or our own keyword check thinks the notice is substantially about
+// removal/deportation, detention, asylum, or criminal matters — those always
+// wait for a news admin to tap Publish in the NewsReview screen, no matter
+// how clean the summary is. Enforcement/fraud press releases about a named
+// person (arrests, convictions, denaturalization cases) are filtered out
+// entirely before they ever reach the AI — see rules.ts.
 //
 // Sources (nothing else is ever accepted — see OFFICIAL_URL in rules.ts):
 //   1. Federal Register API (rules, TPS designations, fee changes) — reliable
@@ -9,13 +13,17 @@
 //      if it does, we skip it quietly and rely on the Federal Register.
 //
 // Called by the cron job twice a day: POST {} with header x-cron-secret.
-// Secrets: ANTHROPIC_API_KEY, USCIS_CRON_SECRET (shared with uscis-case-status),
+// Secrets: ANTHROPIC_API_KEY, NEWS_CRON_SECRET (own secret, not shared with
+//          uscis-case-status — rotating it can't break that function's cron),
+//          RESEND_API_KEY + NEWS_NOTIFY_EMAIL (email when something's held —
+//          see notify.ts; both optional, notification is skipped if unset),
 //          optional NEWS_AI_MODEL (default claude-sonnet-5)
 // Deploy:  npx supabase@latest functions deploy news-ingest --no-verify-jwt --use-api
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { checkAi, expiresAt, FrDoc, isNewsworthyFr, OFFICIAL_URL, parseYoutubeFeed, SYSTEM_PROMPT } from "./rules.ts";
+import { checkAi, expiresAt, FrDoc, isEnforcementPressRelease, isNewsworthyFr, mentionsSensitiveTopic, OFFICIAL_URL, parseYoutubeFeed, SYSTEM_PROMPT } from "./rules.ts";
+import { notifyHeldForReview } from "./notify.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const MODEL = Deno.env.get("NEWS_AI_MODEL") ?? "claude-sonnet-5";
@@ -90,13 +98,18 @@ async function fromUscisRss(): Promise<Candidate[]> {
     const pub = Date.parse(tag(it, "pubDate"));
     if (!OFFICIAL_URL.test(link) || !pub || pub < cutoff) continue;
     const title = stripHtml(tag(it, "title"));
+    const description = stripHtml(tag(it, "description")).slice(0, 8000);
+    // USCIS's own news feed carries enforcement/fraud press releases
+    // alongside policy news — filter those out entirely, same as Federal
+    // Register candidates.
+    if (isEnforcementPressRelease(`${title} ${description}`)) continue;
     out.push({
       source: "uscis",
       source_id: `uscis:${link}`,
       source_url: link,
       source_title: title,
       published_at: new Date(pub).toISOString(),
-      official_text: `TITLE: ${title}\nPUBLISHED: ${new Date(pub).toISOString().slice(0, 10)}\n\nTEXT:\n${stripHtml(tag(it, "description")).slice(0, 8000)}`,
+      official_text: `TITLE: ${title}\nPUBLISHED: ${new Date(pub).toISOString().slice(0, 10)}\n\nTEXT:\n${description}`,
     });
   }
   return out;
@@ -148,10 +161,10 @@ async function summarize(c: Candidate, videos: { id: string; title: string }[]) 
 }
 
 serve(async (req) => {
-  const secret = Deno.env.get("USCIS_CRON_SECRET");
+  const secret = Deno.env.get("NEWS_CRON_SECRET");
   if (!secret || req.headers.get("x-cron-secret") !== secret) return json({ error: "Unauthorized" }, 401);
 
-  const report = { candidates: 0, queued_for_review: 0, skipped: 0, held_for_review: 0, errors: [] as string[] };
+  const report = { candidates: 0, auto_published: 0, held_for_review: 0, skipped: 0, errors: [] as string[] };
 
   // Expire old items
   await admin.from("news_items").update({ status: "expired", updated_at: new Date().toISOString() })
@@ -183,21 +196,38 @@ serve(async (req) => {
       if (!checked.ok) {
         const held = checked.reason.includes("review");
         await admin.from("news_items").insert({ ...base, status: held ? "hidden" : "skipped", hidden_reason: checked.reason });
-        held ? report.held_for_review++ : report.skipped++;
+        if (held) {
+          report.held_for_review++;
+          await notifyHeldForReview({ title: c.source_title, reason: checked.reason, sourceUrl: c.source_url });
+        } else {
+          report.skipped++;
+        }
         continue;
       }
       const v = checked.value;
+      // Auto-publish unless the AI flagged it sensitive OR our own keyword
+      // check independently thinks it touches removal/detention/asylum/
+      // criminal matters — either signal alone is enough to hold it, since
+      // getting this wrong in the "should have held it" direction is the
+      // only safe failure mode.
+      const sensitive = v.sensitive || mentionsSensitiveTopic(c.official_text);
+      const status = sensitive ? "hidden" : "published";
       await admin.from("news_items").insert({
         ...base,
         headline: v.headline, kind: v.kind, summary: v.summary, who_affected: v.who_affected,
         examples: v.examples, questions: v.questions, audience: v.audience,
         deadline: v.deadline, effective_date: v.effective_date ?? c.effective_on ?? null,
         video_id: v.video_id,
-        status: "hidden",
-        hidden_reason: "Awaiting admin review",
+        status,
+        hidden_reason: sensitive ? "Sensitive topic — awaiting admin review" : null,
         expires_at: expiresAt(c.published_at, v.deadline),
       });
-      report.queued_for_review++;
+      if (sensitive) {
+        report.held_for_review++;
+        await notifyHeldForReview({ title: v.headline || c.source_title, reason: "Sensitive topic", sourceUrl: c.source_url });
+      } else {
+        report.auto_published++;
+      }
     } catch (e) {
       report.errors.push(`${c.source_id}: ${String(e).slice(0, 200)}`);
     }

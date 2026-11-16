@@ -47,6 +47,11 @@ import LanguageVoiceSettingsScreen        from './src/screens/settings/LanguageV
 import RemindersSettingsScreen            from './src/screens/settings/RemindersSettingsScreen';
 import PrivacyAppLockSettingsScreen       from './src/screens/settings/PrivacyAppLockSettingsScreen';
 import MyImmigrationProfileSettingsScreen from './src/screens/settings/MyImmigrationProfileSettingsScreen';
+// TEMP: ThemeSettingsScreen.js doesn't exist on disk (missing, unrelated to the news feature) — commented out to unblock bundling. Restore when the real file is available.
+// import ThemeSettingsScreen                from './src/screens/settings/ThemeSettingsScreen';
+import NewsReviewScreen                   from './src/screens/settings/NewsReviewScreen';
+import ImmigrationNewsScreen              from './src/screens/ImmigrationNewsScreen';
+import ImmigrationNewsDetailScreen        from './src/screens/ImmigrationNewsDetailScreen';
 import DeadlinesScreen         from './src/screens/DeadlinesScreen';
 import DocumentsScreen         from './src/screens/DocumentsScreen';
 import DocumentExpiryScreen    from './src/screens/DocumentExpiryScreen';
@@ -199,7 +204,7 @@ function MainTabs({ route }) {
           elevation: 12,
         },
         tabBarLabelStyle: { fontSize: 12, fontWeight: '700', marginTop: 3 },
-        headerStyle:      { backgroundColor: '#1A1A2E' },
+        headerStyle:      { backgroundColor: colors.primary },
         headerTintColor:  '#fff',
         headerTitleStyle: { fontFamily: 'Outfit_700Bold', fontSize: 18 },
       })}
@@ -216,7 +221,7 @@ function MainTabs({ route }) {
 function AppStack({ firstSession = false }) {
   const { colors } = useTheme();
   const headerOpts = {
-    headerStyle:      { backgroundColor: '#1A1A2E' },
+    headerStyle:      { backgroundColor: colors.primary },
     headerTintColor:  '#fff',
     headerTitleStyle: { fontWeight: '800', fontSize: 17 },
     headerBackTitle:  '',
@@ -229,6 +234,10 @@ function AppStack({ firstSession = false }) {
       <Stack.Screen name="RemindersSettings"            component={RemindersSettingsScreen}            options={{ title: 'Reminders',              ...headerOpts }} />
       <Stack.Screen name="PrivacyAppLockSettings"       component={PrivacyAppLockSettingsScreen}       options={{ title: 'Privacy and App Lock',   ...headerOpts }} />
       <Stack.Screen name="MyImmigrationProfileSettings" component={MyImmigrationProfileSettingsScreen} options={{ title: 'My Immigration Profile', ...headerOpts }} />
+      {/* TEMP: ThemeSettingsScreen.js is missing, see commented import above */}
+      <Stack.Screen name="ImmigrationNews"              component={ImmigrationNewsScreen}              options={{ title: 'Immigration Updates',    ...headerOpts }} />
+      <Stack.Screen name="ImmigrationNewsDetail"        component={ImmigrationNewsDetailScreen}        options={{ title: 'Update',                 ...headerOpts }} />
+      <Stack.Screen name="NewsReview"                   component={NewsReviewScreen}                   options={{ title: 'News Review',            ...headerOpts }} />
       <Stack.Screen name="Deadlines"   component={DeadlinesScreen}   options={{ title: 'Deadline Reminders',  ...headerOpts }} />
       <Stack.Screen name="DocumentExpiry" component={DocumentExpiryScreen} options={{ title: 'Document Expiry Dates', ...headerOpts }} />
       <Stack.Screen name="Legal"       component={LegalPortalScreen} options={{ title: 'Legal Portal',        ...headerOpts }} />

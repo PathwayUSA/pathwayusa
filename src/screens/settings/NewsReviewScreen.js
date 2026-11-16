@@ -7,8 +7,11 @@ import { lightHaptic } from '../../utils/haptics';
 import { fetchAdminNews, setNewsStatus, formatDate } from '../../lib/news';
 import { KindPill } from '../../components/NewsHomeCard';
 
-// Admin-only (enforced by the database, not just this screen): new updates
-// land here as Hidden and wait for a tap on Publish before anyone sees them.
+// Admin-only (enforced by the database, not just this screen). Most new
+// updates from official sources publish automatically; items that touch
+// removal/deportation, detention, asylum, or criminal matters land here as
+// Hidden and wait for a tap on Publish — this screen is for those, plus
+// anything the AI's own safety check held back.
 export default function NewsReviewScreen({ navigation }) {
   const { colors } = useTheme();
   const [items, setItems] = useState(null);
@@ -33,7 +36,7 @@ export default function NewsReviewScreen({ navigation }) {
       data={items}
       keyExtractor={(i) => i.id}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
-      ListHeaderComponent={<Text style={styles.intro}>New updates from official sources wait here for review — nothing goes live until you tap Publish. Items the safety check flagged show a reason below the date.</Text>}
+      ListHeaderComponent={<Text style={styles.intro}>Most updates from official sources publish automatically. Sensitive topics (removal, detention, asylum, criminal matters) and anything the safety check flagged wait here for a tap on Publish — the reason shows below the date.</Text>}
       ListEmptyComponent={<Text style={styles.intro}>No updates yet.</Text>}
       renderItem={({ item }) => (
         <View style={[styles.card, item.status === 'hidden' && { opacity: 0.7 }]}>
