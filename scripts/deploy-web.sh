@@ -26,7 +26,7 @@ if [ -d dist/assets/node_modules ]; then
 
   echo "==> Patching references to the old path..."
   while IFS= read -r f; do
-    sed -i '' 's#assets/node_modules#assets/vendor_modules#g' "$f"
+    perl -pi -e 's#assets/node_modules#assets/vendor_modules#g' "$f"
   done < <(grep -rl "assets/node_modules" dist 2>/dev/null)
 fi
 
