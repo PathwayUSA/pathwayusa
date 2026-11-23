@@ -25,9 +25,9 @@ if [ -d dist/assets/node_modules ]; then
   mv dist/assets/node_modules dist/assets/vendor_modules
 
   echo "==> Patching references to the old path..."
-  grep -rlZ "assets/node_modules" dist 2>/dev/null | while IFS= read -r -d '' f; do
+  while IFS= read -r f; do
     sed -i '' 's#assets/node_modules#assets/vendor_modules#g' "$f"
-  done
+  done < <(grep -rl "assets/node_modules" dist 2>/dev/null)
 fi
 
 echo "==> Deploying to Cloudflare Pages (pathwayusa-app)..."
