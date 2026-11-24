@@ -45,9 +45,13 @@ export default function NewsHomeCard({ navigation, userCtx }) {
     fetchVideos(1).then(setVideos);
   }, []);
 
-  if (!items || items.length === 0) return null; // nothing official yet: show nothing, never filler
   const topVideo = videos[0];
-  const topArticles = sortForUser(items, userCtx).slice(0, 2);
+  const hasArticles = !!items && items.length > 0;
+  // Videos and articles come from independent sources (YouTube sync vs. the
+  // AI news pipeline) and can go quiet separately — show whichever is ready
+  // rather than hiding a ready video behind an empty article list.
+  if (!topVideo && !hasArticles) return null; // nothing official yet: show nothing, never filler
+  const topArticles = hasArticles ? sortForUser(items, userCtx).slice(0, 2) : [];
 
   return (
     <View style={styles.card}>
