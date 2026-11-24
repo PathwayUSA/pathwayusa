@@ -524,19 +524,3 @@ export function getStatusLabel(status) {
   };
   return labels[status] ?? status;
 }
-
-/**
- * Returns a short label for a goal key.
- */
-export function getGoalLabel(goal) {
-  const labels = {
-    green_card:   'Get a Green Card',
-    citizenship:  'U.S. Citizenship',
-    extend_renew: 'Extend / Renew Status',
-    family:       'Bring Family to the U.S.',
-    work_auth:    'Work Authorization',
-    asylum:       'Asylum / Refugee Status',
-    other:        'Other / Not Sure',
-  };
-  return labels[goal] ?? goal;
-}

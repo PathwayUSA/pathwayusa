@@ -98,7 +98,7 @@ const PLACEHOLDER_RESOURCES = [
 
 function makeStyles(colors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     // Header
     header: { paddingHorizontal: 20, paddingBottom: 24 },

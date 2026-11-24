@@ -199,7 +199,7 @@ function makeStyles(colors) {
     leadsBadgeTxt:      { fontSize: 11, fontWeight: '900', color: '#fff' },
     leadsScroll:        { paddingHorizontal: 16, paddingBottom: 4, gap: 10 },
 
-    leadCard:     { width: 240, backgroundColor: '#F5F7F5', borderRadius: 14, padding: 14, gap: 8, borderWidth: 1, borderColor: '#E8ECE8' },
+    leadCard:     { width: 240, backgroundColor: colors.background, borderRadius: 14, padding: 14, gap: 8, borderWidth: 1, borderColor: '#E8ECE8' },
     leadCardTop:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
     leadAvatar:   { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
     leadAvatarTxt:{ fontSize: 14, fontWeight: '900', color: '#fff' },

@@ -231,10 +231,6 @@ export function getStepTitle(stepId) {
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
-export function sanitizeDocName(name) {
-  return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-}
-
 export function getStatusTheme(status) {
   switch (status) {
     case 'approved':       return { bg: '#e8f5e9', text: '#388e3c', label: 'Approved',       icon: 'checkmark-circle'  };

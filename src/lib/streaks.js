@@ -70,15 +70,3 @@ export async function checkAndUpdateStreak(userId) {
 
   return { streak: newStreak, isNew: newStreak > (current_streak || 0), milestone, froze, broken, previousStreak: current_streak };
 }
-
-export async function getStreakFreezes(userId) {
-  const thisMonth = new Date().toISOString().substring(0, 7);
-  const { data } = await supabase
-    .from('profiles')
-    .select('streak_freezes_remaining, streak_freeze_month')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (!data || data.streak_freeze_month !== thisMonth) return FREEZE_MONTHLY_ALLOWANCE;
-  return data.streak_freezes_remaining ?? FREEZE_MONTHLY_ALLOWANCE;
-}

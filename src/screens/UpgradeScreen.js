@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSubscription } from '../context/SubscriptionContext';
+import { useTheme } from '../context/ThemeContext';
 import { startCheckout, openBillingPortal } from '../services/stripe';
 import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { successHaptic, lightHaptic } from '../utils/haptics';
@@ -42,6 +43,7 @@ const WHY_UPGRADE = [
 
 export default function UpgradeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const { isPro, isFree, loading, refresh } = useSubscription();
   const [purchasing, setPurchasing] = useState(false);
   const [restoring,  setRestoring]  = useState(false);
@@ -90,14 +92,14 @@ export default function UpgradeScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F7F5' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator color={NAVY} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F5F7F5' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* ── HERO (navy gradient) ── */}

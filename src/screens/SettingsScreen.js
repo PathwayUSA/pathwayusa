@@ -8,12 +8,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
-import { THEME_DEFINITIONS } from '../themes';
 import { isNewsAdmin } from '../lib/news';
 import { useAuth, REDIRECT_URL } from '../context/AuthContext';
 import { useVisualEffects } from '../context/VisualEffectsContext';
 import { supabase } from '../lib/supabase';
-import { useSubscription } from '../hooks/useSubscription';
+import { useSubscription } from '../context/SubscriptionContext';
 import { openBillingPortal } from '../services/stripe';
 import { useHelperTips } from '../context/HelperTipsContext';
 import { useFirstLaunch } from '../context/FirstLaunchContext';
@@ -25,13 +24,13 @@ import { SectionHeader, RowLink, RowToggle } from '../components/SettingsRow';
 const ZIP_KEY = '@pathwayusa/user_zip_code';
 
 export default function SettingsScreen({ navigation }) {
-  const { colors, themeName } = useTheme();
+  const { colors } = useTheme();
   const { profile, user, updateProfile, signOut, deleteAccount, refreshProfile } = useAuth();
   const [newsAdmin, setNewsAdmin] = useState(false);
   useEffect(() => { isNewsAdmin(user?.id).then(setNewsAdmin).catch(() => {}); }, [user?.id]);
   const { enabled: vfxEnabled, toggle: toggleVfx } = useVisualEffects();
   const insets = useSafeAreaInsets();
-  const { plan, isPro, isFree, subscriptionStatus, renewsAt, refresh: refreshSub } = useSubscription();
+  const { isPro, isFree, subscription, refresh: refreshSub } = useSubscription();
   const { tipsEnabled, setTipsEnabled } = useHelperTips();
   const { replay: replayIntro } = useFirstLaunch();
 
@@ -147,13 +146,8 @@ export default function SettingsScreen({ navigation }) {
           iconColor={colors.primary}
           onPress={() => navigation.navigate('MyImmigrationProfileSettings')}
         />
-        <View style={styles.divider} />
-        <RowLink
-          icon="color-palette-outline" label="App Colors"
-          iconColor={colors.primary}
-          value={THEME_DEFINITIONS[themeName]?.name}
-          onPress={() => navigation.navigate('ThemeSettings')}
-        />
+        {/* TEMP: hidden until ThemeSettingsScreen exists on disk — this row
+            currently navigates to a route that isn't registered and crashes. */}
         {newsAdmin && (
           <>
             <View style={styles.divider} />
@@ -260,15 +254,15 @@ export default function SettingsScreen({ navigation }) {
               {isPro ? 'PRO' : 'FREE'}
             </Text>
           </View>
-          {subscriptionStatus ? (
+          {subscription?.status ? (
             <Text style={styles.subStatusTxt}>
-              {subscriptionStatus === 'active' ? 'Active' : subscriptionStatus}
+              {subscription.status === 'active' ? 'Active' : subscription.status}
             </Text>
           ) : null}
         </View>
-        {renewsAt ? (
+        {subscription?.current_period_end ? (
           <Text style={styles.subRenewsTxt}>
-            {'Renews ' + new Date(renewsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            {'Renews ' + new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </Text>
         ) : null}
         {isPro ? (

@@ -471,10 +471,3 @@ export async function scheduleAllUserNotifications({
     await cancelWeeklySummary();
   }
 }
-
-// Legacy stubs kept for API compatibility
-export async function scheduleStreakReminder()            {}
-export async function scheduleMorningMotivation()         {}
-export async function scheduleWeeklySummaryNotification() {}
-export async function scheduleInactivityNotification()    {}
-export async function scheduleMilestoneNotification()     {}

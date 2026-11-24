@@ -40,7 +40,7 @@ function getHelpItems(colors) {
 
 function makeStyles(colors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     // Header
     header: {
@@ -85,7 +85,7 @@ function makeStyles(colors) {
 
     // What you'll need grid
     needGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    needTile: { width: (width - 80) / 2, backgroundColor: '#F5F7F5', borderRadius: 12, padding: 12, gap: 6, alignItems: 'flex-start' },
+    needTile: { width: (width - 80) / 2, backgroundColor: colors.background, borderRadius: 12, padding: 12, gap: 6, alignItems: 'flex-start' },
     needTileTxt: { fontSize: 12, fontWeight: '700', color: '#1A1A2E', lineHeight: 17 },
 
     // Primary CTA
@@ -114,7 +114,7 @@ function makeStyles(colors) {
 
     // Documents tab
     docRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
-    docDivider: { height: 1, backgroundColor: '#F5F7F5', marginLeft: 36 },
+    docDivider: { height: 1, backgroundColor: colors.background, marginLeft: 36 },
     docName: { fontSize: 14, color: '#1A1A2E', fontWeight: '600', flex: 1 },
     docBadge: { fontSize: 11, fontWeight: '800', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
 
@@ -129,7 +129,7 @@ function makeStyles(colors) {
 
     // Help tab
     helpRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 16, paddingHorizontal: 20 },
-    helpDivider: { height: 1, backgroundColor: '#F5F7F5', marginLeft: 70 },
+    helpDivider: { height: 1, backgroundColor: colors.background, marginLeft: 70 },
     helpIconWrap: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
     helpLabel: { fontSize: 15, fontWeight: '800', color: '#1A1A2E', flex: 1 },
     helpSub: { fontSize: 12, color: '#7F8C8D', marginTop: 2 },
@@ -774,7 +774,7 @@ export default function StepMissionScreen({ route, navigation }) {
 
   if (!step) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F7F5' }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
         <Text style={{ color: '#7F8C8D' }}>No step data found.</Text>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16 }}>
           <Text style={{ color: colors.primary, fontWeight: '700' }}>Go Back</Text>

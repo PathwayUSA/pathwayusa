@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { useSubscription } from '../../hooks/useSubscription';
+import { useSubscription } from '../../context/SubscriptionContext';
 import { rowStyles, SectionHeader, RowToggle } from '../../components/SettingsRow';
 import {
   registerForPushNotifications,

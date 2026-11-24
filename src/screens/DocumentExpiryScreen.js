@@ -16,6 +16,7 @@ import {
   scheduleDocumentExpiryNotifications,
   cancelDocumentExpiryNotifications,
 } from '../lib/notifications';
+import { formatDate, daysUntil, URGENCY_COLORS } from '../lib/dates';
 
 const DOC_TYPES = [
   { key: 'green_card',   label: 'Green Card',    icon: 'card-outline' },
@@ -31,21 +32,10 @@ function docTypeInfo(key) {
   return DOC_TYPES.find((t) => t.key === key) ?? DOC_TYPES[DOC_TYPES.length - 1];
 }
 
-function formatDate(iso) {
-  if (!iso) return '';
-  return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-  });
-}
-
-function daysUntil(iso) {
-  return Math.ceil((new Date(iso + 'T12:00:00') - new Date()) / 86400000);
-}
-
 function urgencyColor(days) {
-  if (days > 180) return '#27AE60';
-  if (days > 60) return '#E67E22';
-  return '#E74C3C';
+  if (days > 180) return URGENCY_COLORS.ok;
+  if (days > 60) return URGENCY_COLORS.soon;
+  return URGENCY_COLORS.now;
 }
 
 function urgencyTone(days) {

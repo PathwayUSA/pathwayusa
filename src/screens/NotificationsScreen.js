@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase';
 import { SHADOWS, TYPOGRAPHY } from '../theme';
 import { lightHaptic } from '../utils/haptics';
 import { BADGE_DEFS } from '../lib/badges';
+import { daysUntil } from '../lib/dates';
 
 const NOTIF_READ_KEY = '@pathwayusa/notifications_read_ids';
 
@@ -27,10 +28,6 @@ const INACTIVITY_STYLE = { icon: 'map', color: '#7F8C8D', bg: '#F5F7F5' };
 const INACTIVITY_DAYS = 14;
 const DEADLINE_WINDOW_DAYS = 30;
 const DOC_EXPIRY_WINDOW_DAYS = 90;
-
-function daysUntil(iso) {
-  return Math.ceil((new Date(iso + 'T12:00:00') - new Date()) / 86400000);
-}
 
 function dueLabel(days) {
   if (days === 0) return 'today';
@@ -265,7 +262,7 @@ export default function NotificationsScreen({ navigation }) {
 
 function makeStyles(colors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     header: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

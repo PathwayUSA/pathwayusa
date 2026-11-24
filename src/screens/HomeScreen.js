@@ -30,7 +30,7 @@ import {
   markNotificationPermissionAsked,
 } from '../lib/notifications';
 import { useLanguage } from '../i18n';
-import { useSubscription } from '../hooks/useSubscription';
+import { useSubscription } from '../context/SubscriptionContext';
 
 const { width } = Dimensions.get('window');
 const INTAKE_DATA_KEY    = ONBOARDING_DATA_KEY;

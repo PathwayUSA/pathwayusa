@@ -96,22 +96,9 @@ create policy "Admins read reports"
 --   select id from auth.users where email = 'YOUR_EMAIL_HERE'
 --   on conflict do nothing;
 
--- ── 5. Check for news twice a day (8:05am and 4:05pm Eastern) ────────────────
--- Uses the same Vault secrets as the USCIS daily check. Uncomment and run.
--- select cron.schedule(
---   'immigration-news-check',
---   '5 12,20 * * *',
---   $$
---   select net.http_post(
---     url     := (select decrypted_secret from vault.decrypted_secrets where name = 'project_url')
---                || '/functions/v1/news-ingest',
---     headers := jsonb_build_object(
---                  'Content-Type', 'application/json',
---                  'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'uscis_cron_secret')),
---     body    := '{}'::jsonb
---   );
---   $$
--- );
+-- ── 5. Check for news twice a day ────────────────────────────────────────────
+-- Actual cron setup lives in supabase/news_ingest_cron.sql, which creates its
+-- own independent Vault secret (news_cron_secret) — run that file instead.
 
 -- ════════════════════════════════════════════════════════════════════════════
 -- Official videos (YouTube channels of government agencies only)

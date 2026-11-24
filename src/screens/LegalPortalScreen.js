@@ -37,7 +37,7 @@ const HOW_IT_WORKS = [
 
 function makeStyles(colors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     // Header
     header: { paddingHorizontal: 24, paddingBottom: 28, alignItems: 'center', gap: 8 },
@@ -138,7 +138,7 @@ export default function LegalPortalScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F7F5' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator color={colors.primary} />
       </View>
     );

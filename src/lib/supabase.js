@@ -26,20 +26,3 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     flowType: isWeb ? 'pkce' : 'implicit',
   },
 });
-
-// Call this from any screen to verify the connection is live.
-// Returns { ok: true } on success or { ok: false, error: string } on failure.
-export async function testConnection() {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
-      headers: { apikey: SUPABASE_ANON_KEY },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      return { ok: true, version: json.version };
-    }
-    return { ok: false, error: `HTTP ${res.status}` };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
-}

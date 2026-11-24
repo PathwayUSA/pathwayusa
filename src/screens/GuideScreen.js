@@ -31,7 +31,7 @@ function stepIcon(index) {
 
 function makeStyles(colors) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F5F7F5' },
+    container: { flex: 1, backgroundColor: colors.background },
 
     // Header
     header: { paddingHorizontal: 24, paddingBottom: 28 },
@@ -41,7 +41,7 @@ function makeStyles(colors) {
 
     // Single continuous list
     stepLine: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 20, marginTop: 8, backgroundColor: '#fff', borderRadius: 14, paddingVertical: 12, paddingHorizontal: 15, opacity: 0.62 },
-    stepLineLocked: { opacity: 1, backgroundColor: '#F5F7F5' },
+    stepLineLocked: { opacity: 1, backgroundColor: colors.background },
     stepLineTitle: { fontSize: 14, fontWeight: '600', color: '#1A1A2E', flex: 1 },
     stepLineTitleLocked: { color: '#7F8C8D' },
     stepLineMeta: { fontSize: 12, color: '#BDC3C7' },
@@ -125,7 +125,7 @@ export default function GuideScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F7F5' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );

@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SHADOWS, TYPOGRAPHY } from '../theme';
+import { COLORS, SHADOWS, TYPOGRAPHY } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { useSpeech } from '../hooks/useSpeech';
@@ -75,7 +75,9 @@ Sincerely,
   {
     id: 'criminal',
     icon: 'shield-outline',
-    color: '#2A8B7A',
+    // Only RFE type that keeps a distinct (red) color — it genuinely
+    // indicates a more serious problem than the others, which are all teal.
+    color: COLORS.error,
     title: 'Criminal History Questions',
     what: 'USCIS has questions about your criminal history — arrests, charges, or convictions disclosed on your application.',
     documents: [
