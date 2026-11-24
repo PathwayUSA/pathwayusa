@@ -19,12 +19,15 @@ begin
   end if;
 end $$;
 
--- news-ingest's own secret.
+-- news-ingest's own secret. Only creates it if missing — this file is safe
+-- to re-run, but it will NOT rotate an existing secret to a new value (use
+-- rotate_news_cron_secret.sql for that). Replace the placeholder below only
+-- the first time this ever runs on a fresh project.
 do $$
 begin
   if not exists (select 1 from vault.decrypted_secrets where name = 'news_cron_secret') then
     perform vault.create_secret(
-      'ed29b9392c4a77b045d899d64654c271082956b72957cb83b3481977f90a6f6c',
+      'REPLACE_WITH_A_FRESH_RANDOM_VALUE_MATCHING_NEWS_CRON_SECRET',
       'news_cron_secret',
       'Shared secret for news-ingest cron calls — matches the NEWS_CRON_SECRET edge function secret'
     );
