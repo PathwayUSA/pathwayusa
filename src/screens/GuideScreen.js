@@ -16,6 +16,7 @@ import { getPathway } from '../lib/pathwayRouter';
 import { ONBOARDING_KEY, ONBOARDING_DATA_KEY } from './onboarding/IntakeStack';
 import { useOnboardingRefresh } from '../context/OnboardingContext';
 import { useLanguage } from '../i18n';
+import PathwayMap from '../components/PathwayMap';
 
 // ─── Generic step icons ───────────────────────────────────────────────────────
 
@@ -38,13 +39,6 @@ function makeStyles(colors) {
     headerTopBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
     headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     headerSub: { fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 4, lineHeight: 20 },
-
-    // Single continuous list
-    stepLine: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 20, marginTop: 8, backgroundColor: '#fff', borderRadius: 14, paddingVertical: 12, paddingHorizontal: 15, opacity: 0.62 },
-    stepLineLocked: { opacity: 1, backgroundColor: colors.background },
-    stepLineTitle: { fontSize: 14, fontWeight: '600', color: '#1A1A2E', flex: 1 },
-    stepLineTitleLocked: { color: '#7F8C8D' },
-    stepLineMeta: { fontSize: 12, color: '#BDC3C7' },
 
     // Current step card
     currentStepCard: { marginHorizontal: 20, marginTop: 16, backgroundColor: '#fff', borderRadius: 20, borderLeftWidth: 5, borderLeftColor: colors.primary, padding: 20, gap: 12, ...SHADOWS.small },
@@ -155,66 +149,57 @@ export default function GuideScreen({ navigation }) {
     </View>
   );
 
-  // ── Single continuous list: done steps dimmed, active step expanded, future steps locked ──
+  // ── Winding path map: visual position communicates progress, with the
+  // current step's full task detail expanded in a card right below it ──
+
+  const stepStatuses = steps.map((step, i) => {
+    const isDone    = completedStepIds.has(String(step.id)) || i < completedCount;
+    const isCurrent = i === currentStepIndex && journeyPct < 100;
+    return isDone ? 'done' : isCurrent ? 'current' : 'locked';
+  });
 
   const PathView = !pathway ? NoPathwayView : (
     <>
-      {steps.map((step, i) => {
-        const isDone    = completedStepIds.has(String(step.id)) || i < completedCount;
-        const isCurrent = i === currentStepIndex && journeyPct < 100;
-        const isLocked  = !isDone && !isCurrent;
+      <PathwayMap
+        steps={steps}
+        statuses={stepStatuses}
+        colors={colors}
+        onPressStep={(step, i) => {
+          navigation.navigate('StepMission', { step, stepIndex: i, totalSteps, pathway, steps });
+        }}
+      />
 
-        if (isCurrent) {
-          return (
-            <View key={step.id} style={styles.currentStepCard}>
-              <View style={styles.currentStepTopRow}>
-                <View style={styles.currentStepIconWrap}>
-                  <Ionicons name={stepIcon(i)} size={22} color={colors.primary} />
-                </View>
-                <Text style={styles.currentStepBadge}>YOU ARE HERE · STEP {i + 1} OF {totalSteps}</Text>
-              </View>
-              <Text style={styles.currentStepTitle}>{step.title}</Text>
-              {step.description ? (
-                <Text style={styles.currentStepDesc} numberOfLines={3}>
-                  {step.description}
-                </Text>
-              ) : null}
-              {step.timeframe ? (
-                <Text style={styles.currentStepTime}>{step.timeframe}</Text>
-              ) : null}
-              <TouchableOpacity
-                style={styles.continueBtn}
-                onPress={() => {
-                  mediumHaptic();
-                  navigation.navigate('StepMission', {
-                    step, stepIndex: i, totalSteps, pathway, steps,
-                  });
-                }}
-                activeOpacity={0.85}
-              >
-                <Text style={styles.continueBtnTxt}>Continue Step →</Text>
-              </TouchableOpacity>
+      {currentStep && journeyPct < 100 && (
+        <View style={styles.currentStepCard}>
+          <View style={styles.currentStepTopRow}>
+            <View style={styles.currentStepIconWrap}>
+              <Ionicons name={stepIcon(currentStepIndex)} size={22} color={colors.primary} />
             </View>
-          );
-        }
-
-        return (
-          <View
-            key={step.id}
-            style={[styles.stepLine, isLocked && styles.stepLineLocked]}
-          >
-            <Ionicons
-              name={isDone ? 'checkmark-circle' : 'lock-closed-outline'}
-              size={20}
-              color={isDone ? colors.primary : '#B4B2A9'}
-            />
-            <Text style={[styles.stepLineTitle, isLocked && styles.stepLineTitleLocked]} numberOfLines={1}>
-              {step.title}
-            </Text>
-            <Text style={styles.stepLineMeta}>{isDone ? 'Done' : 'Locked'}</Text>
+            <Text style={styles.currentStepBadge}>STEP {currentStepIndex + 1} OF {totalSteps}</Text>
           </View>
-        );
-      })}
+          <Text style={styles.currentStepTitle}>{currentStep.title}</Text>
+          {currentStep.description ? (
+            <Text style={styles.currentStepDesc} numberOfLines={3}>
+              {currentStep.description}
+            </Text>
+          ) : null}
+          {currentStep.timeframe ? (
+            <Text style={styles.currentStepTime}>{currentStep.timeframe}</Text>
+          ) : null}
+          <TouchableOpacity
+            style={styles.continueBtn}
+            onPress={() => {
+              mediumHaptic();
+              navigation.navigate('StepMission', {
+                step: currentStep, stepIndex: currentStepIndex, totalSteps, pathway, steps,
+              });
+            }}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.continueBtnTxt}>Continue Step →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {journeyPct === 100 && (
         <View style={{ marginHorizontal: 20, marginTop: 16, backgroundColor: '#EAF7EE', borderRadius: 20, padding: 24, alignItems: 'center', gap: 12 }}>
