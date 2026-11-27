@@ -1,16 +1,29 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { TYPOGRAPHY } from '../theme';
 import { lightHaptic, mediumHaptic } from '../utils/haptics';
 
 const { width: SCREEN_W } = Dimensions.get('window');
-const NODE_SIZE = 58;
-const CURRENT_NODE_SIZE = 76;
-const ROW_HEIGHT = 200;
-const BADGE_SPACE = 26;
-const LABEL_WIDTH = 200;
+// Sizes below are the original design x1.35 — approved at that scale after
+// a 1.5x mockup read as too big.
+const NODE_SIZE = 78;
+const CURRENT_NODE_SIZE = 103;
+const ROW_HEIGHT = 270;
+const BADGE_SPACE = 35;
+const LABEL_WIDTH = 270;
+
+// Brick-road styling for the "walked" portion of the path (everything
+// behind/at the current step) — approved from a mockup: a shadow layer for
+// lift, a terracotta base, a lighter highlight stripe, and rotated mortar
+// ticks computed along the real bezier curve so they actually follow the
+// path's direction rather than just being decoration laid on top.
+const BRICK_SHADOW = '#7A3E1D';
+const BRICK_BASE = '#A85A32';
+const BRICK_HIGHLIGHT = '#E0996A';
+const BRICK_MORTAR = '#8A4A26';
+const BRICK_TICKS_PER_SEGMENT = 4;
 // Keep enough margin for the wider label (half its width) plus half the
 // largest node, so neither clips off the edge of a narrow phone screen.
 const AMPLITUDE = Math.min(SCREEN_W * 0.2, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
@@ -68,6 +81,63 @@ function segmentPath(x0, y0, x1, y1) {
   return `M ${x0},${y0} C ${x0},${y0 + dy} ${x1},${y1 - dy} ${x1},${y1}`;
 }
 
+// The two control points segmentPath implies for a given (x0,y0)->(x1,y1)
+// — needed separately here to sample points/tangents along the same curve
+// for the brick-road mortar ticks below.
+function segmentControlPoints(x0, y0, x1, y1) {
+  const dy = (y1 - y0) / 2;
+  return { cx0: x0, cy0: y0 + dy, cx1: x1, cy1: y1 - dy };
+}
+
+function cubicBezierPoint(p0, c0, c1, p1, t) {
+  const mt = 1 - t;
+  const x = mt ** 3 * p0.x + 3 * mt ** 2 * t * c0.x + 3 * mt * t ** 2 * c1.x + t ** 3 * p1.x;
+  const y = mt ** 3 * p0.y + 3 * mt ** 2 * t * c0.y + 3 * mt * t ** 2 * c1.y + t ** 3 * p1.y;
+  return { x, y };
+}
+
+function cubicBezierTangentAngle(p0, c0, c1, p1, t) {
+  const mt = 1 - t;
+  const dx = 3 * mt ** 2 * (c0.x - p0.x) + 6 * mt * t * (c1.x - c0.x) + 3 * t ** 2 * (p1.x - c1.x);
+  const dy = 3 * mt ** 2 * (c0.y - p0.y) + 6 * mt * t * (c1.y - c0.y) + 3 * t ** 2 * (p1.y - c1.y);
+  return (Math.atan2(dy, dx) * 180) / Math.PI;
+}
+
+/** The thick, textured "walked" road — shadow + base + highlight strokes
+ * on the real curve, plus mortar-seam ticks sampled at points along it and
+ * rotated to the curve's actual local direction (not just laid on flat). */
+function BrickSegment({ x0, y0, x1, y1 }) {
+  const d = segmentPath(x0, y0, x1, y1);
+  const { cx0, cy0, cx1, cy1 } = segmentControlPoints(x0, y0, x1, y1);
+  const p0 = { x: x0, y: y0 }, c0 = { x: cx0, y: cy0 }, c1 = { x: cx1, y: cy1 }, p1 = { x: x1, y: y1 };
+
+  const ticks = [];
+  for (let i = 1; i <= BRICK_TICKS_PER_SEGMENT; i++) {
+    const t = i / (BRICK_TICKS_PER_SEGMENT + 1);
+    const pt = cubicBezierPoint(p0, c0, c1, p1, t);
+    const angle = cubicBezierTangentAngle(p0, c0, c1, p1, t) + 90;
+    ticks.push({ ...pt, angle });
+  }
+
+  return (
+    <>
+      <Path d={d} stroke={BRICK_SHADOW} strokeWidth={19} strokeLinecap="round" fill="none" opacity={0.25} transform="translate(2,3)" />
+      <Path d={d} stroke={BRICK_BASE} strokeWidth={19} strokeLinecap="round" fill="none" />
+      <Path d={d} stroke={BRICK_HIGHLIGHT} strokeWidth={6} strokeLinecap="round" fill="none" opacity={0.55} transform="translate(-2,-2)" />
+      {ticks.map((tk, i) => (
+        <Line
+          key={i}
+          x1={tk.x - 9} y1={tk.y} x2={tk.x + 9} y2={tk.y}
+          stroke={BRICK_MORTAR}
+          strokeWidth={2.2}
+          opacity={0.85}
+          transform={`rotate(${tk.angle} ${tk.x} ${tk.y})`}
+        />
+      ))}
+    </>
+  );
+}
+
 function PathNode({ step, index, status, colors, onPress }) {
   const shake = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
@@ -111,7 +181,7 @@ function PathNode({ step, index, status, colors, onPress }) {
     // circle itself always lands at the same offset from `y` — otherwise
     // the current node's badge would push just that one node down,
     // misaligning it from where the SVG path math expects its center.
-    <View style={{ position: 'absolute', left: x - size / 2 - 4, top: y - size / 2 - 4 - BADGE_SPACE, width: size + 8, alignItems: 'center' }}>
+    <View style={{ position: 'absolute', left: x - size / 2 - 5, top: y - size / 2 - 5 - BADGE_SPACE, width: size + 10, alignItems: 'center' }}>
       <View style={{ height: BADGE_SPACE, justifyContent: 'flex-end' }}>
         {status === 'current' && (
           <View style={[styles.hereBadge, { backgroundColor: colors.primaryDark }]}>
@@ -122,17 +192,17 @@ function PathNode({ step, index, status, colors, onPress }) {
       <Animated.View
         style={{
           transform: [
-            { translateX: shake.interpolate({ inputRange: [-1, 1], outputRange: [-6, 6] }) },
+            { translateX: shake.interpolate({ inputRange: [-1, 1], outputRange: [-8, 8] }) },
             { scale: status === 'current' ? pulse : 1 },
           ],
         }}
       >
         {status === 'current' && (
           <>
-            <View style={[styles.haloOuter, { width: size + 36, height: size + 36, borderRadius: (size + 36) / 2, borderColor: colors.primary, left: -18, top: -18 }]} />
-            <View style={[styles.halo, { width: size + 20, height: size + 20, borderRadius: (size + 20) / 2, borderColor: colors.primary, left: -10, top: -10 }]} />
-            <Text style={[styles.sparkle, { color: colors.secondary, right: -14, top: -2 }]}>✦</Text>
-            <Text style={[styles.sparkle, { color: colors.secondary, left: -10, bottom: 6, fontSize: 11 }]}>✦</Text>
+            <View style={[styles.haloOuter, { width: size + 49, height: size + 49, borderRadius: (size + 49) / 2, borderColor: colors.primary, left: -24, top: -24 }]} />
+            <View style={[styles.halo, { width: size + 27, height: size + 27, borderRadius: (size + 27) / 2, borderColor: colors.primary, left: -14, top: -14 }]} />
+            <Text style={[styles.sparkle, { color: colors.secondary, right: -19, top: -3 }]}>✦</Text>
+            <Text style={[styles.sparkle, { color: colors.secondary, left: -14, bottom: 8, fontSize: 15 }]}>✦</Text>
           </>
         )}
         <TouchableOpacity
@@ -141,19 +211,19 @@ function PathNode({ step, index, status, colors, onPress }) {
           style={[
             styles.node,
             { width: size, height: size, borderRadius: size / 2, backgroundColor: bg },
-            status === 'done' && { borderWidth: 3, borderColor: colors.primaryDark },
+            status === 'done' && { borderWidth: 4, borderColor: colors.primaryDark },
           ]}
         >
-          <Ionicons name={icon} size={status === 'current' ? 30 : 22} color={iconColor} />
+          <Ionicons name={icon} size={status === 'current' ? 40 : 30} color={iconColor} />
         </TouchableOpacity>
         {status === 'done' && (
           <View style={[styles.doneBadge, { backgroundColor: colors.secondary, borderColor: colors.background }]}>
-            <Ionicons name="checkmark" size={11} color="#fff" />
+            <Ionicons name="checkmark" size={15} color="#fff" />
           </View>
         )}
         {status === 'locked' && (
           <View style={[styles.doneBadge, { backgroundColor: colors.textLight, borderColor: colors.background }]}>
-            <Ionicons name="lock-closed" size={10} color="#fff" />
+            <Ionicons name="lock-closed" size={13} color="#fff" />
           </View>
         )}
       </Animated.View>
@@ -192,7 +262,7 @@ export default function PathwayMap({ steps, statuses, colors, onPressStep }) {
   for (let i = 0; i < steps.length - 1; i++) {
     // A segment is "walked" once the node it leads into is done or current.
     const walked = statuses[i + 1] === 'done' || statuses[i + 1] === 'current';
-    segments.push({ d: segmentPath(nodeX(i), nodeY(i), nodeX(i + 1), nodeY(i + 1)), walked });
+    segments.push({ x0: nodeX(i), y0: nodeY(i), x1: nodeX(i + 1), y1: nodeY(i + 1), walked });
   }
 
   return (
@@ -201,15 +271,19 @@ export default function PathwayMap({ steps, statuses, colors, onPressStep }) {
       <View style={[styles.blob, { right: -40, top: mapHeight * 0.55, width: 160, height: 160, borderRadius: 80, backgroundColor: colors.navy, opacity: 0.04 }]} />
       <Svg width="100%" height={mapHeight} style={{ position: 'absolute' }}>
         {segments.map((seg, i) => (
-          <Path
-            key={i}
-            d={seg.d}
-            stroke={seg.walked ? colors.primary : colors.border}
-            strokeWidth={6}
-            strokeLinecap="round"
-            fill="none"
-            strokeDasharray={seg.walked ? undefined : '2 12'}
-          />
+          seg.walked ? (
+            <BrickSegment key={i} x0={seg.x0} y0={seg.y0} x1={seg.x1} y1={seg.y1} />
+          ) : (
+            <Path
+              key={i}
+              d={segmentPath(seg.x0, seg.y0, seg.x1, seg.y1)}
+              stroke={colors.border}
+              strokeWidth={9}
+              strokeLinecap="round"
+              fill="none"
+              strokeDasharray="2 13"
+            />
+          )
         ))}
       </Svg>
       {steps.map((step, i) => (
@@ -241,53 +315,53 @@ const styles = StyleSheet.create({
   },
   halo: {
     position: 'absolute',
-    borderWidth: 2,
+    borderWidth: 3,
     opacity: 0.35,
   },
   haloOuter: {
     position: 'absolute',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderStyle: 'dashed',
     opacity: 0.22,
   },
   sparkle: {
     position: 'absolute',
-    fontSize: 14,
+    fontSize: 19,
     fontWeight: '900',
   },
   doneBadge: {
     position: 'absolute',
-    top: -3,
-    right: -3,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
+    top: -4,
+    right: -4,
+    width: 27,
+    height: 27,
+    borderRadius: 14,
+    borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
   },
   hereBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginBottom: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 4,
+    borderRadius: 11,
+    marginBottom: 8,
   },
   hereBadgeTxt: {
-    fontSize: 9.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#fff',
     letterSpacing: 0.5,
   },
   label: {
-    marginTop: 8,
-    fontSize: 11.5,
+    marginTop: 11,
+    fontSize: 15.5,
     fontWeight: '700',
     textAlign: 'center',
     width: LABEL_WIDTH,
-    lineHeight: 15,
+    lineHeight: 20,
   },
   labelCurrent: {
     fontFamily: TYPOGRAPHY.headingFamily,
-    fontSize: 12.5,
+    fontSize: 17,
   },
 });
