@@ -4,6 +4,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,6 +40,8 @@ function makeStyles(colors) {
     headerTopBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
     headerTitle: { fontFamily: TYPOGRAPHY.displayFamily, fontSize: TYPOGRAPHY.displaySize, letterSpacing: TYPOGRAPHY.displayLetterSpacing, color: '#fff', lineHeight: TYPOGRAPHY.displayLineHeight },
     headerSub: { fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 4, lineHeight: 20 },
+    progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16 },
+    progressTxt: { fontSize: 12.5, fontWeight: '600', color: '#fff' },
 
     // Current step card
     currentStepCard: { marginHorizontal: 20, marginTop: 16, backgroundColor: '#fff', borderRadius: 20, borderLeftWidth: 5, borderLeftColor: colors.primary, padding: 20, gap: 12, ...SHADOWS.small },
@@ -47,7 +50,9 @@ function makeStyles(colors) {
     currentStepIconWrap: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.primary + '18', alignItems: 'center', justifyContent: 'center' },
     currentStepTitle: { fontSize: 17, fontWeight: '900', color: '#1A1A2E', lineHeight: 24 },
     currentStepDesc: { fontSize: 14, color: '#7F8C8D', lineHeight: 21 },
-    currentStepTime: { fontSize: 12, color: '#BDC3C7', fontWeight: '600' },
+    chipRow: { flexDirection: 'row', gap: 8, marginTop: 2 },
+    chip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.background, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+    chipTxt: { fontSize: 11, fontWeight: '600', color: colors.textSecondary },
     continueBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: colors.primary, borderRadius: 14, height: 52 },
     continueBtnTxt: { fontSize: 16, fontWeight: '900', color: '#fff' },
 
@@ -183,9 +188,22 @@ export default function GuideScreen({ navigation }) {
               {currentStep.description}
             </Text>
           ) : null}
-          {currentStep.timeframe ? (
-            <Text style={styles.currentStepTime}>{currentStep.timeframe}</Text>
-          ) : null}
+          {(currentStep.timeframe || currentStep.form) && (
+            <View style={styles.chipRow}>
+              {currentStep.timeframe ? (
+                <View style={styles.chip}>
+                  <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
+                  <Text style={styles.chipTxt}>{currentStep.timeframe}</Text>
+                </View>
+              ) : null}
+              {currentStep.form ? (
+                <View style={styles.chip}>
+                  <Ionicons name="document-text-outline" size={12} color={colors.textSecondary} />
+                  <Text style={styles.chipTxt}>{currentStep.form}</Text>
+                </View>
+              ) : null}
+            </View>
+          )}
           <TouchableOpacity
             style={styles.continueBtn}
             onPress={() => {
@@ -240,6 +258,25 @@ export default function GuideScreen({ navigation }) {
               <Ionicons name="notifications-outline" size={20} color="rgba(255,255,255,0.85)" />
             </TouchableOpacity>
           </View>
+          {pathway && totalSteps > 0 && (
+            <View style={styles.progressRow}>
+              <Svg width={34} height={34}>
+                <Circle cx={17} cy={17} r={14} stroke="rgba(255,255,255,0.25)" strokeWidth={4} fill="none" />
+                <Circle
+                  cx={17} cy={17} r={14}
+                  stroke={colors.secondary} strokeWidth={4} fill="none"
+                  strokeDasharray={88}
+                  strokeDashoffset={88 * (1 - journeyPct / 100)}
+                  strokeLinecap="round"
+                  transform="rotate(-90 17 17)"
+                />
+              </Svg>
+              <Text style={styles.progressTxt}>
+                {completedCount} of {totalSteps} steps complete
+                {journeyPct < 100 ? ' · keep going!' : ''}
+              </Text>
+            </View>
+          )}
         </LinearGradient>
 
         {/* ── SINGLE CONTINUOUS LIST ── */}

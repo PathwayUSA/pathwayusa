@@ -98,7 +98,12 @@ function PathNode({ step, index, status, colors, onPress }) {
         }}
       >
         {status === 'current' && (
-          <View style={[styles.halo, { width: size + 20, height: size + 20, borderRadius: (size + 20) / 2, borderColor: colors.primary, left: -10, top: -10 }]} />
+          <>
+            <View style={[styles.haloOuter, { width: size + 36, height: size + 36, borderRadius: (size + 36) / 2, borderColor: colors.primary, left: -18, top: -18 }]} />
+            <View style={[styles.halo, { width: size + 20, height: size + 20, borderRadius: (size + 20) / 2, borderColor: colors.primary, left: -10, top: -10 }]} />
+            <Text style={[styles.sparkle, { color: colors.secondary, right: -14, top: -2 }]}>✦</Text>
+            <Text style={[styles.sparkle, { color: colors.secondary, left: -10, bottom: 6, fontSize: 11 }]}>✦</Text>
+          </>
         )}
         <TouchableOpacity
           onPress={handlePress}
@@ -111,6 +116,11 @@ function PathNode({ step, index, status, colors, onPress }) {
         >
           <Ionicons name={icon} size={status === 'current' ? 30 : 22} color={iconColor} />
         </TouchableOpacity>
+        {status === 'done' && (
+          <View style={[styles.doneBadge, { backgroundColor: colors.secondary, borderColor: colors.background }]}>
+            <Ionicons name="checkmark" size={11} color="#fff" />
+          </View>
+        )}
       </Animated.View>
       <Text
         style={[
@@ -146,7 +156,9 @@ export default function PathwayMap({ steps, statuses, colors, onPressStep }) {
   }
 
   return (
-    <View style={{ height: mapHeight, width: '100%' }}>
+    <View style={{ height: mapHeight, width: '100%', overflow: 'hidden' }}>
+      <View style={[styles.blob, { left: -30, top: mapHeight * 0.22, width: 140, height: 140, borderRadius: 70, backgroundColor: colors.primary, opacity: 0.05 }]} />
+      <View style={[styles.blob, { right: -40, top: mapHeight * 0.55, width: 160, height: 160, borderRadius: 80, backgroundColor: colors.navy, opacity: 0.04 }]} />
       <Svg width="100%" height={mapHeight} style={{ position: 'absolute' }}>
         {segments.map((seg, i) => (
           <Path
@@ -175,6 +187,9 @@ export default function PathwayMap({ steps, statuses, colors, onPressStep }) {
 }
 
 const styles = StyleSheet.create({
+  blob: {
+    position: 'absolute',
+  },
   node: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -188,6 +203,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderWidth: 2,
     opacity: 0.35,
+  },
+  haloOuter: {
+    position: 'absolute',
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    opacity: 0.22,
+  },
+  sparkle: {
+    position: 'absolute',
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  doneBadge: {
+    position: 'absolute',
+    top: -3,
+    right: -3,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   hereBadge: {
     paddingHorizontal: 8,
