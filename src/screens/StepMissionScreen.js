@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Animated, Dimensions, Linking, ActivityIndicator, Alert,
+  Animated, Dimensions, Linking, ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ import GlossaryText from '../components/GlossaryText';
 import CelebrationModal from '../components/CelebrationModal';
 import { awardBadge, BADGE_DEFS } from '../lib/badges';
 import { mediumHaptic, lightHaptic, heavyHaptic } from '../utils/haptics';
+import { showAlert } from '../utils/alert';
 
 // Offline queue key — completions recorded while offline are synced on next mount
 const PENDING_KEY = '@pathwayusa/pending_step_completions';
@@ -220,7 +221,7 @@ function OverviewTab({ mission, styles, colors, onStartGuide, onMarkComplete, ga
         style={styles.markLink}
         onPress={() => {
           if (hasRequiredDocs && !allDocsGathered) {
-            Alert.alert(
+            showAlert(
               'Documents Needed',
               `Gather all ${requiredDocCount} required document${requiredDocCount !== 1 ? 's' : ''} before completing this step.`,
               [{ text: 'OK' }],
@@ -746,7 +747,8 @@ export default function StepMissionScreen({ route, navigation }) {
         setCompleted(true);
         return;
       }
-      Alert.alert('Could not save progress', 'Check your connection and try again.');
+      console.log('handleMarkComplete: supabase upsert failed', error);
+      showAlert('Could not save progress', `${error.message ?? 'Unknown error'} (${error.code ?? 'no code'})`);
       return;
     }
 
