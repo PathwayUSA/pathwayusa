@@ -8,9 +8,12 @@ import { lightHaptic, mediumHaptic } from '../utils/haptics';
 const { width: SCREEN_W } = Dimensions.get('window');
 const NODE_SIZE = 58;
 const CURRENT_NODE_SIZE = 76;
-const ROW_HEIGHT = 128;
+const ROW_HEIGHT = 144;
 const BADGE_SPACE = 26;
-const AMPLITUDE = Math.min(SCREEN_W * 0.24, SCREEN_W / 2 - 74);
+const LABEL_WIDTH = 136;
+// Keep enough margin for the wider label (half its width) plus half the
+// largest node, so neither clips off the edge of a narrow phone screen.
+const AMPLITUDE = Math.min(SCREEN_W * 0.24, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
 const CENTER_X = SCREEN_W / 2;
 
 const STEP_ICONS = [
@@ -128,7 +131,7 @@ function PathNode({ step, index, status, colors, onPress }) {
           { color: status === 'locked' ? colors.textLight : colors.text },
           status === 'current' && styles.labelCurrent,
         ]}
-        numberOfLines={2}
+        numberOfLines={3}
       >
         {step.title}
       </Text>
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
     textAlign: 'center',
-    width: 110,
+    width: LABEL_WIDTH,
   },
   labelCurrent: {
     fontFamily: TYPOGRAPHY.headingFamily,
