@@ -8,17 +8,12 @@ import { lightHaptic, mediumHaptic } from '../utils/haptics';
 const { width: SCREEN_W } = Dimensions.get('window');
 const NODE_SIZE = 58;
 const CURRENT_NODE_SIZE = 76;
-const ROW_HEIGHT = 168;
+const ROW_HEIGHT = 200;
 const BADGE_SPACE = 26;
-// Sized against the actual longest title across every pathway's step list
-// (45 chars, "File Adjustment of Status or Consular Process") — the 136px/
-// 3-line box still truncated titles half that length once the real Outfit
-// bold font metrics were accounted for, so this is set generously rather
-// than re-guessed a third time.
-const LABEL_WIDTH = 180;
+const LABEL_WIDTH = 200;
 // Keep enough margin for the wider label (half its width) plus half the
 // largest node, so neither clips off the edge of a narrow phone screen.
-const AMPLITUDE = Math.min(SCREEN_W * 0.22, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
+const AMPLITUDE = Math.min(SCREEN_W * 0.2, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
 const CENTER_X = SCREEN_W / 2;
 
 const STEP_ICONS = [
@@ -130,13 +125,18 @@ function PathNode({ step, index, status, colors, onPress }) {
           </View>
         )}
       </Animated.View>
+      {/* No numberOfLines cap: a hard line limit combined with a fixed
+          width forced the web renderer to split words mid-letter
+          ("Naturaliza/tion") to cram long titles into the limit instead of
+          just wrapping to another line. Letting it wrap freely avoids that
+          entirely — ROW_HEIGHT below is generous enough for the longest
+          real title to wrap naturally without crowding the next node. */}
       <Text
         style={[
           styles.label,
           { color: status === 'locked' ? colors.textLight : colors.text },
           status === 'current' && styles.labelCurrent,
         ]}
-        numberOfLines={5}
       >
         {step.title}
       </Text>
@@ -248,13 +248,14 @@ const styles = StyleSheet.create({
   },
   label: {
     marginTop: 8,
-    fontSize: 12.5,
+    fontSize: 11.5,
     fontWeight: '700',
     textAlign: 'center',
     width: LABEL_WIDTH,
+    lineHeight: 15,
   },
   labelCurrent: {
     fontFamily: TYPOGRAPHY.headingFamily,
-    fontSize: 13.5,
+    fontSize: 12.5,
   },
 });
