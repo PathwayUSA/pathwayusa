@@ -17,19 +17,7 @@ import { getPathway } from '../lib/pathwayRouter';
 import { ONBOARDING_KEY, ONBOARDING_DATA_KEY } from './onboarding/IntakeStack';
 import { useOnboardingRefresh } from '../context/OnboardingContext';
 import { useLanguage } from '../i18n';
-import PathwayMap from '../components/PathwayMap';
-
-// ─── Generic step icons ───────────────────────────────────────────────────────
-
-function stepIcon(index) {
-  const icons = [
-    'help-circle-outline', 'document-text-outline', 'time-outline',
-    'clipboard-outline', 'finger-print-outline', 'medical-outline',
-    'person-outline', 'ribbon-outline', 'checkmark-circle-outline',
-    'star-outline', 'home-outline', 'card-outline',
-  ];
-  return icons[index % icons.length];
-}
+import PathwayMap, { stepIconFor } from '../components/PathwayMap';
 
 function makeStyles(colors) {
   return StyleSheet.create({
@@ -178,7 +166,7 @@ export default function GuideScreen({ navigation }) {
         <View style={styles.currentStepCard}>
           <View style={styles.currentStepTopRow}>
             <View style={styles.currentStepIconWrap}>
-              <Ionicons name={stepIcon(currentStepIndex)} size={22} color={colors.primary} />
+              <Ionicons name={stepIconFor(currentStep.title)} size={22} color={colors.primary} />
             </View>
             <Text style={styles.currentStepBadge}>STEP {currentStepIndex + 1} OF {totalSteps}</Text>
           </View>

@@ -16,12 +16,39 @@ const LABEL_WIDTH = 200;
 const AMPLITUDE = Math.min(SCREEN_W * 0.2, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
 const CENTER_X = SCREEN_W / 2;
 
-const STEP_ICONS = [
-  'help-circle-outline', 'document-text-outline', 'time-outline',
-  'clipboard-outline', 'finger-print-outline', 'medical-outline',
-  'person-outline', 'ribbon-outline', 'checkmark-circle-outline',
-  'star-outline', 'home-outline', 'card-outline',
+// Keyword -> icon, checked in order (most specific first) against the
+// step's title. Covers every step title across every pathway definition in
+// pathwayRouter.js, not just one path — add a new case here if a future
+// pathway introduces a title these patterns don't catch; FALLBACK_ICON
+// keeps that safe rather than crashing.
+const ICON_RULES = [
+  [/biometric/i, 'finger-print-outline'],
+  [/interview notice/i, 'mail-unread-outline'],
+  [/interview/i, 'chatbubbles-outline'],
+  [/civics|english test|study/i, 'book-outline'],
+  [/oath|ceremony/i, 'flag-outline'],
+  [/certificate/i, 'ribbon-outline'],
+  [/green card/i, 'card-outline'],
+  [/petition|application|file your|file adjustment|file qualifying/i, 'document-text-outline'],
+  [/gather|documents?\b/i, 'folder-open-outline'],
+  [/priority date|monitor|wait for/i, 'hourglass-outline'],
+  [/physical presence|calculate/i, 'time-outline'],
+  [/eligib|qualify|requirements?/i, 'shield-checkmark-outline'],
+  [/employer|sponsor/i, 'briefcase-outline'],
+  [/attorney|consult/i, 'people-outline'],
+  [/status|confirm/i, 'clipboard-outline'],
+  [/relationship|family|marriage/i, 'heart-outline'],
+  [/work authorization|\bead\b|\bopt\b|h-1b|lottery|stem/i, 'briefcase-outline'],
+  [/pathway|identify/i, 'map-outline'],
+  [/based on your/i, 'information-circle-outline'],
 ];
+const FALLBACK_ICON = 'document-text-outline';
+
+export function stepIconFor(title) {
+  if (!title) return FALLBACK_ICON;
+  const rule = ICON_RULES.find(([pattern]) => pattern.test(title));
+  return rule ? rule[1] : FALLBACK_ICON;
+}
 
 function nodeX(i) {
   // A gentle, deterministic meander left/right — a trail, not a straight list.
@@ -76,7 +103,7 @@ function PathNode({ step, index, status, colors, onPress }) {
   const y = nodeY(index);
 
   const bg = status === 'locked' ? colors.border : colors.primary;
-  const icon = status === 'done' ? 'checkmark' : status === 'locked' ? 'lock-closed' : STEP_ICONS[index % STEP_ICONS.length];
+  const icon = stepIconFor(step.title);
   const iconColor = status === 'locked' ? colors.textLight : '#fff';
 
   return (
@@ -122,6 +149,11 @@ function PathNode({ step, index, status, colors, onPress }) {
         {status === 'done' && (
           <View style={[styles.doneBadge, { backgroundColor: colors.secondary, borderColor: colors.background }]}>
             <Ionicons name="checkmark" size={11} color="#fff" />
+          </View>
+        )}
+        {status === 'locked' && (
+          <View style={[styles.doneBadge, { backgroundColor: colors.textLight, borderColor: colors.background }]}>
+            <Ionicons name="lock-closed" size={10} color="#fff" />
           </View>
         )}
       </Animated.View>
