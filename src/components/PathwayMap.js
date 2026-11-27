@@ -8,12 +8,17 @@ import { lightHaptic, mediumHaptic } from '../utils/haptics';
 const { width: SCREEN_W } = Dimensions.get('window');
 const NODE_SIZE = 58;
 const CURRENT_NODE_SIZE = 76;
-const ROW_HEIGHT = 144;
+const ROW_HEIGHT = 168;
 const BADGE_SPACE = 26;
-const LABEL_WIDTH = 136;
+// Sized against the actual longest title across every pathway's step list
+// (45 chars, "File Adjustment of Status or Consular Process") — the 136px/
+// 3-line box still truncated titles half that length once the real Outfit
+// bold font metrics were accounted for, so this is set generously rather
+// than re-guessed a third time.
+const LABEL_WIDTH = 180;
 // Keep enough margin for the wider label (half its width) plus half the
 // largest node, so neither clips off the edge of a narrow phone screen.
-const AMPLITUDE = Math.min(SCREEN_W * 0.24, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
+const AMPLITUDE = Math.min(SCREEN_W * 0.22, SCREEN_W / 2 - (CURRENT_NODE_SIZE / 2 + LABEL_WIDTH / 2));
 const CENTER_X = SCREEN_W / 2;
 
 const STEP_ICONS = [
@@ -131,7 +136,7 @@ function PathNode({ step, index, status, colors, onPress }) {
           { color: status === 'locked' ? colors.textLight : colors.text },
           status === 'current' && styles.labelCurrent,
         ]}
-        numberOfLines={3}
+        numberOfLines={5}
       >
         {step.title}
       </Text>
